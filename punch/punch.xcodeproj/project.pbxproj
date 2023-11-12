@@ -12,8 +12,11 @@
 		466AC00A2AFC218200ACA0CE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC0092AFC218200ACA0CE /* Assets.xcassets */; };
 		466AC00D2AFC218200ACA0CE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */; };
 		466AC0162AFC220900ACA0CE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0152AFC220900ACA0CE /* main.cpp */; };
-		466AC01A2AFC23E900ACA0CE /* vrEmu6502.c in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0192AFC23E900ACA0CE /* vrEmu6502.c */; };
 		466AC02A2AFC304800ACA0CE /* blitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0292AFC304800ACA0CE /* blitter.cpp */; };
+		46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */; };
+		46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */; };
+		46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181572B00E79800E7FDC8 /* mc6809_addressing_modes.cpp */; };
+		46F1815C2B00E79800E7FDC8 /* mc6809.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181582B00E79800E7FDC8 /* mc6809.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,11 +40,14 @@
 		466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		466AC00E2AFC218200ACA0CE /* punch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = punch.entitlements; sourceTree = "<group>"; };
 		466AC0152AFC220900ACA0CE /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../src/main.cpp; sourceTree = "<group>"; };
-		466AC0182AFC23E900ACA0CE /* vrEmu6502.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vrEmu6502.h; path = ../../src/vrEmu6502/vrEmu6502.h; sourceTree = "<group>"; };
-		466AC0192AFC23E900ACA0CE /* vrEmu6502.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = vrEmu6502.c; path = ../../src/vrEmu6502/vrEmu6502.c; sourceTree = "<group>"; };
 		466AC0232AFC29B100ACA0CE /* common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = common.hpp; path = ../../src/common.hpp; sourceTree = "<group>"; };
 		466AC0292AFC304800ACA0CE /* blitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blitter.cpp; path = ../../src/blitter/blitter.cpp; sourceTree = "<group>"; };
 		466AC02B2AFC31F100ACA0CE /* blitter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blitter.hpp; path = ../../src/blitter/blitter.hpp; sourceTree = "<group>"; };
+		46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_disassembler.cpp; path = ../../src/MC6809/mc6809_disassembler.cpp; sourceTree = "<group>"; };
+		46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_instructions.cpp; path = ../../src/MC6809/mc6809_instructions.cpp; sourceTree = "<group>"; };
+		46F181562B00E79800E7FDC8 /* mc6809.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mc6809.hpp; path = ../../src/MC6809/mc6809.hpp; sourceTree = "<group>"; };
+		46F181572B00E79800E7FDC8 /* mc6809_addressing_modes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_addressing_modes.cpp; path = ../../src/MC6809/mc6809_addressing_modes.cpp; sourceTree = "<group>"; };
+		46F181582B00E79800E7FDC8 /* mc6809.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809.cpp; path = ../../src/MC6809/mc6809.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,20 +103,11 @@
 			children = (
 				466AC0272AFC2F1400ACA0CE /* blitter */,
 				466AC0222AFC295300ACA0CE /* host */,
-				466AC0172AFC230100ACA0CE /* vrEmu6502 */,
+				46F181532B00E77E00E7FDC8 /* MC6809 */,
 				466AC0152AFC220900ACA0CE /* main.cpp */,
 				466AC0232AFC29B100ACA0CE /* common.hpp */,
 			);
 			name = src;
-			sourceTree = "<group>";
-		};
-		466AC0172AFC230100ACA0CE /* vrEmu6502 */ = {
-			isa = PBXGroup;
-			children = (
-				466AC0182AFC23E900ACA0CE /* vrEmu6502.h */,
-				466AC0192AFC23E900ACA0CE /* vrEmu6502.c */,
-			);
-			name = vrEmu6502;
 			sourceTree = "<group>";
 		};
 		466AC01B2AFC25A500ACA0CE /* Frameworks */ = {
@@ -135,6 +132,18 @@
 				466AC0292AFC304800ACA0CE /* blitter.cpp */,
 			);
 			name = blitter;
+			sourceTree = "<group>";
+		};
+		46F181532B00E77E00E7FDC8 /* MC6809 */ = {
+			isa = PBXGroup;
+			children = (
+				46F181562B00E79800E7FDC8 /* mc6809.hpp */,
+				46F181582B00E79800E7FDC8 /* mc6809.cpp */,
+				46F181572B00E79800E7FDC8 /* mc6809_addressing_modes.cpp */,
+				46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */,
+				46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */,
+			);
+			name = MC6809;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -208,7 +217,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				466AC01A2AFC23E900ACA0CE /* vrEmu6502.c in Sources */,
+				46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */,
+				46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */,
+				46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */,
+				46F1815C2B00E79800E7FDC8 /* mc6809.cpp in Sources */,
 				466AC0162AFC220900ACA0CE /* main.cpp in Sources */,
 				466AC02A2AFC304800ACA0CE /* blitter.cpp in Sources */,
 			);
@@ -352,7 +364,7 @@
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
 				);
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (

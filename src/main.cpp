@@ -2,36 +2,41 @@
 #include <cstdint>
 #include "common.hpp"
 #include "blitter.hpp"
-#include "vrEmu6502.h"
+#include "mc6809.hpp"
 #include <SDL2/SDL.h>
 
-uint8_t memory[65536];
+blitter_ic blitter;
 
-uint8_t read8(uint16_t address, bool is_debug)
+uint8_t read8(uint16_t address)
 {
-	return memory[address];
+	return blitter.vram[address];
 }
 
 void write8(uint16_t address, uint8_t val)
 {
-	memory[address] = val;
+	blitter.vram[address] = val;
 }
 
 void create_scanlines_texture(SDL_Texture *slt);
 
+void dump(mc6809 *m);
+
 int main()
 {
-	memory[0xfffc] = 0x00;
-	memory[0xfffd] = 0x02;
+	blitter.vram[0xfffe] = 0x02;
+	blitter.vram[0xffff] = 0x00;
 	
-	memory[0x0200] = 0xa9;	// lda #$21
-	memory[0x0201] = 0x21;
-	memory[0x0202] = 0x85;	// sta $40
-	memory[0x0203] = 0x40;
-	memory[0x0204] = 0xe6;	// inc $40
-	memory[0x0205] = 0x40;
-	memory[0x0206] = 0x80;	// bra $0204
-	memory[0x0207] = 0xfc;
+	blitter.vram[0x0200] = 0x86;	// lda #$21
+	blitter.vram[0x0201] = 0x21;
+	blitter.vram[0x0202] = 0xb7;	// sta $40
+	blitter.vram[0x0203] = 0x00;
+	blitter.vram[0x0204] = 0x40;
+	blitter.vram[0x0205] = 0x7c;	// inc $40
+	blitter.vram[0x0206] = 0x00;
+	blitter.vram[0x0207] = 0x40;
+	blitter.vram[0x0208] = 0x7e;	// jmp $0205
+	blitter.vram[0x0209] = 0x02;
+	blitter.vram[0x020a] = 0x05;
 	
 	uint32_t buffer[PIXELS];
 	
@@ -40,23 +45,22 @@ int main()
 	 * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics
 	 */
 	
-	uint8_t basis = 16;
-	uint8_t rest = 255 - basis;
+	uint8_t base = 16;
+	uint8_t rest = 255 - base;
 	uint32_t palette[256];
-	//const uint8_t values[8] = { 0x00, 0x24, 0x49, 0x6d, 0x92, 0xb6, 0xdb, 0xff };
 	for (int i=0; i<256; i++) {
-		uint32_t r = (basis + (rest * ((i & 0b11100000) >> 5)) / 7) << 16;
-		uint32_t g = (basis + (rest * ((i & 0b00011100) >> 2)) / 7) << 8;
-		uint32_t b = (basis + (rest * ((i & 0b00000011) >> 0)) / 3);
+		uint32_t r = (base + (rest * ((i & 0b11100000) >> 5)) / 7) << 16;
+		uint32_t g = (base + (rest * ((i & 0b00011100) >> 2)) / 7) << 8;
+		uint32_t b = (base + (rest * ((i & 0b00000011) >> 0)) / 3);
 		palette[i] = 0xff000000 | r | g | b;
-		printf("palette[%02x] = 0x%08x\n", i, palette[i]);
-		memory[(MAX_PIXELS_PER_SCANLINE*16) + (((i & 0b11100000)>>5)*MAX_PIXELS_PER_SCANLINE) + (i&0b11111)] = i;
+		blitter.vram[(MAX_PIXELS_PER_SCANLINE*16) + (((i & 0b11100000)>>5)*MAX_PIXELS_PER_SCANLINE) + (i & 0b11111)] = i;
 	}
 	
-	blitter_ic *blitter = new blitter_ic();
-	
-	VrEmu6502 *cpu;
-	cpu = vrEmu6502New(CPU_W65C02, read8, write8);
+	mc6809 *cpu;
+	cpu = new mc6809(read8, write8);
+	dump(cpu);
+	cpu->reset();
+	dump(cpu);
 	
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
@@ -84,6 +88,9 @@ int main()
 	
 	int32_t cycles = 0;
 	
+	int16_t dx = 1;
+	int16_t dy = 1;
+	
 	while (running) {
 		frames++;
 		while (SDL_PollEvent(&my_event) != 0 ) {
@@ -94,13 +101,21 @@ int main()
 		
 		cycles += 985248;
 		while (cycles > 0) {
-			vrEmu6502Tick(cpu);
-			cycles--;
+			cycles -= cpu->execute();
 		}
 		
 		for (auto i=0; i < PIXELS; i++) {
-			buffer[i] = palette[memory[i]];
+			buffer[i] = palette[blitter.vram[i]];
 		}
+		
+		blitter.blit(&blitter.blob, &blitter.screen);
+		
+		blitter.blob.x += dx;
+		blitter.blob.y += dy;
+		
+		if ((blitter.blob.x > 230) || (blitter.blob.x < 1)) dx = -dx;
+		if ((blitter.blob.y > 130) || (blitter.blob.y < 1)) dy = -dy;
+		
 		SDL_UpdateTexture(screen_texture, NULL, buffer, sizeof(uint32_t) * MAX_PIXELS_PER_SCANLINE);
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -118,10 +133,9 @@ int main()
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	
-	SDL_Quit();
-	vrEmu6502Destroy(cpu);
+	delete cpu;
 	
-	delete blitter;
+	SDL_Quit();
 	
 	printf("%i frames\n", frames);
 	
@@ -144,4 +158,28 @@ void create_scanlines_texture(SDL_Texture *slt)
 		}
 	}
 	SDL_UpdateTexture(slt, NULL, scanline_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
+}
+
+void dump(mc6809 *m)
+{
+	printf(" pc  dp ac:br  xr   yr   us   sp  efhinzvc\n%04x %02x %02x %02x %04x %04x %04x %04x %c%c%c%c%c%c%c%c\n",
+	       m->get_pc(),
+	       m->get_dp(),
+	       m->get_ac(),
+	       m->get_br(),
+	       m->get_xr(),
+	       m->get_yr(),
+	       m->get_us(),
+	       m->get_sp(),
+	       (m->get_cc() & 0x80) ? '1' : '0',
+	       (m->get_cc() & 0x40) ? '1' : '0',
+	       (m->get_cc() & 0x20) ? '1' : '0',
+	       (m->get_cc() & 0x10) ? '1' : '0',
+	       (m->get_cc() & 0x08) ? '1' : '0',
+	       (m->get_cc() & 0x04) ? '1' : '0',
+	       (m->get_cc() & 0x02) ? '1' : '0',
+	       (m->get_cc() & 0x01) ? '1' : '0');
+	char buffer[64];
+	m->disassemble_instruction(buffer, m->get_pc());
+	printf("%s\n", buffer);
 }
