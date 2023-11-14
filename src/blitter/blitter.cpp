@@ -4,19 +4,20 @@
 blitter_ic::blitter_ic()
 {
 	vram = new uint8_t[VRAM_SIZE];
-	for (int i=0; i<VRAM_SIZE; i++) vram[i] = 0x00;
 	
-	screen.base = 0x00000;
+	screen.base = 0x10000;
 	screen.x = 0;
 	screen.y = 0;
 	screen.w = MAX_PIXELS_PER_SCANLINE;
 	screen.h = MAX_SCANLINES;
 	
 	blob.base = 0x0400;
+	blob.keycolor = 0xdd;
+	blob.index = 1;
 	blob.x = 2;
 	blob.y = 85;
-	blob.w = 5;
-	blob.h = 7;
+	blob.w = 4;
+	blob.h = 6;
 	
 	for (uint16_t i=1024; i<1073; i++) {
 		vram[i] = blob_data[i-1024];
@@ -43,8 +44,10 @@ void blitter_ic::blit(rect *src, rect *dst)
 	
 	for (int y=starty; y < endy; y++) {
 		for (int x=startx; x < endx; x++) {
-			uint8_t px = vram[src->base + (y * src->w) + x];
-			vram[dst->base + ((y + src->y) * dst->w) + x + src->x] = px;
+			uint8_t px = vram[(src->base + (src->index * src->w * src->h) + (y * src->w) + x) & VRAM_SIZE_MASK];
+			if (px != src->keycolor) {
+				vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = px;
+			}
 		}
 	}
 }

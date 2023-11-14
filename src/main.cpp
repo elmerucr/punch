@@ -104,11 +104,25 @@ int main()
 			cycles -= cpu->execute();
 		}
 		
+		/*
+		 * clear framebuffer
+		 */
+		for (int i=0; i<VRAM_SIZE; i++) blitter.vram[i+0x10000] = 0x00;
+		
+		/*
+		 * blit
+		 */
+		blitter.blit(&blitter.blob, &blitter.screen);
+		
+		/*
+		 * copy to sdl buffer
+		 */
 		for (auto i=0; i < PIXELS; i++) {
-			buffer[i] = palette[blitter.vram[i]];
+			buffer[i] = palette[blitter.vram[i+0x10000]];
+			//if (clear_buffer) blitter.vram[i+0x10000] = 0;
 		}
 		
-		blitter.blit(&blitter.blob, &blitter.screen);
+		
 		
 		blitter.blob.x += dx;
 		blitter.blob.y += dy;
