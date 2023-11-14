@@ -23,6 +23,7 @@ public:
 	
 	void blit(rect *src, rect *dst);
 	
+	uint16_t palette[256];
 	uint8_t *vram;
 private:
 	const uint8_t blob_data[48] = {

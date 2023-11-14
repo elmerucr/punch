@@ -38,23 +38,7 @@ int main()
 	blitter.vram[0x0209] = 0x02;
 	blitter.vram[0x020a] = 0x05;
 	
-	uint32_t buffer[PIXELS];
-	
-	/*
-	 * RGB332
-	 * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics
-	 */
-	
-	uint8_t base = 16;
-	uint8_t rest = 255 - base;
-	uint32_t palette[256];
-	for (int i=0; i<256; i++) {
-		uint32_t r = (base + (rest * ((i & 0b11100000) >> 5)) / 7) << 16;
-		uint32_t g = (base + (rest * ((i & 0b00011100) >> 2)) / 7) << 8;
-		uint32_t b = (base + (rest * ((i & 0b00000011) >> 0)) / 3);
-		palette[i] = 0xff000000 | r | g | b;
-		blitter.vram[(MAX_PIXELS_PER_SCANLINE*16) + (((i & 0b11100000)>>5)*MAX_PIXELS_PER_SCANLINE) + (i & 0b11111)] = i;
-	}
+	uint16_t framebuffer[PIXELS];
 	
 	mc6809 *cpu;
 	cpu = new mc6809(read8, write8);
@@ -74,9 +58,9 @@ int main()
 	SDL_Window *window = SDL_CreateWindow("punch", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MAX_PIXELS_PER_SCANLINE*scaling, MAX_SCANLINES*scaling, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	SDL_Texture *screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
+	SDL_Texture *screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-	SDL_Texture *scanlines_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);
+	SDL_Texture *scanlines_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STATIC, MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);
 	create_scanlines_texture(scanlines_texture);
 	
 	//SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -118,19 +102,17 @@ int main()
 		 * copy to sdl buffer
 		 */
 		for (auto i=0; i < PIXELS; i++) {
-			buffer[i] = palette[blitter.vram[i+0x10000]];
+			framebuffer[i] = blitter.palette[blitter.vram[i+0x10000]];
 			//if (clear_buffer) blitter.vram[i+0x10000] = 0;
 		}
-		
-		
 		
 		blitter.blob.x += dx;
 		blitter.blob.y += dy;
 		
-		if ((blitter.blob.x > 230) || (blitter.blob.x < 1)) dx = -dx;
+		if ((blitter.blob.x > 236) || (blitter.blob.x < 1)) dx = -dx;
 		if ((blitter.blob.y > 130) || (blitter.blob.y < 1)) dy = -dy;
 		
-		SDL_UpdateTexture(screen_texture, NULL, buffer, sizeof(uint32_t) * MAX_PIXELS_PER_SCANLINE);
+		SDL_UpdateTexture(screen_texture, NULL, framebuffer, sizeof(uint16_t) * MAX_PIXELS_PER_SCANLINE);
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
@@ -158,20 +140,20 @@ int main()
 
 void create_scanlines_texture(SDL_Texture *slt)
 {
-	uint32_t scanline_buffer[PIXELS * 4];
+	uint16_t scanline_buffer[PIXELS * 4];
 	
 	SDL_SetTextureBlendMode(slt, SDL_BLENDMODE_BLEND);
 	
 	for (int i=0; i < 4*MAX_SCANLINES; i++) {
 		for (int j=0; j < MAX_PIXELS_PER_SCANLINE; j++) {
-			uint32_t color = 0x00000000;
+			uint16_t color = 0x0000;
 			if ((i % 4) == 0 || (i % 4) == 3) {
-				color = 0xff000000;
+				color = 0xf000;
 			}
 			scanline_buffer[(i * MAX_PIXELS_PER_SCANLINE) + j] = color;
 		}
 	}
-	SDL_UpdateTexture(slt, NULL, scanline_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
+	SDL_UpdateTexture(slt, NULL, scanline_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint16_t));
 }
 
 void dump(mc6809 *m)
