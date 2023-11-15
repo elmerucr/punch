@@ -5,7 +5,7 @@ blitter_ic::blitter_ic()
 {
 	vram = new uint8_t[VRAM_SIZE];
 	
-	screen.base = 0x10000;
+	screen.base = 0x00000;
 	screen.x = 0;
 	screen.y = 0;
 	screen.w = MAX_PIXELS_PER_SCANLINE;
@@ -24,17 +24,17 @@ blitter_ic::blitter_ic()
 	}
 	
 	/*
-	 * RGB332 palette
+	 * Display the RGB332 palette
 	 * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics
 	 */
-	uint8_t base = 1;
-	uint8_t rest = 15 - base;
 	for (int i=0; i<256; i++) {
-		uint16_t r = (base + (rest * ((i & 0b11100000) >> 5)) / 7) << 8;
-		uint16_t g = (base + (rest * ((i & 0b00011100) >> 2)) / 7) << 4;
-		uint16_t b = (base + (rest * ((i & 0b00000011) >> 0)) / 3);
-		palette[i] = 0xf000 | r | g | b;
-		vram[(MAX_PIXELS_PER_SCANLINE*16) + (((i & 0b11100000)>>5)*MAX_PIXELS_PER_SCANLINE) + (i & 0b11111)] = i;
+		vram[(MAX_PIXELS_PER_SCANLINE*16) + 32 + (((i & 0b00011100)>>2)*MAX_PIXELS_PER_SCANLINE) + ((i & 0b11100000) >>3) +(i&0b11)] = i;
+	}
+	
+	for (int x=134; x< 149;x++) {
+		for (int y = 23; y < 29; y++) {
+			vram[(y*MAX_PIXELS_PER_SCANLINE)+x] = 0b01001010;
+		}
 	}
 }
 

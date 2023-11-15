@@ -38,8 +38,6 @@ int main()
 	blitter.vram[0x0209] = 0x02;
 	blitter.vram[0x020a] = 0x05;
 	
-	uint16_t framebuffer[PIXELS];
-	
 	mc6809 *cpu;
 	cpu = new mc6809(read8, write8);
 	dump(cpu);
@@ -57,8 +55,8 @@ int main()
 	
 	SDL_Window *window = SDL_CreateWindow("punch", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MAX_PIXELS_PER_SCANLINE*scaling, MAX_SCANLINES*scaling, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	SDL_Texture *screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+	SDL_Texture *screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	SDL_Texture *scanlines_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STATIC, MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);
 	create_scanlines_texture(scanlines_texture);
@@ -97,28 +95,25 @@ int main()
 		 * blit
 		 */
 		blitter.blit(&blitter.blob, &blitter.screen);
-		
-		/*
-		 * copy to sdl buffer
-		 */
-		for (auto i=0; i < PIXELS; i++) {
-			framebuffer[i] = blitter.palette[blitter.vram[i+0x10000]];
-			//if (clear_buffer) blitter.vram[i+0x10000] = 0;
-		}
+
 		
 		blitter.blob.x += dx;
 		blitter.blob.y += dy;
 		
 		if ((blitter.blob.x > 236) || (blitter.blob.x < 1)) dx = -dx;
-		if ((blitter.blob.y > 130) || (blitter.blob.y < 1)) dy = -dy;
+		if ((blitter.blob.y > 130) || (blitter.blob.y < 60)) dy = -dy;
 		
-		SDL_UpdateTexture(screen_texture, NULL, framebuffer, sizeof(uint16_t) * MAX_PIXELS_PER_SCANLINE);
+		/*
+		 * pointer for texture straight in memory!
+		 * TODO: boundary checking
+		 */
+		SDL_UpdateTexture(screen_texture, NULL, &blitter.vram[0x0000], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 		
-		SDL_SetTextureAlphaMod(scanlines_texture, 64);
+		SDL_SetTextureAlphaMod(scanlines_texture, 32);
 		SDL_RenderCopy(renderer, scanlines_texture, NULL, NULL);
 
 		SDL_RenderPresent(renderer);
