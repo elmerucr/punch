@@ -4,4 +4,4 @@
 
 Screenshot with scanlines.
 
-![punch](./docs/20231112_screenshot.png)
+![punch](./docs/20231115_screenshot.png)

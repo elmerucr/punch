@@ -13,7 +13,6 @@
 		466AC00D2AFC218200ACA0CE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */; };
 		466AC0162AFC220900ACA0CE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0152AFC220900ACA0CE /* main.cpp */; };
 		466AC02A2AFC304800ACA0CE /* blitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0292AFC304800ACA0CE /* blitter.cpp */; };
-		467F6AF42B04195600CE15CE /* tiny_font_4x6.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 467F6AF32B04195600CE15CE /* tiny_font_4x6.cpp */; };
 		46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */; };
 		46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */; };
 		46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181572B00E79800E7FDC8 /* mc6809_addressing_modes.cpp */; };
@@ -44,7 +43,6 @@
 		466AC0232AFC29B100ACA0CE /* common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = common.hpp; path = ../../src/common.hpp; sourceTree = "<group>"; };
 		466AC0292AFC304800ACA0CE /* blitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blitter.cpp; path = ../../src/blitter/blitter.cpp; sourceTree = "<group>"; };
 		466AC02B2AFC31F100ACA0CE /* blitter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blitter.hpp; path = ../../src/blitter/blitter.hpp; sourceTree = "<group>"; };
-		467F6AF32B04195600CE15CE /* tiny_font_4x6.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tiny_font_4x6.cpp; path = ../../src/blitter/tiny_font_4x6.cpp; sourceTree = "<group>"; };
 		46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_disassembler.cpp; path = ../../src/MC6809/mc6809_disassembler.cpp; sourceTree = "<group>"; };
 		46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_instructions.cpp; path = ../../src/MC6809/mc6809_instructions.cpp; sourceTree = "<group>"; };
 		46F181562B00E79800E7FDC8 /* mc6809.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mc6809.hpp; path = ../../src/MC6809/mc6809.hpp; sourceTree = "<group>"; };
@@ -132,7 +130,6 @@
 			children = (
 				466AC02B2AFC31F100ACA0CE /* blitter.hpp */,
 				466AC0292AFC304800ACA0CE /* blitter.cpp */,
-				467F6AF32B04195600CE15CE /* tiny_font_4x6.cpp */,
 			);
 			name = blitter;
 			sourceTree = "<group>";
@@ -222,7 +219,6 @@
 			files = (
 				46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */,
 				46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */,
-				467F6AF42B04195600CE15CE /* tiny_font_4x6.cpp in Sources */,
 				46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */,
 				46F1815C2B00E79800E7FDC8 /* mc6809.cpp in Sources */,
 				466AC0162AFC220900ACA0CE /* main.cpp in Sources */,

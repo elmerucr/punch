@@ -50,12 +50,12 @@ int main()
 	SDL_GetCurrentDisplayMode(0, &dm);
 	uint8_t scaling = 1;
 	while (((scaling * MAX_PIXELS_PER_SCANLINE) < dm.w) && ((scaling * MAX_SCANLINES) < dm.h)) scaling++;
-	scaling--;
+	scaling = (3 * scaling) / 4;
 	printf("scaling = %i\n", scaling);
 	
 	SDL_Window *window = SDL_CreateWindow("punch", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MAX_PIXELS_PER_SCANLINE*scaling, MAX_SCANLINES*scaling, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	SDL_Texture *screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	SDL_Texture *scanlines_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STATIC, MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);
@@ -101,7 +101,7 @@ int main()
 		blitter.blob.y += dy;
 		
 		if ((blitter.blob.x > 236) || (blitter.blob.x < 1)) dx = -dx;
-		if ((blitter.blob.y > 130) || (blitter.blob.y < 60)) dy = -dy;
+		if ((blitter.blob.y > 90) || (blitter.blob.y < 60)) dy = -dy;
 		
 		/*
 		 * pointer for texture straight in memory!
@@ -113,7 +113,7 @@ int main()
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
 		
-		SDL_SetTextureAlphaMod(scanlines_texture, 32);
+		SDL_SetTextureAlphaMod(scanlines_texture, 64);
 		SDL_RenderCopy(renderer, scanlines_texture, NULL, NULL);
 
 		SDL_RenderPresent(renderer);

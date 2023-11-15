@@ -103,7 +103,7 @@ const uint8_t font4x6 [96][2] = {
 };
 
 // Font retrieval function - ugly, but needed.
-bool get_font_pixel(uint8_t data, uint8_t x, uint8_t y)
+inline bool get_font_pixel(uint8_t data, uint8_t x, uint8_t y)
 {
 	if (data < 32) return false;
 
