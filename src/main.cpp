@@ -89,7 +89,7 @@ int main()
 		/*
 		 * clear framebuffer
 		 */
-		for (int i=0; i<VRAM_SIZE; i++) blitter.vram[i+0x10000] = 0x00;
+		for (int i=0; i<PIXELS; i++) blitter.vram[i+0x10000] = 0x00;
 		
 		/*
 		 * blit
