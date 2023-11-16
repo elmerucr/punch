@@ -26,6 +26,14 @@ typedef struct {
 	uint16_t h;
 } surface;
 
+typedef struct {
+	uint8_t columns;
+	uint8_t rows;
+	uint32_t base;
+	int16_t x;
+	int16_t y;
+} tile_surface;
+
 class blitter_ic {
 public:
 	blitter_ic();
@@ -35,9 +43,11 @@ public:
 	surface blob;
 	
 	/*
-	 * returns number of pixels blitted
+	 * both return number of pixels blitted
 	 */
 	uint32_t blit(surface *src, surface *dst);
+	uint32_t tile_blit(tile_surface *ts, surface *src, surface *dst);
+	
 	
 	uint32_t rectangle();	// use to wipe surface?
 	uint32_t line();
@@ -46,22 +56,7 @@ public:
 	
 	//uint16_t palette[256];
 	uint8_t *vram;
-private:
-	const uint8_t blob_data[48] = {
-		0xae,0x18,0x18,0x18,
-		0x00,0x18,0x00,0x00,
-		0x00,0x18,0x18,0x00,
-		0x00,0x18,0x00,0x00,
-		0x00,0x18,0x18,0x18,
-		0x00,0x00,0x00,0x00,
-		0x00,0x18,0x00,0x00,
-		0x00,0x18,0x00,0x00,
-		0x00,0x18,0x00,0x00,
-		0x00,0x18,0x00,0x00,
-		0x00,0x18,0x18,0x18,
-		0x00,0x00,0x00,0x00
-	};
-	
+private:	
 	uint8_t *tiny_4x6_pixel_font;
 	void init_tiny_4x6_pixel_font();
 };

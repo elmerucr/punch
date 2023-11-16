@@ -17,30 +17,26 @@ blitter_ic::blitter_ic()
 	
 	blob.base = 0x0800;
 	blob.keycolor = 0x01;
-	blob.index = 49;
+	blob.index = 33;
 	blob.x = 2;
 	blob.y = 85;
 	blob.w = 4;
 	blob.h = 6;
-	
-	for (uint16_t i=1024; i<1073; i++) {
-		vram[i] = blob_data[i-1024];
-	}
 	
 	/*
 	 * Display the RGB332 palette
 	 * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics
 	 */
 	for (int i=0; i<256; i++) {
-		vram[(MAX_PIXELS_PER_SCANLINE*16) + 32 + (((i & 0b00011100)>>2)*MAX_PIXELS_PER_SCANLINE) + ((i & 0b11100000) >>3) +(i&0b11)] = i;
+		vram[(MAX_PIXELS_PER_SCANLINE*40) + 196 + (((i & 0b00011100)>>2)*MAX_PIXELS_PER_SCANLINE) + ((i & 0b11100000) >>3) +(i&0b11)] = i;
 	}
 	
 	/*
 	 * Draw rectangles
 	 */
 	for (int x=130; x< 162;x++) {
-		for (int y = 22; y < 40; y++) {
-			vram[(y*MAX_PIXELS_PER_SCANLINE)+x] = C64_LIGHTBLUE;
+		for (int y = 36; y < 50; y++) {
+			vram[(y*MAX_PIXELS_PER_SCANLINE)+x] = C64_LIGHTRED;
 		}
 	}
 	
@@ -48,8 +44,8 @@ blitter_ic::blitter_ic()
 	 * Draw rectangles
 	 */
 	for (int x=132; x< 160;x++) {
-		for (int y = 24; y < 38; y++) {
-			vram[(y*MAX_PIXELS_PER_SCANLINE)+x] = C64_PURPLE;
+		for (int y = 38; y < 48; y++) {
+			vram[(y*MAX_PIXELS_PER_SCANLINE)+x] = C64_RED;
 		}
 	}
 	
@@ -115,39 +111,8 @@ uint32_t blitter_ic::blit(surface *src, surface *dst)
 	return pixelcount;
 }
 
-const uint8_t font4x6 [128][2] = {
-	{  0b00000000, 0b00000000 },	// $00
-	{  0b00010100, 0b10111100 },	// $01 smiley
-	{  0b00010100, 0b11110100 },	// $02 not smiley
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },
-	{  0x00  ,  0x00  },	// $20 SPACE
+const uint8_t font4x6 [96][2] = {
+	{  0x00  ,  0x00  },   /*' '*/
 	{  0x49  ,  0x08  },   /*'!'*/
 	{  0xb4  ,  0x00  },   /*'"'*/
 	{  0xbe  ,  0xf6  },   /*'#'*/
@@ -245,12 +210,140 @@ const uint8_t font4x6 [128][2] = {
 	{  0x56  ,  0xe2  }    /*''*/
 };
 
-// Font retrieval function - ugly, but needed.
-inline bool get_font_pixel(uint8_t index, uint8_t x, uint8_t y)
-{
-	//if (data < 32) return false;
+const uint8_t blocks[108] = {
+	0b0000,
+	0b0000,
+	0b0000,
+	0b0000,
+	0b0000,
+	0b0000,
+	
+	0b1100,
+	0b1100,
+	0b1100,
+	0b0000,
+	0b0000,
+	0b0000,
+	
+	0b0011,
+	0b0011,
+	0b0011,
+	0b0000,
+	0b0000,
+	0b0000,
+	
+	0b1111,
+	0b1111,
+	0b1111,
+	0b0000,
+	0b0000,
+	0b0000,
+	
+	0b0000,
+	0b0000,
+	0b0000,
+	0b1100,
+	0b1100,
+	0b1100,
+	
+	0b1100,
+	0b1100,
+	0b1100,
+	0b1100,
+	0b1100,
+	0b1100,
+	
+	0b0011,
+	0b0011,
+	0b0011,
+	0b1100,
+	0b1100,
+	0b1100,
+	
+	0b1111,
+	0b1111,
+	0b1111,
+	0b1100,
+	0b1100,
+	0b1100,
+	
+	0b0000,
+	0b0000,
+	0b0000,
+	0b0011,
+	0b0011,
+	0b0011,
+	
+	0b1100,
+	0b1100,
+	0b1100,
+	0b0011,
+	0b0011,
+	0b0011,
+	
+	0b0011,
+	0b0011,
+	0b0011,
+	0b0011,
+	0b0011,
+	0b0011,
+	
+	0b1111,
+	0b1111,
+	0b1111,
+	0b0011,
+	0b0011,
+	0b0011,
+	
+	0b0000,
+	0b0000,
+	0b0000,
+	0b1111,
+	0b1111,
+	0b1111,
+	
+	0b1100,
+	0b1100,
+	0b1100,
+	0b1111,
+	0b1111,
+	0b1111,
+	
+	0b0011,
+	0b0011,
+	0b0011,
+	0b1111,
+	0b1111,
+	0b1111,
+	
+	0b1111,
+	0b1111,
+	0b1111,
+	0b1111,
+	0b1111,
+	0b1111,
+	
+	0b0110,
+	0b0110,
+	0b1110,
+	0b1110,
+	0b0000,
+	0b0000,
+	
+	0b0110,
+	0b0110,
+	0b0111,
+	0b0111,
+	0b0000,
+	0b0000
+};
 
-	//const uint8_t index = (data-32);
+// Font retrieval function - ugly, but needed.
+inline bool get_font_pixel(uint8_t data, uint8_t x, uint8_t y)
+{
+	if (data < 32) return false;
+
+	const uint8_t index = (data-32);
 	uint8_t pixel = 0;
 	if ((font4x6[index][1] & 1) == 1) y -= 1;
 	if (y == 0) {
@@ -281,6 +374,18 @@ void blitter_ic::init_tiny_4x6_pixel_font()
 					tiny_4x6_pixel_font[(i * 4 * 6) + (y * 4) + x] = C64_BLUE;
 					tiny_4x6_pixel_font[((i + 128) * 4 * 6) + (y * 4) + x] = C64_LIGHTBLUE;
 				}
+			}
+		}
+	}
+	
+	for (int i=0; i<(108); i++) {
+		for (int j=0; j<4; j++) {
+			if (blocks[i] & (0b1<<(3-j))) {
+				tiny_4x6_pixel_font[(i*4)+j] = C64_LIGHTBLUE;
+				tiny_4x6_pixel_font[(128*4*6)+(i*4)+j] = C64_BLUE;
+			} else {
+				tiny_4x6_pixel_font[(i*4)+j] = C64_BLUE;
+				tiny_4x6_pixel_font[(128*4*6)+(i*4)+j] = C64_LIGHTBLUE;
 			}
 		}
 	}
