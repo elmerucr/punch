@@ -1,5 +1,6 @@
 #include "blitter.hpp"
 #include "common.hpp"
+#include <cstdio>
 
 blitter_ic::blitter_ic()
 {
@@ -15,6 +16,7 @@ blitter_ic::blitter_ic()
 	screen.w = MAX_PIXELS_PER_SCANLINE;
 	screen.h = MAX_SCANLINES;
 	
+	blob.flags0 = 0b001;
 	blob.base = 0x0800;
 	blob.keycolor = 0x01;
 	blob.index = 33;
@@ -54,20 +56,30 @@ blitter_ic::blitter_ic()
 	}
 	
 	surface e;
+	e.flags0 = 0b111;
+	e.fgc = C64_LIGHTGREEN;
+	e.bgc = C64_GREEN;
+	e.keycolor = C64_BLUE;
 	e.base = 0x800;
 	e.w = 4;
 	e.h = 6;
 	e.x = 2;
 	e.y = 97;
 	for (int i=0; i<256; i++) {
-		if ((i % 59) == 0) {
-			e.y += e.h;
-			e.x = 2;
-		}
-		e.index = i;
-		blit(&e, &screen);
-		e.x += e.w;
+		vram[0x10000 + i] = i;
 	}
+	vram[0x10014] = 0x45;
+	vram[0x10015] = 0x6c;
+	vram[0x10016] = 0x6d;
+	vram[0x10017] = 0x65;
+	vram[0x10018] = 0x72;
+	tile_surface f;
+	f.columns = 59;
+	f.rows = 5;
+	f.x = 2;
+	f.y = 103;
+	f.base = 0x10000;
+	printf("%i\n", tile_blit(&e, &screen, &f));
 }
 
 blitter_ic::~blitter_ic()
@@ -79,7 +91,6 @@ blitter_ic::~blitter_ic()
 /*
  * - Check with keycolor
  * - Do real value, or defined color(s)?
- * - How to do textblocks / map?
  * - (mis)use this to make blocks of one color?
  */
 uint32_t blitter_ic::blit(surface *src, surface *dst)
@@ -102,15 +113,76 @@ uint32_t blitter_ic::blit(surface *src, surface *dst)
 	for (int y=starty; y < endy; y++) {
 		for (int x=startx; x < endx; x++) {
 			uint8_t px = vram[(offset + x + (src->w * y)) & VRAM_SIZE_MASK];
-			if (px != src->keycolor) {
-				vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = px;
+			/*
+			 * TODO: Can this be sped up?
+			 */
+			switch (src->flags0 & 0b111) {
+				case 0b000:
+				case 0b100:
+					vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = px;
+					break;
+				case 0b010:
+				case 0b110:
+					vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->fgc;
+					break;
+				case 0b001:
+					if (px != src->keycolor) {
+						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = px;
+					}
+					break;
+				case 0b011:
+					if (px != src->keycolor) {
+						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->fgc;
+					}
+					break;
+				case 0b101:
+					if (px != src->keycolor) {
+						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = px;
+					} else {
+						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->bgc;
+					}
+					break;
+				case 0b111:
+					if (px != src->keycolor) {
+						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->fgc;
+					} else {
+						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->bgc;
+					}
+					break;
 			}
+
 			pixelcount++;
 		}
 	}
 	return pixelcount;
 }
 
+uint32_t blitter_ic::tile_blit(surface *src, surface *dst, tile_surface *ts)
+{
+	uint32_t pixelcount = 0;
+	
+	surface source = *src;
+	
+	source.x = ts->x;
+	source.y = ts->y;
+	uint32_t tiles = ts->base;
+	
+	for (int y=0; y<ts->rows; y++) {
+		for (int x=0; x<ts->columns; x++) {
+			source.index = vram[tiles++ & VRAM_SIZE_MASK];
+			pixelcount += blit(&source, dst);
+			source.x += source.w;
+		}
+		source.x = ts->x;
+		source.y += source.h;
+	}
+	
+	return pixelcount;
+}
+
+/*
+ * https://hackaday.io/project/6309-vga-graphics-over-spi-and-serial-vgatonic/log/20759-a-tiny-4x6-pixel-font-that-will-fit-on-almost-any-microcontroller-license-mit
+ */
 const uint8_t font4x6 [96][2] = {
 	{  0x00  ,  0x00  },   /*' '*/
 	{  0x49  ,  0x08  },   /*'!'*/

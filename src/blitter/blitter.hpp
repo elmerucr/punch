@@ -5,19 +5,25 @@
 
 typedef struct {
 	/*
+	 * flags0
+	 *
 	 * bit
-	 *  0  alpha
-	 *  1  index or fixed color
-	 *  2
-	 *  3
-	 *  4  hor flip
-	 *  5  ver flip
-	 *  6  hor stretch
-	 *  7  ver stretch
+	 *  0  keycolor
+	 *  1  fg
+	 *  2  bg
+	 *  3  -
+	 *  4  -
+	 *  5  -
+	 *  6  -
+	 *  7  -
 	 */
+	uint8_t  flags0;
 	uint8_t  flags1;
-	uint8_t  flags2;
+	
 	uint8_t  keycolor;
+	uint8_t  fgc;
+	uint8_t  bgc;
+	
 	uint8_t  index;
 	uint32_t base;
 	int16_t  x;
@@ -46,7 +52,7 @@ public:
 	 * both return number of pixels blitted
 	 */
 	uint32_t blit(surface *src, surface *dst);
-	uint32_t tile_blit(tile_surface *ts, surface *src, surface *dst);
+	uint32_t tile_blit(surface *src, surface *dst, tile_surface *ts);
 	
 	
 	uint32_t rectangle();	// use to wipe surface?
