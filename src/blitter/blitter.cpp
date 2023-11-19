@@ -16,7 +16,7 @@ blitter_ic::blitter_ic()
 	screen.w = MAX_PIXELS_PER_SCANLINE;
 	screen.h = MAX_SCANLINES;
 	
-	blob.flags0 = 0b001;
+	blob.flags_0 = 0b001;
 	blob.base = 0x0800;
 	blob.keycolor = 0x01;
 	blob.index = 33;
@@ -33,53 +33,66 @@ blitter_ic::blitter_ic()
 		vram[(MAX_PIXELS_PER_SCANLINE*40) + 196 + (((i & 0b00011100)>>2)*MAX_PIXELS_PER_SCANLINE) + ((i & 0b11100000) >>3) +(i&0b11)] = i;
 	}
 	
-	/*
-	 * Draw rectangles
-	 */
-	for (int x=130; x< 162;x++) {
-		for (int y = 36; y < 50; y++) {
-			vram[(y*MAX_PIXELS_PER_SCANLINE)+x] = C64_LIGHTRED;
-		}
-	}
-	
-	/*
-	 * Draw rectangles
-	 */
-	for (int x=132; x< 160;x++) {
-		for (int y = 38; y < 48; y++) {
-			vram[(y*MAX_PIXELS_PER_SCANLINE)+x] = C64_RED;
-		}
-	}
+	surface font;
+	font.flags_0 = 0b00000000;
+	font.flags_1 = 0b00000000;
+	font.fgc = 0b00111000;
+	font.keycolor = C64_BLUE;
+	font.base = 0x800;
+	font.w = 4;
+	font.h = 6;
+	font.x = 0;
+	font.y = 0;
 	
 	for (int i=0; i< (256*4*6); i++) {
-		vram[0x800 + i] = tiny_4x6_pixel_font[i];
+		vram[font.base + i] = tiny_4x6_pixel_font[i];
 	}
 	
-	surface e;
-	e.flags0 = 0b111;
-	e.fgc = C64_LIGHTGREEN;
-	e.bgc = C64_GREEN;
-	e.keycolor = C64_BLUE;
-	e.base = 0x800;
-	e.w = 4;
-	e.h = 6;
-	e.x = 2;
-	e.y = 97;
+	tile_surface text_buffer;
+	text_buffer.columns = 80;
+	text_buffer.rows = 4;
+	text_buffer.x = 0;
+	text_buffer.y = 0;
+	text_buffer.base = 0x10000;
 	for (int i=0; i<256; i++) {
-		vram[0x10000 + i] = i;
+		vram[text_buffer.base + i] = i;
 	}
-	vram[0x10014] = 0x45;
-	vram[0x10015] = 0x6c;
-	vram[0x10016] = 0x6d;
-	vram[0x10017] = 0x65;
-	vram[0x10018] = 0x72;
-	tile_surface f;
-	f.columns = 59;
-	f.rows = 5;
-	f.x = 2;
-	f.y = 103;
-	f.base = 0x10000;
-	printf("%i\n", tile_blit(&e, &screen, &f));
+	vram[text_buffer.base + 0x14] = 0x45;	// E
+	vram[text_buffer.base + 0x15] = 0x6c;	// l
+	vram[text_buffer.base + 0x16] = 0x6d;	// m
+	vram[text_buffer.base + 0x17] = 0x65;	// e
+	vram[text_buffer.base + 0x18] = 0x72;	// r
+	
+	surface turn_text;
+	turn_text.flags_0 = 0b00000000;
+	turn_text.flags_1 = 0b01000000;
+	turn_text.base= 0x30000;
+	turn_text.w = 320;
+	turn_text.h = 30;
+	turn_text.x = 50;
+	turn_text.y = 105;
+	tile_blit(&font, &turn_text, &text_buffer);
+	blit(&turn_text, &screen);
+	
+	//text_buffer.y = 103;
+	//tile_blit(&font, &screen, &text_buffer);
+	
+	for (int i=0; i<112; i++) {
+		vram[0x300+i] = sprite[i];
+	}
+	surface pacman;
+	pacman.index = 0;
+	pacman.base = 0x300;
+	pacman.keycolor = 0x01;
+	pacman.flags_0 = 0b00000001;
+	pacman.flags_1 = 0b00000000;
+	pacman.w = 8;
+	pacman.h = 14;
+	pacman.x = 12;
+	pacman.y = 10;
+	blit(&pacman, &screen);
+	pacman.flags_1 = 0b01000000;
+	blit(&pacman, &screen);
 }
 
 blitter_ic::~blitter_ic()
@@ -93,60 +106,75 @@ blitter_ic::~blitter_ic()
  * - Do real value, or defined color(s)?
  * - (mis)use this to make blocks of one color?
  */
-uint32_t blitter_ic::blit(surface *src, surface *dst)
+uint32_t blitter_ic::blit(const surface *src, surface *dst)
 {
 	uint32_t pixelcount = 0;
 	
 	auto min = [](int16_t a, int16_t b) { return a < b ? a : b; };
 	auto max = [](int16_t a, int16_t b) { return a > b ? a : b; };
+	auto swap = [](int16_t &a, int16_t &b) { int16_t c = a; a = b; b = c; };
+	
+	int16_t startx, endx, starty, endy;
 	
 	/*
 	 * Following values are coordinates in the src rectangle
 	 */
-	int16_t startx = max(0, -src->x);
-	int16_t endx = min(src->w, -src->x + dst->w);
-	int16_t starty = max(0, -src->y);
-	int16_t endy = min(src->h, -src->y + dst->h);
+	if (!(src->flags_1 & F1_XY_FLIP)) {
+		startx = max(0, -src->x);
+		endx = min(src->w, -src->x + dst->w);
+		starty = max(0, -src->y);
+		endy = min(src->h, -src->y + dst->h);
+	} else {
+		startx = max(0, -src->y);
+		endx = min(src->w, -src->y + dst->h);
+		starty = max(0, -src->x);
+		endy = min(src->h, -src->x + dst->w);
+	}
 
 	uint32_t offset = src->base + (src->index * src->w * src->h);
 
 	for (int y=starty; y < endy; y++) {
 		for (int x=startx; x < endx; x++) {
 			uint8_t px = vram[(offset + x + (src->w * y)) & VRAM_SIZE_MASK];
+			
+			int16_t ax = x;
+			int16_t ay = y;
+			if (src->flags_1 & F1_XY_FLIP) swap(ax, ay);
+			
 			/*
 			 * TODO: Can this be sped up?
 			 */
-			switch (src->flags0 & 0b111) {
+			switch (src->flags_0 & 0b111) {
 				case 0b000:
 				case 0b100:
-					vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = px;
+					vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = px;
 					break;
 				case 0b010:
 				case 0b110:
-					vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->fgc;
+					vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->fgc;
 					break;
 				case 0b001:
 					if (px != src->keycolor) {
-						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = px;
+						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = px;
 					}
 					break;
 				case 0b011:
 					if (px != src->keycolor) {
-						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->fgc;
+						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->fgc;
 					}
 					break;
 				case 0b101:
 					if (px != src->keycolor) {
-						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = px;
+						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = px;
 					} else {
-						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->bgc;
+						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->bgc;
 					}
 					break;
 				case 0b111:
 					if (px != src->keycolor) {
-						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->fgc;
+						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->fgc;
 					} else {
-						vram[(dst->base + ((y + src->y) * dst->w) + x + src->x) & VRAM_SIZE_MASK] = src->bgc;
+						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->bgc;
 					}
 					break;
 			}
@@ -157,7 +185,7 @@ uint32_t blitter_ic::blit(surface *src, surface *dst)
 	return pixelcount;
 }
 
-uint32_t blitter_ic::tile_blit(surface *src, surface *dst, tile_surface *ts)
+uint32_t blitter_ic::tile_blit(const surface *src, surface *dst, const tile_surface *ts)
 {
 	uint32_t pixelcount = 0;
 	
@@ -165,11 +193,11 @@ uint32_t blitter_ic::tile_blit(surface *src, surface *dst, tile_surface *ts)
 	
 	source.x = ts->x;
 	source.y = ts->y;
-	uint32_t tiles = ts->base;
+	uint32_t tile = ts->base;
 	
-	for (int y=0; y<ts->rows; y++) {
-		for (int x=0; x<ts->columns; x++) {
-			source.index = vram[tiles++ & VRAM_SIZE_MASK];
+	for (int y = 0; y < ts->rows; y++) {
+		for (int x = 0; x < ts->columns; x++) {
+			source.index = vram[tile++ & VRAM_SIZE_MASK];
 			pixelcount += blit(&source, dst);
 			source.x += source.w;
 		}
