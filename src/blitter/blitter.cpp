@@ -10,33 +10,35 @@ blitter_ic::blitter_ic()
 	init_tiny_4x6_pixel_font();
 	
 	/* framebuffer is a surface as well */
-	screen.base = 0x00000;
+	screen.base = framebuffer_bank << 16;
 	screen.x = 0;
 	screen.y = 0;
 	screen.w = MAX_PIXELS_PER_SCANLINE;
 	screen.h = MAX_SCANLINES;
+	screen.bg_col = 0b000000101;
 	
-	blob.flags_0 = 0b001;
+	blob.flags_0 = 0b011;
 	blob.base = 0x0800;
-	blob.keycolor = 0x01;
+	blob.keycolor = C64_BLUE;
 	blob.index = 33;
+	blob.fg_col = 0b00011100;
 	blob.x = 2;
 	blob.y = 85;
 	blob.w = 4;
 	blob.h = 6;
 	
-	/*
-	 * Display the RGB332 palette
-	 * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics
-	 */
-	for (int i=0; i<256; i++) {
-		vram[(MAX_PIXELS_PER_SCANLINE*40) + 196 + (((i & 0b00011100)>>2)*MAX_PIXELS_PER_SCANLINE) + ((i & 0b11100000) >>3) +(i&0b11)] = i;
-	}
+//	/*
+//	 * Display the RGB332 palette
+//	 * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics
+//	 */
+//	for (int i=0; i<256; i++) {
+//		vram[(MAX_PIXELS_PER_SCANLINE*40) + 196 + (((i & 0b00011100)>>2)*MAX_PIXELS_PER_SCANLINE) + ((i & 0b11100000) >>3) +(i&0b11)] = i;
+//	}
 	
 	surface font;
 	font.flags_0 = 0b00000000;
-	font.flags_1 = 0b00000000;
-	font.fgc = 0b00111000;
+	font.flags_1 = 0b00000011;
+	font.fg_col = 0b00111000;
 	font.keycolor = C64_BLUE;
 	font.base = 0x800;
 	font.w = 4;
@@ -63,36 +65,28 @@ blitter_ic::blitter_ic()
 	vram[text_buffer.base + 0x17] = 0x65;	// e
 	vram[text_buffer.base + 0x18] = 0x72;	// r
 	
-	surface turn_text;
+	//surface turn_text;
 	turn_text.flags_0 = 0b00000000;
-	turn_text.flags_1 = 0b01000000;
+	turn_text.flags_1 = 0b00010000;
 	turn_text.base= 0x30000;
 	turn_text.w = 320;
-	turn_text.h = 30;
+	turn_text.h = 24;
 	turn_text.x = 50;
-	turn_text.y = 105;
+	turn_text.y = 65;
 	tile_blit(&font, &turn_text, &text_buffer);
-	blit(&turn_text, &screen);
 	
-	//text_buffer.y = 103;
-	//tile_blit(&font, &screen, &text_buffer);
-	
-	for (int i=0; i<112; i++) {
+	for (int i=0; i<184; i++) {
 		vram[0x300+i] = sprite[i];
 	}
-	surface pacman;
-	pacman.index = 0;
-	pacman.base = 0x300;
-	pacman.keycolor = 0x01;
-	pacman.flags_0 = 0b00000001;
-	pacman.flags_1 = 0b00000000;
-	pacman.w = 8;
-	pacman.h = 14;
-	pacman.x = 12;
-	pacman.y = 10;
-	blit(&pacman, &screen);
-	pacman.flags_1 = 0b01000000;
-	blit(&pacman, &screen);
+	bruce.index = 0;
+	bruce.base = 0x300;
+	bruce.keycolor = 0x01;
+	bruce.flags_0 = 0b00000001;
+	bruce.flags_1 = 0b00000001;
+	bruce.w = 8;
+	bruce.h = 23;
+	bruce.x = 8;
+	bruce.y = 8;
 }
 
 blitter_ic::~blitter_ic()
@@ -103,10 +97,8 @@ blitter_ic::~blitter_ic()
 
 /*
  * - Check with keycolor
- * - Do real value, or defined color(s)?
- * - (mis)use this to make blocks of one color?
  */
-uint32_t blitter_ic::blit(const surface *src, surface *dst)
+uint32_t blitter_ic::blit(const surface *src, surface *dest)
 {
 	uint32_t pixelcount = 0;
 	
@@ -114,32 +106,50 @@ uint32_t blitter_ic::blit(const surface *src, surface *dst)
 	auto max = [](int16_t a, int16_t b) { return a > b ? a : b; };
 	auto swap = [](int16_t &a, int16_t &b) { int16_t c = a; a = b; b = c; };
 	
+	uint8_t dw = (src->flags_1 & FLAGS1_DBLWIDTH) ? 1 : 0;
+	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) ? 1 : 0;
+	
 	int16_t startx, endx, starty, endy;
 	
 	/*
 	 * Following values are coordinates in the src rectangle
 	 */
-	if (!(src->flags_1 & F1_XY_FLIP)) {
+	if (!(src->flags_1 & FLAGS1_XY_FLIP)) {
 		startx = max(0, -src->x);
-		endx = min(src->w, -src->x + dst->w);
+		endx = min(src->w << dw, -src->x + dest->w);
 		starty = max(0, -src->y);
-		endy = min(src->h, -src->y + dst->h);
+		endy = min(src->h << dh, -src->y + dest->h);
 	} else {
 		startx = max(0, -src->y);
-		endx = min(src->w, -src->y + dst->h);
+		endx = min(src->w << dw, -src->y + dest->h);
 		starty = max(0, -src->x);
-		endy = min(src->h, -src->x + dst->w);
+		endy = min(src->h << dh, -src->x + dest->w);
+	}
+	
+	if (src->flags_1 & FLAGS1_HOR_FLIP) {
+		int16_t temp_value = startx;
+		startx = src->w - endx;
+		endx   = src->w - temp_value;
+	}
+	
+	if (src->flags_1 & FLAGS1_VER_FLIP) {
+		int16_t temp_value = starty;
+		starty = src->h - endy;
+		endy   = src->h - temp_value;
 	}
 
 	uint32_t offset = src->base + (src->index * src->w * src->h);
+	
+	int16_t dest_x;
+	int16_t dest_y;
 
-	for (int y=starty; y < endy; y++) {
-		for (int x=startx; x < endx; x++) {
-			uint8_t px = vram[(offset + x + (src->w * y)) & VRAM_SIZE_MASK];
+	for (int y = starty; y < endy; y++) {
+		for (int x = startx; x < endx; x++) {
+			uint8_t px = vram[(offset + (x >> dw) + (src->w * (y >> dh))) & VRAM_SIZE_MASK];
 			
-			int16_t ax = x;
-			int16_t ay = y;
-			if (src->flags_1 & F1_XY_FLIP) swap(ax, ay);
+			if (src->flags_1 & FLAGS1_HOR_FLIP) dest_x = src->w - 1 - x; else dest_x = x;
+			if (src->flags_1 & FLAGS1_VER_FLIP) dest_y = src->h - 1 - y; else dest_y = y;
+			if (src->flags_1 & FLAGS1_XY_FLIP) swap(dest_x, dest_y);
 			
 			/*
 			 * TODO: Can this be sped up?
@@ -147,49 +157,51 @@ uint32_t blitter_ic::blit(const surface *src, surface *dst)
 			switch (src->flags_0 & 0b111) {
 				case 0b000:
 				case 0b100:
-					vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = px;
+					vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 					break;
 				case 0b010:
 				case 0b110:
-					vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->fgc;
+					vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
 					break;
 				case 0b001:
 					if (px != src->keycolor) {
-						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = px;
+						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 					}
 					break;
 				case 0b011:
 					if (px != src->keycolor) {
-						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->fgc;
+						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
 					}
 					break;
 				case 0b101:
 					if (px != src->keycolor) {
-						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = px;
+						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 					} else {
-						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->bgc;
+						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
 					}
 					break;
 				case 0b111:
 					if (px != src->keycolor) {
-						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->fgc;
+						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
 					} else {
-						vram[(dst->base + ((ay + src->y) * dst->w) + ax + src->x) & VRAM_SIZE_MASK] = src->bgc;
+						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
 					}
 					break;
 			}
-
 			pixelcount++;
 		}
 	}
 	return pixelcount;
 }
 
-uint32_t blitter_ic::tile_blit(const surface *src, surface *dst, const tile_surface *ts)
+uint32_t blitter_ic::tile_blit(const surface *src, surface *dest, const tile_surface *ts)
 {
 	uint32_t pixelcount = 0;
 	
 	surface source = *src;
+	
+	uint8_t dw = (src->flags_1 & FLAGS1_DBLWIDTH) ? 1 : 0;
+	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) ? 1 : 0;
 	
 	source.x = ts->x;
 	source.y = ts->y;
@@ -198,14 +210,23 @@ uint32_t blitter_ic::tile_blit(const surface *src, surface *dst, const tile_surf
 	for (int y = 0; y < ts->rows; y++) {
 		for (int x = 0; x < ts->columns; x++) {
 			source.index = vram[tile++ & VRAM_SIZE_MASK];
-			pixelcount += blit(&source, dst);
-			source.x += source.w;
+			pixelcount += blit(&source, dest);
+			source.x += (source.w << dw);
 		}
 		source.x = ts->x;
-		source.y += source.h;
+		source.y += (source.h << dh);
 	}
 	
 	return pixelcount;
+}
+
+uint32_t blitter_ic::clear_surface(const surface *s)
+{
+	uint32_t pixels = s->w * s->h;
+	for (uint32_t i=0; i < pixels; i++) {
+		vram[(s->base + i) & VRAM_SIZE_MASK] = s->bg_col;
+	}
+	return pixels;
 }
 
 /*

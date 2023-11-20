@@ -61,7 +61,15 @@ int main()
 	SDL_Texture *scanlines_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STATIC, MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);
 	create_scanlines_texture(scanlines_texture);
 	
+	/*
+	 * ??
+	 */
 	//SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	
+	/*
+	 * Make sure mouse cursor isn't visible
+	 */
+	SDL_ShowCursor(SDL_DISABLE);
 	
 	bool running = true;
 	SDL_Event my_event;
@@ -89,25 +97,27 @@ int main()
 		/*
 		 * clear framebuffer
 		 */
-		for (int i=0; i<PIXELS; i++) blitter.vram[i+0x10000] = 0x00;
+		blitter.clear_surface(&blitter.screen);
+		
+		blitter.blit(&blitter.turn_text, &blitter.screen);
+		blitter.blit(&blitter.bruce, &blitter.screen);
 		
 		/*
 		 * blit
 		 */
 		blitter.blit(&blitter.blob, &blitter.screen);
-
 		
 		blitter.blob.x += dx;
 		blitter.blob.y += dy;
 		
-		if ((blitter.blob.x > 236) || (blitter.blob.x < 1)) dx = -dx;
-		if ((blitter.blob.y > 90) || (blitter.blob.y < 60)) dy = -dy;
+		if ((blitter.blob.x > 316) || (blitter.blob.x < 1)) dx = -dx;
+		if ((blitter.blob.y > 174) || (blitter.blob.y < 1)) dy = -dy;
 		
 		/*
 		 * pointer for texture straight in memory!
 		 * TODO: boundary checking
 		 */
-		SDL_UpdateTexture(screen_texture, NULL, &blitter.vram[0x0000], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
+		SDL_UpdateTexture(screen_texture, NULL, &blitter.vram[(blitter.framebuffer_bank & 0x0f) << 16], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
