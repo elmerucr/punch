@@ -76,7 +76,7 @@ blitter_ic::blitter_ic()
 	tile_blit(&font, &turn_text, &text_buffer);
 	
 	for (int i=0; i<184; i++) {
-		vram[0x300+i] = sprite[i];
+		vram[0x300+i] = bruce_data[i];
 	}
 	bruce.index = 0;
 	bruce.base = 0x300;
@@ -85,8 +85,20 @@ blitter_ic::blitter_ic()
 	bruce.flags_1 = 0b00000001;
 	bruce.w = 8;
 	bruce.h = 23;
-	bruce.x = 8;
-	bruce.y = 8;
+	bruce.x = 170;
+	bruce.y = 42;
+	
+	for (int i=0; i< 169; i++) {
+		vram[0x400+i] = punch_data[i];
+	}
+	punch.base = 0x400;
+	punch.keycolor = 0x01;
+	punch.flags_0 = 0b1;
+	punch.flags_1 = 0;
+	punch.w = 13;
+	punch.h = 13;
+	punch.x = 190;
+	punch.y = 52;
 }
 
 blitter_ic::~blitter_ic()
@@ -128,14 +140,14 @@ uint32_t blitter_ic::blit(const surface *src, surface *dest)
 	
 	if (src->flags_1 & FLAGS1_HOR_FLIP) {
 		int16_t temp_value = startx;
-		startx = src->w - endx;
-		endx   = src->w - temp_value;
+		startx = (src->w << dw) - endx;
+		endx   = (src->w << dw) - temp_value;
 	}
 	
 	if (src->flags_1 & FLAGS1_VER_FLIP) {
 		int16_t temp_value = starty;
-		starty = src->h - endy;
-		endy   = src->h - temp_value;
+		starty = (src->h << dh) - endy;
+		endy   = (src->h << dh) - temp_value;
 	}
 
 	uint32_t offset = src->base + (src->index * src->w * src->h);
@@ -147,8 +159,8 @@ uint32_t blitter_ic::blit(const surface *src, surface *dest)
 		for (int x = startx; x < endx; x++) {
 			uint8_t px = vram[(offset + (x >> dw) + (src->w * (y >> dh))) & VRAM_SIZE_MASK];
 			
-			if (src->flags_1 & FLAGS1_HOR_FLIP) dest_x = src->w - 1 - x; else dest_x = x;
-			if (src->flags_1 & FLAGS1_VER_FLIP) dest_y = src->h - 1 - y; else dest_y = y;
+			if (src->flags_1 & FLAGS1_HOR_FLIP) dest_x = (src->w << dw) - 1 - x; else dest_x = x;
+			if (src->flags_1 & FLAGS1_VER_FLIP) dest_y = (src->h << dh) - 1 - y; else dest_y = y;
 			if (src->flags_1 & FLAGS1_XY_FLIP) swap(dest_x, dest_y);
 			
 			/*

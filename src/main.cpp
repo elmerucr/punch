@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "blitter.hpp"
 #include "mc6809.hpp"
+#include "core.hpp"
 #include <SDL2/SDL.h>
 
 blitter_ic blitter;
@@ -44,6 +45,9 @@ int main()
 	cpu->reset();
 	dump(cpu);
 	
+	core_t core;
+	core.reset();
+	
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
 	SDL_DisplayMode dm;
@@ -53,13 +57,17 @@ int main()
 	scaling = (3 * scaling) / 4;
 	printf("scaling = %i\n", scaling);
 	
+	/*
+	 * TODO: Need SDL_WINDOW_ALWAYS_ON_TOP?
+	 */
 	SDL_Window *window = SDL_CreateWindow("punch", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, MAX_PIXELS_PER_SCANLINE*scaling, MAX_SCANLINES*scaling, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	SDL_Texture *screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	SDL_Texture *scanlines_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STATIC, MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);
 	create_scanlines_texture(scanlines_texture);
+	SDL_RenderSetLogicalSize(renderer, 320, 180);	// keeps right aspect ratio
 	
 	/*
 	 * ??
@@ -90,17 +98,21 @@ int main()
 		}
 		
 		cycles += 985248;
+		
+		core.run(cycles);
+		
 		while (cycles > 0) {
 			cycles -= cpu->execute();
 		}
 		
 		/*
-		 * clear framebuffer
+		 * Clear framebuffer
 		 */
 		blitter.clear_surface(&blitter.screen);
 		
 		blitter.blit(&blitter.turn_text, &blitter.screen);
 		blitter.blit(&blitter.bruce, &blitter.screen);
+		blitter.blit(&blitter.punch, &blitter.screen);
 		
 		/*
 		 * blit
@@ -119,6 +131,7 @@ int main()
 		 */
 		SDL_UpdateTexture(screen_texture, NULL, &blitter.vram[(blitter.framebuffer_bank & 0x0f) << 16], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
 		
+		/* TODO: Consider background color from blitter here? */
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
