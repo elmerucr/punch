@@ -1,7 +1,7 @@
 /*
  * mc6809.hpp  -  part of MC6809
  *
- * (C)2021-2022 elmerucr
+ * (C)2021-2023 elmerucr
  */
 
 /*
@@ -23,9 +23,9 @@
 #include <cstdint>
 
 #define MC6809_MAJOR_VERSION	0
-#define MC6809_MINOR_VERSION	9
-#define MC6809_BUILD		20211113
-#define MC6809_YEAR		2021
+#define MC6809_MINOR_VERSION	11
+#define MC6809_BUILD		20231123
+#define MC6809_YEAR		2023
 
 #define	C_FLAG	0x01	// carry
 #define	V_FLAG	0x02	// overflow
@@ -47,26 +47,18 @@
 
 class mc6809 {
 public:
-	/*
-	 * read/write callbacks to memory bus
-	 */
-	typedef uint8_t (*bus_read)(uint16_t);
-	typedef void (*bus_write)(uint16_t, uint8_t);
-	bus_read read_8;
-	bus_write write_8;
+	mc6809();
+	virtual ~mc6809();
 
-	/*
-	 * Constructor receives function pointers for memory calls
-	 */
-	mc6809(bus_read r, bus_write w);
-
-	~mc6809();
+	virtual uint8_t read8(uint16_t address) const = 0;
+	virtual void write8(uint16_t address, uint8_t value) const = 0;
 
 	/*
 	 * Assignment of the different interrupt lines. The constructor of the
 	 * cpu class creates true values (level up) by default - so if none
 	 * is assigned, the cpu will still work.
 	 */
+	public:
 	void assign_nmi_line(bool *line) { nmi_line = line; }
 	void assign_firq_line(bool *line) { firq_line = line; }
 	void assign_irq_line(bool *line) { irq_line = line; }
@@ -83,8 +75,8 @@ public:
 	 */
 	uint8_t execute();
 
-	void status(char *text_buffer);
-	void stacks(char *text_buffer, int no);
+	void status(char *text_buffer, int n);
+	void stacks(char *text_buffer, int n, int no);
 	uint16_t disassemble_instruction(char *buffer, uint16_t address);
 	bool disassemble_successfull() { return disassemble_success; }
 
@@ -206,10 +198,10 @@ private:
 	/*
 	 * Internal stackpointer functionality
 	 */
-	inline void    push_sp(uint8_t byte) { (*write_8)(--sp, byte); }
-	inline uint8_t pull_sp()             { return (*read_8)(sp++); }
-	inline void    push_us(uint8_t byte) { (*write_8)(--us, byte); }
-	inline uint8_t pull_us()             { return (*read_8)(us++); }
+	inline void    push_sp(uint8_t byte) { write8(--sp, byte); }
+	inline uint8_t pull_sp()             { return read8(sp++); }
+	inline void    push_us(uint8_t byte) { write8(--us, byte); }
+	inline uint8_t pull_us()             { return read8(us++); }
 
 	/*
 	 * addressing modes

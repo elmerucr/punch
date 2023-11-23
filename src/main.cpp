@@ -2,21 +2,10 @@
 #include <cstdint>
 #include "common.hpp"
 #include "blitter.hpp"
-#include "mc6809.hpp"
 #include "core.hpp"
 #include <SDL2/SDL.h>
 
 blitter_ic blitter;
-
-uint8_t read8(uint16_t address)
-{
-	return blitter.vram[address];
-}
-
-void write8(uint16_t address, uint8_t val)
-{
-	blitter.vram[address] = val;
-}
 
 void create_scanlines_texture(SDL_Texture *slt);
 
@@ -24,27 +13,6 @@ void dump(mc6809 *m);
 
 int main()
 {
-	blitter.vram[0xfffe] = 0x02;
-	blitter.vram[0xffff] = 0x00;
-	
-	blitter.vram[0x0200] = 0x86;	// lda #$21
-	blitter.vram[0x0201] = 0x21;
-	blitter.vram[0x0202] = 0xb7;	// sta $40
-	blitter.vram[0x0203] = 0x00;
-	blitter.vram[0x0204] = 0x40;
-	blitter.vram[0x0205] = 0x7c;	// inc $40
-	blitter.vram[0x0206] = 0x00;
-	blitter.vram[0x0207] = 0x40;
-	blitter.vram[0x0208] = 0x7e;	// jmp $0205
-	blitter.vram[0x0209] = 0x02;
-	blitter.vram[0x020a] = 0x05;
-	
-	mc6809 *cpu;
-	cpu = new mc6809(read8, write8);
-	dump(cpu);
-	cpu->reset();
-	dump(cpu);
-	
 	core_t core;
 	core.reset();
 	
@@ -101,9 +69,9 @@ int main()
 		
 		core.run(cycles);
 		
-		while (cycles > 0) {
-			cycles -= cpu->execute();
-		}
+//		while (cycles > 0) {
+//			//cycles -= cpu->execute();
+//		}
 		
 		/*
 		 * Clear framebuffer
@@ -147,8 +115,6 @@ int main()
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	
-	delete cpu;
-	
 	SDL_Quit();
 	
 	printf("%i frames\n", frames);
@@ -174,26 +140,26 @@ void create_scanlines_texture(SDL_Texture *slt)
 	SDL_UpdateTexture(slt, NULL, scanline_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint16_t));
 }
 
-void dump(mc6809 *m)
-{
-	printf(" pc  dp ac:br  xr   yr   us   sp  efhinzvc\n%04x %02x %02x %02x %04x %04x %04x %04x %c%c%c%c%c%c%c%c\n",
-	       m->get_pc(),
-	       m->get_dp(),
-	       m->get_ac(),
-	       m->get_br(),
-	       m->get_xr(),
-	       m->get_yr(),
-	       m->get_us(),
-	       m->get_sp(),
-	       (m->get_cc() & 0x80) ? '1' : '0',
-	       (m->get_cc() & 0x40) ? '1' : '0',
-	       (m->get_cc() & 0x20) ? '1' : '0',
-	       (m->get_cc() & 0x10) ? '1' : '0',
-	       (m->get_cc() & 0x08) ? '1' : '0',
-	       (m->get_cc() & 0x04) ? '1' : '0',
-	       (m->get_cc() & 0x02) ? '1' : '0',
-	       (m->get_cc() & 0x01) ? '1' : '0');
-	char buffer[64];
-	m->disassemble_instruction(buffer, m->get_pc());
-	printf("%s\n", buffer);
-}
+//void dump(mc6809 *m)
+//{
+//	printf(" pc  dp ac:br  xr   yr   us   sp  efhinzvc\n%04x %02x %02x %02x %04x %04x %04x %04x %c%c%c%c%c%c%c%c\n",
+//	       m->get_pc(),
+//	       m->get_dp(),
+//	       m->get_ac(),
+//	       m->get_br(),
+//	       m->get_xr(),
+//	       m->get_yr(),
+//	       m->get_us(),
+//	       m->get_sp(),
+//	       (m->get_cc() & 0x80) ? '1' : '0',
+//	       (m->get_cc() & 0x40) ? '1' : '0',
+//	       (m->get_cc() & 0x20) ? '1' : '0',
+//	       (m->get_cc() & 0x10) ? '1' : '0',
+//	       (m->get_cc() & 0x08) ? '1' : '0',
+//	       (m->get_cc() & 0x04) ? '1' : '0',
+//	       (m->get_cc() & 0x02) ? '1' : '0',
+//	       (m->get_cc() & 0x01) ? '1' : '0');
+//	char buffer[64];
+//	m->disassemble_instruction(buffer, m->get_pc());
+//	printf("%s\n", buffer);
+//}

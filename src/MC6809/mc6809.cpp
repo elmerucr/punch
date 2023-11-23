@@ -1,17 +1,14 @@
 /*
  * mc6809.cpp  -  part of MC6809
  *
- * (C)2021-2022 elmerucr
+ * (C)2021-2023 elmerucr
  */
 
 #include "mc6809.hpp"
 #include <cstdio>
 
-mc6809::mc6809(bus_read r, bus_write w)
+mc6809::mc6809()
 {
-	read_8 = (bus_read)r;
-	write_8 = (bus_write)w;
-
 	cc = 0b00000000;
 
 	/*
@@ -33,7 +30,7 @@ mc6809::mc6809(bus_read r, bus_write w)
 	breakpoint_array = NULL;
 	breakpoint_array = new bool[65536];
 	clear_breakpoints();
-	
+
 	printf("[MC6809] version %i.%i.%i (C)%i elmerucr\n",
 	       MC6809_MAJOR_VERSION,
 	       MC6809_MINOR_VERSION,
@@ -72,14 +69,14 @@ void mc6809::reset()
 	 * Load program counter from vector
 	 */
 	pc = 0;
-	pc = ((*read_8)(VECTOR_RESET)) << 8;
-	pc |= (*read_8)(VECTOR_RESET+1);
+	pc = read8(VECTOR_RESET) << 8;
+	pc |= read8(VECTOR_RESET+1);
 }
 
 uint8_t mc6809::execute()
 {
 	uint32_t old_cycles = cycles;
-	
+
 	if ((*nmi_line == false) && (old_nmi_line == true) && nmi_enabled) {
 		nmi();
 	} else if ((*firq_line == false) && is_f_flag_clear()) {
@@ -87,7 +84,7 @@ uint8_t mc6809::execute()
 	} else if ((*irq_line == false) && is_i_flag_clear()) {
 		irq();
 	} else {
-		uint8_t opcode = (*read_8)(pc++);
+		uint8_t opcode = read8(pc++);
 		/*
 		 * TODO: check for illegal opcode and start exception
 		 */
@@ -96,7 +93,7 @@ uint8_t mc6809::execute()
 		uint16_t effective_address = (this->*addressing_modes_page1[opcode])(&am_legal);
 		(this->*opcodes_page1[opcode])(effective_address);
 	}
-	
+
 	old_nmi_line = *nmi_line;
 	return cycles - old_cycles;
 }
@@ -131,11 +128,11 @@ void mc6809::nmi()
 	set_i_flag();
 	set_f_flag();
 	pc = 0;
-	pc = ((*read_8)(VECTOR_NMI)) << 8;
-	pc |= (*read_8)(VECTOR_NMI+1);
+	pc = read8(VECTOR_NMI) << 8;
+	pc |= read8(VECTOR_NMI+1);
 
 	/*
-	 * can't find this in the documentation
+	 * TODO: Can't find this in the documentation
 	 */
 	cycles += 19;
 }
@@ -149,8 +146,8 @@ void mc6809::firq()
 	set_f_flag();
 	set_i_flag();
 	pc = 0;
-	pc = ((*read_8)(VECTOR_FIRQ)) << 8;
-	pc |= (*read_8)(VECTOR_FIRQ+1);
+	pc = read8(VECTOR_FIRQ) << 8;
+	pc |= read8(VECTOR_FIRQ+1);
 
 	/*
 	 * can't find this in the documentation
@@ -175,8 +172,8 @@ void mc6809::irq()
 	push_sp(cc);
 	set_i_flag();
 	pc = 0;
-	pc = ((*read_8)(VECTOR_IRQ)) << 8;
-	pc |= (*read_8)(VECTOR_IRQ+1);
+	pc = read8(VECTOR_IRQ) << 8;
+	pc |= read8(VECTOR_IRQ+1);
 
 	/*
 	 * can't find this in the documentation
@@ -202,8 +199,8 @@ void mc6809::illegal_opcode()
 	set_i_flag();
 	set_f_flag();
 	pc = 0;
-	pc = ((*read_8)(VECTOR_ILL_OPC)) << 8;
-	pc |= (*read_8)(VECTOR_ILL_OPC+1);
+	pc = read8(VECTOR_ILL_OPC) << 8;
+	pc |= read8(VECTOR_ILL_OPC+1);
 
 	/*
 	 * same as nmi number of cycles
@@ -215,9 +212,12 @@ void mc6809::illegal_opcode()
  *  pc  dp ac br  xr   yr   us   sp  efhinzvc  N F I  NMI enabled/blocked
  * c000 00 01:ae 0000 d0d0 0000 0ffc -*-*---- 11 1 1  state normal/cwai/sync
  */
-void mc6809::status(char *text_buffer)
+/*
+ * TODO: "state normal" --> make it real after implementation of cwai/sync
+ */
+void mc6809::status(char *text_buffer, int n)
 {
-	sprintf(text_buffer, " pc  dp ac br  xr   yr   us   sp  efhinzvc  N F I  NMI %s\n"
+	snprintf(text_buffer, n, " pc  dp ac br  xr   yr   us   sp  efhinzvc  N F I  NMI %s\n"
 			"%04x %02x %02x:%02x "
 			"%04x %04x %04x %04x "
 			"%c%c%c%c%c%c%c%c "
@@ -240,18 +240,24 @@ void mc6809::status(char *text_buffer)
 			*irq_line ? '1' : '0');
 }
 
-void mc6809::stacks(char *text_buffer, int no)
+void mc6809::stacks(char *text_buffer, int n, int no)
 {
 	// display top of both stacks as 8 and 16 bit values
-	text_buffer += sprintf(text_buffer, "  usp      ssp\n");
+	int bytes = snprintf(text_buffer, n, "  usp      ssp\n");
+	text_buffer += bytes;
+	n -= bytes;
 	for (int i=0; i<no; i++) {
-		text_buffer += sprintf(text_buffer, "%04x %02x  %04x %02x",
+		bytes = snprintf(text_buffer, n, "%04x %02x  %04x %02x",
 			get_us() + i,
-			read_8((uint16_t)(get_us() + i)),
+			read8((uint16_t)(get_us() + i)),
 			get_sp() + i,
-			read_8((uint16_t)(get_sp() + i)));
+			read8((uint16_t)(get_sp() + i)));
+		text_buffer += bytes;
+		n -= bytes;
 		if (i < no-1) {
-			text_buffer += sprintf(text_buffer, "\n");
+			bytes = snprintf(text_buffer, n, "\n");
+			text_buffer += bytes;
+			n -= bytes;
 		}
 	}
 }

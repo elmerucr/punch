@@ -4,8 +4,8 @@
 core_t::core_t()
 {
 	blitter = new blitter_ic();
-	mmu_init(blitter);
-	cpu = new mc6809(mmu_read8, mmu_write8);
+	mmu = new mmu_t(blitter);
+	cpu = new cpu_t(mmu);
 	
 	blitter->vram[0xfffe] = 0x02;
 	blitter->vram[0xffff] = 0x00;
@@ -25,8 +25,9 @@ core_t::core_t()
 
 core_t::~core_t()
 {
-	delete blitter;
 	delete cpu;
+	delete mmu;
+	delete blitter;
 }
 
 void core_t::reset()
