@@ -3,8 +3,6 @@
 
 #include <cstdint>
 
-#define FRAMEBUFFER_BANK	0x00
-
 #define	FLAGS1_DBLWIDTH		0b00000001
 #define FLAGS1_DBLHEIGHT	0b00000010
 #define FLAGS1_HOR_FLIP		0b00010000
@@ -67,6 +65,7 @@ public:
 	blitter_ic();
 	~blitter_ic();
 	
+	surface font;
 	surface screen;
 	surface blob;
 	surface turn_text;

@@ -35,9 +35,11 @@ blitter_ic::blitter_ic()
 //		vram[(MAX_PIXELS_PER_SCANLINE*40) + 196 + (((i & 0b00011100)>>2)*MAX_PIXELS_PER_SCANLINE) + ((i & 0b11100000) >>3) +(i&0b11)] = i;
 //	}
 	
-	surface font;
-	font.flags_0 = 0b00000000;
-	font.flags_1 = 0b00000011;
+	/*
+	 * TODO: keep this???
+	 */
+	font.flags_0 = 0b00000011;
+	font.flags_1 = 0b00000000;
 	font.fg_col = 0b00111000;
 	font.keycolor = C64_BLUE;
 	font.base = 0x800;

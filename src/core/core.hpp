@@ -31,8 +31,9 @@ public:
 	
 	void reset();
 	void run(uint32_t cycles);
-private:
+	
 	blitter_ic *blitter;
+private:
 	mmu_t *mmu;
 	mc6809 *cpu;
 };

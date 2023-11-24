@@ -12,7 +12,6 @@ public:
 	}
 	
 	uint8_t read8(uint16_t address) {
-		printf("%04x: %02x\n", address, blitter->vram[address]);
 		return blitter->vram[address];
 	}
 	

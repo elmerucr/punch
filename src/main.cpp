@@ -1,11 +1,9 @@
 #include <cstdio>
 #include <cstdint>
 #include "common.hpp"
-#include "blitter.hpp"
 #include "core.hpp"
+#include "debug.hpp"
 #include <SDL2/SDL.h>
-
-blitter_ic blitter;
 
 void create_scanlines_texture(SDL_Texture *slt);
 
@@ -15,6 +13,8 @@ int main()
 {
 	core_t core;
 	core.reset();
+	
+	debug_t debug;
 	
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
@@ -32,6 +32,7 @@ int main()
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	SDL_Texture *screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
+	SDL_Texture *debug_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	SDL_Texture *scanlines_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STATIC, MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);
 	create_scanlines_texture(scanlines_texture);
@@ -57,6 +58,12 @@ int main()
 	int16_t dx = 1;
 	int16_t dy = 1;
 	
+	SDL_Rect viewer;
+	viewer.w = 128;
+	viewer.h = 72;
+	viewer.x = 192;
+	viewer.y = 0;
+	
 	while (running) {
 		frames++;
 		while (SDL_PollEvent(&my_event) != 0 ) {
@@ -69,48 +76,53 @@ int main()
 		
 		core.run(cycles);
 		
-//		while (cycles > 0) {
-//			//cycles -= cpu->execute();
-//		}
-		
 		/*
 		 * Clear framebuffer
 		 */
-		blitter.clear_surface(&blitter.screen);
+		core.blitter->clear_surface(&core.blitter->screen);
 		
-		blitter.blit(&blitter.turn_text, &blitter.screen);
-		blitter.blit(&blitter.bruce, &blitter.screen);
-		blitter.blit(&blitter.punch, &blitter.screen);
+		core.blitter->blit(&core.blitter->turn_text, &core.blitter->screen);
+		core.blitter->blit(&core.blitter->bruce, &core.blitter->screen);
+		core.blitter->blit(&core.blitter->punch, &core.blitter->screen);
 		
 		/*
 		 * blit
 		 */
-		blitter.blit(&blitter.blob, &blitter.screen);
+		core.blitter->blit(&core.blitter->blob, &core.blitter->screen);
 		
-		blitter.blob.x += dx;
-		blitter.blob.y += dy;
+		core.blitter->blob.x += dx;
+		core.blitter->blob.y += dy;
 		
-		if ((blitter.blob.x > 316) || (blitter.blob.x < 1)) dx = -dx;
-		if ((blitter.blob.y > 174) || (blitter.blob.y < 1)) dy = -dy;
+		if ((core.blitter->blob.x > 316) || (core.blitter->blob.x < 1)) dx = -dx;
+		if ((core.blitter->blob.y > 174) || (core.blitter->blob.y < 1)) dy = -dy;
+		
+		debug.redraw();
 		
 		/*
 		 * pointer for texture straight in memory!
 		 * TODO: boundary checking
 		 */
-		SDL_UpdateTexture(screen_texture, NULL, &blitter.vram[(blitter.framebuffer_bank & 0x0f) << 16], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
+		SDL_UpdateTexture(screen_texture, NULL, &core.blitter->vram[(core.blitter->framebuffer_bank & 0x0f) << 16], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
+		SDL_UpdateTexture(debug_texture, NULL, &debug.blitter->vram[(debug.blitter->framebuffer_bank & 0x0f) << 16], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
 		
-		/* TODO: Consider background color from blitter here? */
+		/*
+		 * TODO: Consider background color from blitter here?
+		 */
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
+		
 		SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
+		SDL_RenderCopy(renderer, debug_texture, NULL, NULL);
 		
 		SDL_SetTextureAlphaMod(scanlines_texture, 64);
 		SDL_RenderCopy(renderer, scanlines_texture, NULL, NULL);
+		
+		SDL_RenderCopy(renderer, screen_texture, NULL, &viewer);
 
 		SDL_RenderPresent(renderer);
-
 	}
 	
+	SDL_DestroyTexture(debug_texture);
 	SDL_DestroyTexture(screen_texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
