@@ -2,7 +2,7 @@
 #include <cstdint>
 #include "common.hpp"
 #include "core.hpp"
-#include "debug.hpp"
+#include "debugger.hpp"
 #include <SDL2/SDL.h>
 
 void create_scanlines_texture(SDL_Texture *slt);
@@ -14,7 +14,7 @@ int main()
 	core_t core;
 	core.reset();
 	
-	debug_t debug;
+	debugger_t debugger;
 	
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
@@ -32,7 +32,7 @@ int main()
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	SDL_Texture *screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
-	SDL_Texture *debug_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
+	SDL_Texture *debugger_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB332, SDL_TEXTUREACCESS_STREAMING, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	SDL_Texture *scanlines_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STATIC, MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);
 	create_scanlines_texture(scanlines_texture);
@@ -96,14 +96,14 @@ int main()
 		if ((core.blitter->blob.x > 316) || (core.blitter->blob.x < 1)) dx = -dx;
 		if ((core.blitter->blob.y > 174) || (core.blitter->blob.y < 1)) dy = -dy;
 		
-		debug.redraw();
+		debugger.redraw();
 		
 		/*
 		 * pointer for texture straight in memory!
 		 * TODO: boundary checking
 		 */
 		SDL_UpdateTexture(screen_texture, NULL, &core.blitter->vram[(core.blitter->framebuffer_bank & 0x0f) << 16], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
-		SDL_UpdateTexture(debug_texture, NULL, &debug.blitter->vram[(debug.blitter->framebuffer_bank & 0x0f) << 16], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
+		SDL_UpdateTexture(debugger_texture, NULL, &debugger.blitter->vram[(debugger.blitter->framebuffer_bank & 0x0f) << 16], sizeof(uint8_t) * MAX_PIXELS_PER_SCANLINE);
 		
 		/*
 		 * TODO: Consider background color from blitter here?
@@ -112,7 +112,7 @@ int main()
 		SDL_RenderClear(renderer);
 		
 		SDL_RenderCopy(renderer, screen_texture, NULL, NULL);
-		SDL_RenderCopy(renderer, debug_texture, NULL, NULL);
+		SDL_RenderCopy(renderer, debugger_texture, NULL, NULL);
 		
 		SDL_SetTextureAlphaMod(scanlines_texture, 64);
 		SDL_RenderCopy(renderer, scanlines_texture, NULL, NULL);
@@ -122,7 +122,7 @@ int main()
 		SDL_RenderPresent(renderer);
 	}
 	
-	SDL_DestroyTexture(debug_texture);
+	SDL_DestroyTexture(debugger_texture);
 	SDL_DestroyTexture(screen_texture);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
