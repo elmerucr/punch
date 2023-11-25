@@ -1,6 +1,6 @@
 
 
-#define BUILD			20231124
+#define BUILD			20231125
 
 #define FPS			60
 #define MAX_PIXELS_PER_SCANLINE	320

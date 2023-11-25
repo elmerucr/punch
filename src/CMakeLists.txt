@@ -1,2 +1,5 @@
 add_subdirectory(blitter/)
+add_subdirectory(core/)
+add_subdirectory(debugger/)
 add_subdirectory(MC6809/)
+add_subdirectory(mmu/)

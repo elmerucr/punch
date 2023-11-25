@@ -10,11 +10,14 @@ include_directories(
     ${SDL2_INCLUDE_DIRS}
     src/
     src/blitter/
+    src/core/
+    src/debugger/
     src/MC6809/
+    src/mmu/
 )
 
 add_subdirectory(src/)
 
 add_executable(punch src/main.cpp)
 
-target_link_libraries(punch blitter MC6809 ${SDL2_LIBRARIES})
+target_link_libraries(punch core debugger ${SDL2_LIBRARIES})
