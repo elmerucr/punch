@@ -6,8 +6,9 @@ blitter_ic::blitter_ic()
 {
 	vram = new uint8_t[VRAM_SIZE];
 	
-	tiny_4x6_pixel_font = new uint8_t[256*4*6];
-	init_tiny_4x6_pixel_font();
+	font_4x6 = new uint8_t[8192];
+	for (int i = 0; i < 8192; i++) font_4x6[i] = 0;
+	init_font_4x6();
 	
 	/* framebuffer is a surface as well */
 	screen.base = framebuffer_bank << 16;
@@ -17,7 +18,7 @@ blitter_ic::blitter_ic()
 	screen.h = MAX_SCANLINES;
 	screen.bg_col = 0b000000101;
 	
-	blob.flags_0 = 0b011;
+	blob.flags_0 = 0b01000011;
 	blob.base = 0x0800;
 	blob.keycolor = C64_BLUE;
 	blob.index = 33;
@@ -38,18 +39,15 @@ blitter_ic::blitter_ic()
 	/*
 	 * TODO: keep this???
 	 */
-	font.flags_0 = 0b00000011;
+	font.flags_0 = 0b01000011;
 	font.flags_1 = 0b00000000;
 	font.fg_col = 0b00111000;
 	font.keycolor = C64_BLUE;
-	font.base = 0x800;
 	font.w = 4;
 	font.h = 6;
-	font.x = 0;
-	font.y = 0;
 	
 	for (int i=0; i< (256*4*6); i++) {
-		vram[font.base + i] = tiny_4x6_pixel_font[i];
+		vram[font.base + i] = font_4x6[i];
 	}
 	
 	tile_surface text_buffer;
@@ -95,8 +93,8 @@ blitter_ic::blitter_ic()
 	}
 	punch.base = 0x400;
 	punch.keycolor = 0x01;
-	punch.flags_0 = 0b1;
-	punch.flags_1 = 0;
+	punch.flags_0 = 0b00000001;
+	punch.flags_1 = 0b00000000;
 	punch.w = 13;
 	punch.h = 13;
 	punch.x = 190;
@@ -105,7 +103,7 @@ blitter_ic::blitter_ic()
 
 blitter_ic::~blitter_ic()
 {
-	delete [] tiny_4x6_pixel_font;
+	delete [] font_4x6;
 	delete [] vram;
 }
 
@@ -152,14 +150,25 @@ uint32_t blitter_ic::blit(const surface *src, surface *dest)
 		endy   = (src->h << dh) - temp_value;
 	}
 
-	uint32_t offset = src->base + (src->index * src->w * src->h);
+	uint32_t offset = (src->index * src->w * src->h);
 	
 	int16_t dest_x;
 	int16_t dest_y;
 
 	for (int y = starty; y < endy; y++) {
 		for (int x = startx; x < endx; x++) {
-			uint8_t px = vram[(offset + (x >> dw) + (src->w * (y >> dh))) & VRAM_SIZE_MASK];
+			uint8_t px{0};
+			
+			switch ((src->flags_0 & 0b11000000) >> 6) {
+				case 0b00:
+					px = vram[src->base + (offset + (x >> dw) + (src->w * (y >> dh))) & VRAM_SIZE_MASK];
+					break;
+				case 0b01:
+				case 0b10:
+				case 0b11:
+					px = font_4x6[(offset + (x >> dw) + (src->w * (y >> dh))) & 0x1fff];
+					break;
+			}
 			
 			if (src->flags_1 & FLAGS1_HOR_FLIP) dest_x = (src->w << dw) - 1 - x; else dest_x = x;
 			if (src->flags_1 & FLAGS1_VER_FLIP) dest_y = (src->h << dh) - 1 - y; else dest_y = y;
@@ -246,7 +255,7 @@ uint32_t blitter_ic::clear_surface(const surface *s)
 /*
  * https://hackaday.io/project/6309-vga-graphics-over-spi-and-serial-vgatonic/log/20759-a-tiny-4x6-pixel-font-that-will-fit-on-almost-any-microcontroller-license-mit
  */
-const uint8_t font4x6 [96][2] = {
+const uint8_t font4x6_orig [96][2] = {
 	{  0x00  ,  0x00  },   /*' '*/
 	{  0x49  ,  0x08  },   /*'!'*/
 	{  0xb4  ,  0x00  },   /*'"'*/
@@ -474,40 +483,40 @@ const uint8_t blocks[108] = {
 };
 
 // Font retrieval function - ugly, but needed.
-inline bool get_font_pixel(uint8_t data, uint8_t x, uint8_t y)
+inline bool get_font_4x6_pixel(uint8_t data, uint8_t x, uint8_t y)
 {
 	if (data < 32) return false;
 
 	const uint8_t index = (data-32);
 	uint8_t pixel = 0;
-	if ((font4x6[index][1] & 1) == 1) y -= 1;
+	if ((font4x6_orig[index][1] & 1) == 1) y -= 1;
 	if (y == 0) {
-		pixel = (font4x6[index][0]) >> 4;
+		pixel = (font4x6_orig[index][0]) >> 4;
 	} else if (y == 1) {
-		pixel = (font4x6[index][0]) >> 1;
+		pixel = (font4x6_orig[index][0]) >> 1;
 	} else if (y == 2) {
 		// Split over 2 bytes
-		pixel = ((font4x6[index][0] & 0x03) << 2) | ((font4x6[index][1]) & 0x02);
+		pixel = ((font4x6_orig[index][0] & 0x03) << 2) | ((font4x6_orig[index][1]) & 0x02);
 	} else if (y == 3) {
-		pixel = (font4x6[index][1]) >> 4;
+		pixel = (font4x6_orig[index][1]) >> 4;
 	} else if (y == 4) {
-		pixel = (font4x6[index][1]) >> 1;
+		pixel = (font4x6_orig[index][1]) >> 1;
 	}
 	x &= 0b11;
 	return (pixel & 0b1110) & (1 << (3 - x)) ? true : false;
 }
 
-void blitter_ic::init_tiny_4x6_pixel_font()
+void blitter_ic::init_font_4x6()
 {
 	for (int i=0; i<128; i++){
 		for (int y=0; y<6; y++) {
 			for (int x=0; x<4; x++) {
-				if (get_font_pixel(i, x, y)) {
-					tiny_4x6_pixel_font[(i * 4 * 6) + (y * 4) + x] = C64_LIGHTBLUE;
-					tiny_4x6_pixel_font[((i + 128) * 4 * 6) + (y * 4) + x] = C64_BLUE;
+				if (get_font_4x6_pixel(i, x, y)) {
+					font_4x6[(i * 4 * 6) + (y * 4) + x] = C64_LIGHTBLUE;
+					font_4x6[((i + 128) * 4 * 6) + (y * 4) + x] = C64_BLUE;
 				} else {
-					tiny_4x6_pixel_font[(i * 4 * 6) + (y * 4) + x] = C64_BLUE;
-					tiny_4x6_pixel_font[((i + 128) * 4 * 6) + (y * 4) + x] = C64_LIGHTBLUE;
+					font_4x6[(i * 4 * 6) + (y * 4) + x] = C64_BLUE;
+					font_4x6[((i + 128) * 4 * 6) + (y * 4) + x] = C64_LIGHTBLUE;
 				}
 			}
 		}
@@ -516,11 +525,11 @@ void blitter_ic::init_tiny_4x6_pixel_font()
 	for (int i=0; i<(108); i++) {
 		for (int j=0; j<4; j++) {
 			if (blocks[i] & (0b1<<(3-j))) {
-				tiny_4x6_pixel_font[(i*4)+j] = C64_LIGHTBLUE;
-				tiny_4x6_pixel_font[(128*4*6)+(i*4)+j] = C64_BLUE;
+				font_4x6[(i*4)+j] = C64_LIGHTBLUE;
+				font_4x6[(128*4*6)+(i*4)+j] = C64_BLUE;
 			} else {
-				tiny_4x6_pixel_font[(i*4)+j] = C64_BLUE;
-				tiny_4x6_pixel_font[(128*4*6)+(i*4)+j] = C64_LIGHTBLUE;
+				font_4x6[(i*4)+j] = C64_BLUE;
+				font_4x6[(128*4*6)+(i*4)+j] = C64_LIGHTBLUE;
 			}
 		}
 	}

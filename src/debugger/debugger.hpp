@@ -13,6 +13,7 @@ public:
 	blitter_ic *blitter;
 private:
 	surface screen;
+	surface font;
 	tile_surface terminal;
 };
 

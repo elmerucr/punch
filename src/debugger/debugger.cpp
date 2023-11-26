@@ -8,9 +8,16 @@ debugger_t::debugger_t()
 	blitter->framebuffer_bank = 0x0e;
 
 	screen.base = blitter->framebuffer_bank << 16;
-	screen.bg_col = C64_BLACK;
+	screen.bg_col = C64_BLUE;
 	screen.w = MAX_PIXELS_PER_SCANLINE;
 	screen.h = MAX_SCANLINES;
+	
+	font.flags_0 = 0b01000011;
+	font.flags_1 = 0b00000000;
+	font.keycolor = C64_BLUE;
+	font.fg_col = C64_LIGHTBLUE;
+	font.w = 4;
+	font.h = 6;
 
 	terminal.columns = MAX_PIXELS_PER_SCANLINE / 4;
 	terminal.rows = MAX_SCANLINES / 6;
@@ -32,5 +39,5 @@ debugger_t::~debugger_t()
 void debugger_t::redraw()
 {
 	blitter->clear_surface(&screen);
-	blitter->tile_blit(&blitter->font, &screen, &terminal);
+	blitter->tile_blit(&font, &screen, &terminal);
 }
