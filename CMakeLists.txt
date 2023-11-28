@@ -12,6 +12,7 @@ include_directories(
     src/blitter/
     src/core/
     src/debugger/
+    src/host/
     src/MC6809/
     src/mmu/
 )
@@ -20,4 +21,4 @@ add_subdirectory(src/)
 
 add_executable(punch src/main.cpp)
 
-target_link_libraries(punch core debugger ${SDL2_LIBRARIES})
+target_link_libraries(punch core debugger host)

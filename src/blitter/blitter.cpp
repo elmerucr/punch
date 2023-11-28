@@ -28,9 +28,9 @@ blitter_ic::blitter_ic()
 	font.w = 4;
 	font.h = 6;
 	
-	for (int i=0; i< (256*4*6); i++) {
-		vram[font.base + i] = font_4x6[i];
-	}
+	// for (int i=0; i< (256*4*6); i++) {
+	// 	vram[font.base + i] = font_4x6[i];
+	// }
 	
 	tile_surface text_buffer;
 	text_buffer.columns = 80;
