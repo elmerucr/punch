@@ -31,6 +31,7 @@ public:
 	
 	void reset();
 	void run(uint32_t cycles);
+	void run_blitter();
 	
 	blitter_ic *blitter;
 private:

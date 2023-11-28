@@ -39,3 +39,11 @@ void core_t::run(uint32_t cycles)
 {
 	cpu->execute();
 }
+
+void core_t::run_blitter()
+{
+	blitter->clear_surface(&blitter->framebuffer);
+	blitter->blit(&blitter->turn_text, &blitter->framebuffer);
+	blitter->blit(&blitter->bruce, &blitter->framebuffer);
+	blitter->blit(&blitter->punch, &blitter->framebuffer);
+}

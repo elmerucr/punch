@@ -11,35 +11,17 @@ blitter_ic::blitter_ic()
 	init_font_4x6();
 	
 	/* framebuffer is a surface as well */
-	screen.base = framebuffer_bank << 16;
-	screen.x = 0;
-	screen.y = 0;
-	screen.w = MAX_PIXELS_PER_SCANLINE;
-	screen.h = MAX_SCANLINES;
-	screen.bg_col = 0b000000101;
-	
-	blob.flags_0 = 0b01000011;
-	blob.base = 0x0800;
-	blob.keycolor = C64_BLUE;
-	blob.index = 33;
-	blob.fg_col = 0b00011100;
-	blob.x = 2;
-	blob.y = 85;
-	blob.w = 4;
-	blob.h = 6;
-	
-//	/*
-//	 * Display the RGB332 palette
-//	 * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics
-//	 */
-//	for (int i=0; i<256; i++) {
-//		vram[(MAX_PIXELS_PER_SCANLINE*40) + 196 + (((i & 0b00011100)>>2)*MAX_PIXELS_PER_SCANLINE) + ((i & 0b11100000) >>3) +(i&0b11)] = i;
-//	}
+	framebuffer.base = framebuffer_bank << 16;
+	framebuffer.x = 0;
+	framebuffer.y = 0;
+	framebuffer.w = MAX_PIXELS_PER_SCANLINE;
+	framebuffer.h = MAX_SCANLINES;
+	framebuffer.bg_col = 0b000000101;
 	
 	/*
 	 * TODO: keep this???
 	 */
-	font.flags_0 = 0b01000011;
+	font.flags_0 = 0b01000000;
 	font.flags_1 = 0b00000000;
 	font.fg_col = 0b00111000;
 	font.keycolor = C64_BLUE;
@@ -229,10 +211,14 @@ uint32_t blitter_ic::tile_blit(const surface *src, surface *dest, const tile_sur
 	source.x = ts->x;
 	source.y = ts->y;
 	uint32_t tile = ts->base;
+	uint32_t fg_color = ts->base + (ts->columns * ts->rows);
+	uint32_t bg_color = ts->base + (2 * ts->columns * ts->rows);
 	
 	for (int y = 0; y < ts->rows; y++) {
 		for (int x = 0; x < ts->columns; x++) {
 			source.index = vram[tile++ & VRAM_SIZE_MASK];
+			source.fg_col = vram[fg_color++ & VRAM_SIZE_MASK];
+			source.bg_col = vram[bg_color++ & VRAM_SIZE_MASK];
 			pixelcount += blit(&source, dest);
 			source.x += (source.w << dw);
 		}
