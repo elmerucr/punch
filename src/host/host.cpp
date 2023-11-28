@@ -149,21 +149,15 @@ void host_t::video_init()
 	printf("[SDL] Max window scaling is %i, defaulting to %i\n", video_scaling_max, video_scaling);
 	
 	/*
-	 * Create window - title will be set later on by update_title()
-	 * Note: Usage of SDL_WINDOW_ALLOW_HIGHDPI actually helps: interpolation
-	 * of pixels at unlogical window sizes looks a lot better!
+	 * Create window
 	 */
 	video_window = SDL_CreateWindow("punch", SDL_WINDOWPOS_CENTERED,
 				  SDL_WINDOWPOS_CENTERED,
 				  video_scaling * MAX_PIXELS_PER_SCANLINE,
 				  video_scaling * MAX_SCANLINES,
-				  SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE |
+				  SDL_WINDOW_SHOWN |
 				  SDL_WINDOW_ALLOW_HIGHDPI);
-//	
-//	if (settings->video_fullscreen) {
-//		SDL_SetWindowFullscreen(video_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-//	}
-//
+
 	SDL_GetWindowSize(video_window, &window_width, &window_height);
 	printf("[SDL] Display window dimension: %u x %u pixels\n", window_width, window_height);
 	
@@ -196,8 +190,8 @@ void host_t::video_init()
 	punch_texture = nullptr;
 	debugger_texture = nullptr;
 	
-	create_punch_texture(true);
-	create_debugger_texture(true);
+	create_punch_texture(video_linear_filtering);
+	create_debugger_texture(video_linear_filtering);
 
 	/*
 	 * Scanlines: A static texture that mimics scanlines
@@ -246,12 +240,12 @@ void host_t::update_screen()
 	SDL_RenderClear(video_renderer);
 
 	SDL_RenderCopy(video_renderer, punch_texture, NULL, NULL);
-	SDL_RenderCopy(video_renderer, debugger_texture, NULL, NULL);
-	SDL_SetTextureAlphaMod(scanlines_texture, 64);
+	//SDL_RenderCopy(video_renderer, debugger_texture, NULL, NULL);
+	SDL_SetTextureAlphaMod(scanlines_texture, video_scanlines_alpha);
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
-	const SDL_Rect viewer = { 192, 0, 128, 72 };
-	SDL_RenderCopy(video_renderer, punch_texture, NULL, &viewer);
+	//const SDL_Rect viewer = { 192, 0, 128, 72 };
+	//SDL_RenderCopy(video_renderer, punch_texture, NULL, &viewer);
 
 	SDL_RenderPresent(video_renderer);
 }
@@ -326,41 +320,41 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 	delete [] scanline_buffer;
 }
 
-//enum E64::events_output_state E64::host_t::events_process_events()
-//{
-//	enum events_output_state return_value = NO_EVENT;
-//	
-//	SDL_Event event;
-//	
-//	//bool shift_pressed = E64_sdl2_keyboard_state[SDL_SCANCODE_LSHIFT] | E64_sdl2_keyboard_state[SDL_SCANCODE_RSHIFT];
-//	bool alt_pressed = sdl_keyboard_state[SDL_SCANCODE_LALT] | sdl_keyboard_state[SDL_SCANCODE_RALT];
-//	//bool gui_pressed   = E64_sdl2_keyboard_state[SDL_SCANCODE_LGUI] | E64_sdl2_keyboard_state[SDL_SCANCODE_RGUI];
-//	
-//	while (SDL_PollEvent(&event)) {
-//		switch(event.type) {
-//			case SDL_KEYDOWN:
-//				return_value = KEYPRESS_EVENT;
-//				if( (event.key.keysym.sym == SDLK_f) && alt_pressed ) {
-//					events_wait_until_key_released(SDLK_f);
-//					video_toggle_fullscreen();
-//				} else if( (event.key.keysym.sym == SDLK_s) && alt_pressed ) {
-//					video_change_scanlines_intensity();
-//				} else if ((event.key.keysym.sym == SDLK_b) && alt_pressed) {
-//					video_toggle_linear_filtering();
+enum events_output_state host_t::events_process_events()
+{
+	enum events_output_state return_value = NO_EVENT;
+	
+	SDL_Event event;
+	
+	//bool shift_pressed = E64_sdl2_keyboard_state[SDL_SCANCODE_LSHIFT] | E64_sdl2_keyboard_state[SDL_SCANCODE_RSHIFT];
+	bool alt_pressed = sdl_keyboard_state[SDL_SCANCODE_LALT] | sdl_keyboard_state[SDL_SCANCODE_RALT];
+	//bool gui_pressed   = E64_sdl2_keyboard_state[SDL_SCANCODE_LGUI] | E64_sdl2_keyboard_state[SDL_SCANCODE_RGUI];
+	
+	while (SDL_PollEvent(&event)) {
+		switch(event.type) {
+			case SDL_KEYDOWN:
+				return_value = KEYPRESS_EVENT;
+				if( (event.key.keysym.sym == SDLK_f) && alt_pressed ) {
+					events_wait_until_key_released(SDLK_f);
+					video_toggle_fullscreen();
+				} else if( (event.key.keysym.sym == SDLK_s) && alt_pressed ) {
+					video_change_scanlines_intensity();
+				} else if ((event.key.keysym.sym == SDLK_b) && alt_pressed) {
+					video_toggle_linear_filtering();
 //				} else if ((event.key.keysym.sym == SDLK_r) && alt_pressed) {
 //					events_wait_until_key_released(SDLK_r);
 //					hud->show_notification("\nResetting system");
-//				} else if( (event.key.keysym.sym == SDLK_q) && alt_pressed ) {
-//					events_wait_until_key_released(SDLK_q);
-//					return_value = QUIT_EVENT;
-//				} else if ((event.key.keysym.sym == SDLK_MINUS) && alt_pressed) {
-//					// decrease screen size
-//					events_wait_until_key_released(SDLK_MINUS);
-//					video_decrease_window_size();
-//				} else if ((event.key.keysym.sym == SDLK_EQUALS) && alt_pressed) {
-//					// decrease screen size
-//					events_wait_until_key_released(SDLK_EQUALS);
-//					video_increase_window_size();
+				} else if( (event.key.keysym.sym == SDLK_q) && alt_pressed ) {
+					events_wait_until_key_released(SDLK_q);
+					return_value = QUIT_EVENT;
+				} else if ((event.key.keysym.sym == SDLK_MINUS) && alt_pressed) {
+					// decrease screen size
+					events_wait_until_key_released(SDLK_MINUS);
+					video_decrease_window_size();
+				} else if ((event.key.keysym.sym == SDLK_EQUALS) && alt_pressed) {
+					// increase screen size
+					events_wait_until_key_released(SDLK_EQUALS);
+					video_increase_window_size();
 //				} else if(event.key.keysym.sym == SDLK_F10) {
 //					hud->toggle_stats();
 //				} else if((event.key.keysym.sym == SDLK_w) && alt_pressed) {
@@ -371,13 +365,13 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 //						hud->show_notification("\nStart recording sound");
 //					}
 //					settings->audio_toggle_recording();
-//				}
-//				break;
-//			case SDL_QUIT:
-//				return_value = QUIT_EVENT;
-//				break;
-//		}
-//	}
+				}
+				break;
+			case SDL_QUIT:
+				return_value = QUIT_EVENT;
+				break;
+		}
+	}
 //
 //	if (!alt_pressed) {
 //		(keyboard_state[SCANCODE_ESCAPE      ] <<= 1) |= sdl_keyboard_state[SDL_SCANCODE_ESCAPE      ] ? 0b1 : 0b0;
@@ -452,77 +446,70 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 //		(keyboard_state[SCANCODE_RIGHT       ] <<= 1) |= sdl_keyboard_state[SDL_SCANCODE_RIGHT       ] ? 0b1 : 0b0;
 //	};
 //	
-//	if (return_value == QUIT_EVENT) printf("[SDL] detected quit event\n");
-//	return return_value;
-//}
-//
-//void E64::host_t::events_wait_until_key_released(SDL_KeyCode key)
-//{
-//	SDL_Event event;
-//	bool wait = true;
-//	while (wait) {
-//	    SDL_PollEvent(&event);
-//	    if ((event.type == SDL_KEYUP) && (event.key.keysym.sym == key)) wait = false;
-//	    std::this_thread::sleep_for(std::chrono::microseconds(40000));
-//	}
-//}
-//
-//void E64::host_t::video_toggle_fullscreen()
-//{
-//	settings->video_fullscreen = !settings->video_fullscreen;
-//	if (settings->video_fullscreen) {
-//		SDL_SetWindowFullscreen(video_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-//	} else {
-//		SDL_SetWindowFullscreen(video_window, SDL_WINDOW_RESIZABLE);
-//	}
-//	// TODO: this is buggy in Linux, after full->window wrong sizes are reported
-//	SDL_GetWindowSize(video_window, &window_width, &window_height);
-//	hud->show_notification("Switched to %s mode with size %ix%i",
-//			      settings->video_fullscreen ? "fullscreen" : "window",
-//			      window_width,
-//			      window_height);
-//}
-//
-//void E64::host_t::video_change_scanlines_intensity()
-//{
-//	if (settings->video_scanlines_alpha < 64) {
-//		settings->video_scanlines_alpha = 64;
-//	} else if (settings->video_scanlines_alpha < 128) {
-//		settings->video_scanlines_alpha = 128;
-//	} else if (settings->video_scanlines_alpha < 192) {
-//		settings->video_scanlines_alpha = 192;
-//	} else if (settings->video_scanlines_alpha < 255) {
-//		settings->video_scanlines_alpha = 255;
-//	} else {
-//		settings->video_scanlines_alpha = 0;
-//	}
+	if (return_value == QUIT_EVENT) printf("[SDL] detected quit event\n");
+	return return_value;
+}
+
+void host_t::events_wait_until_key_released(SDL_KeyCode key)
+{
+	SDL_Event event;
+	bool wait = true;
+	while (wait) {
+	    SDL_PollEvent(&event);
+	    if ((event.type == SDL_KEYUP) && (event.key.keysym.sym == key)) wait = false;
+	    std::this_thread::sleep_for(std::chrono::microseconds(40000));
+	}
+}
+
+void host_t::video_toggle_fullscreen()
+{
+	video_fullscreen = !video_fullscreen;
+	if (video_fullscreen) {
+		SDL_SetWindowFullscreen(video_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	} else {
+		SDL_SetWindowFullscreen(video_window, SDL_WINDOW_RESIZABLE);
+	}
+}
+
+void host_t::video_change_scanlines_intensity()
+{
+	if (video_scanlines_alpha < 64) {
+		video_scanlines_alpha = 64;
+	} else if (video_scanlines_alpha < 128) {
+		video_scanlines_alpha = 128;
+	} else if (video_scanlines_alpha < 192) {
+		video_scanlines_alpha = 192;
+	} else if (video_scanlines_alpha < 255) {
+		video_scanlines_alpha = 255;
+	} else {
+		video_scanlines_alpha = 0;
+	}
 //	hud->show_notification("Scanlines alpha value = %3u", settings->video_scanlines_alpha);
-//}
-//
-//void E64::host_t::video_toggle_linear_filtering()
-//{
-//	settings->video_linear_filtering = !settings->video_linear_filtering;
-//	create_vm_texture(settings->video_linear_filtering);
-//	create_hud_texture(settings->video_linear_filtering);
-//	hud->show_notification("Linear filtering = %s", settings->video_linear_filtering ? "on" : "off");
-//}
-//
-//void E64::host_t::video_increase_window_size()
-//{
-//	if (current_window_size < 8) current_window_size++;
-//	SDL_SetWindowSize(video_window, video_window_sizes[current_window_size].x,
-//			  video_window_sizes[current_window_size].y);
-//	SDL_GetWindowSize(video_window, &window_width, &window_height);
-//	SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-//	hud->show_notification("Set host window size to %ix%i", window_width, window_height);
-//}
-//
-//void E64::host_t::video_decrease_window_size()
-//{
-//	if (current_window_size > 0) current_window_size--;
-//	SDL_SetWindowSize(video_window, video_window_sizes[current_window_size].x,
-//			  video_window_sizes[current_window_size].y);
-//	SDL_GetWindowSize(video_window, &window_width, &window_height);
-//	SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-//	hud->show_notification("Set host window size to %ix%i", window_width, window_height);
-//}
+}
+
+void host_t::video_toggle_linear_filtering()
+{
+	video_linear_filtering = !video_linear_filtering;
+	create_punch_texture(video_linear_filtering);
+	create_debugger_texture(video_linear_filtering);
+}
+
+void host_t::video_increase_window_size()
+{
+	if (!video_fullscreen) {
+		if (video_scaling < video_scaling_max) video_scaling++;
+		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * MAX_SCANLINES);
+		SDL_GetWindowSize(video_window, &window_width, &window_height);
+		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	}
+}
+
+void host_t::video_decrease_window_size()
+{
+	if (!video_fullscreen) {
+		if (video_scaling > 1) video_scaling--;
+		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * MAX_SCANLINES);
+		SDL_GetWindowSize(video_window, &window_width, &window_height);
+		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	}
+}

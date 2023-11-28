@@ -14,20 +14,14 @@ int main()
 	core->reset();
 	
 	bool running = true;
-	SDL_Event my_event;
 	
 	uint32_t frames = 0;
-	
 	int32_t cycles = 0;
 	
 	while (running) {
 		frames++;
 		
-		while (SDL_PollEvent(&my_event) != 0 ) {
-			if(my_event.type == SDL_QUIT ) {
-				running = false;
-			}
-		}
+		if (host->events_process_events() == QUIT_EVENT) running = false;
 		
 		cycles += 985248;
 		
