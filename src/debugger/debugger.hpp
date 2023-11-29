@@ -16,7 +16,7 @@ public:
 	
 	terminal_t *terminal;
 private:
-	surface font;
+	surface font_surface;
 	tile_surface character_screen;
 	
 	core_t *core;
