@@ -55,13 +55,13 @@ typedef struct {
 	uint16_t h;
 } surface;
 
-typedef struct {
+struct tile_surface {
 	uint8_t columns;
 	uint8_t rows;
 	uint32_t base;
 	int16_t x;
 	int16_t y;
-} tile_surface;
+};
 
 class blitter_ic {
 public:

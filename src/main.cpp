@@ -9,7 +9,7 @@ int main()
 {
 	host_t *host = new host_t();
 	core_t *core = new core_t();
-	debugger_t *debugger = new debugger_t();
+	debugger_t *debugger = new debugger_t(core);
 	
 	core->reset();
 	
@@ -28,6 +28,7 @@ int main()
 		core->run(cycles);
 		core->run_blitter();
 		
+		debugger->terminal->printf("MC6809 build: %i. ", MC6809_BUILD);
 		debugger->redraw();
 		
 		host->update_textures(&core->blitter->vram[(core->blitter->framebuffer_bank & 0x0f) << 16], &debugger->blitter->vram[(debugger->blitter->framebuffer_bank & 0x0f) << 16]);

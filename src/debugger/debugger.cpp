@@ -2,8 +2,10 @@
 #include "common.hpp"
 #include <cstdio>
 
-debugger_t::debugger_t()
+debugger_t::debugger_t(core_t *c)
 {
+	core = c;
+	
 	blitter = new blitter_ic();
 	blitter->framebuffer_bank = 0x0e;
 	blitter->framebuffer.bg_col = 0x00;
@@ -20,16 +22,22 @@ debugger_t::debugger_t()
 	character_screen.base = 0x10000;
 	character_screen.x = 0;
 	character_screen.y = 0;
-
-	for (int i=0; i < (character_screen.columns * character_screen.rows); i++) {
-		blitter->vram[character_screen.base + i] = 0x20;
-		blitter->vram[character_screen.base + (character_screen.columns * character_screen.rows) + i] = 0b00111000;
-	}
-	snprintf((char *)&blitter->vram[character_screen.base], 80, ".,0c000 lda #$0e");
+	
+	terminal = new terminal_t(&character_screen, blitter);
+	terminal->clear();
+	terminal->puts("\n.,0c000 lda #$0e");
+	terminal->puts("\n.,0c002 tfr a,b");
+	
+	char output[256];
+	core->cpu->status(output, 256);
+	terminal->puts(output);
+	
+	terminal->printf("\n\n%i\n\n", MC6809_BUILD);
 }
 
 debugger_t::~debugger_t()
 {
+	delete terminal;
 	delete blitter;
 }
 

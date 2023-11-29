@@ -237,16 +237,24 @@ void host_t::update_textures(uint8_t *punch, uint8_t *debugger)
 
 void host_t::update_screen()
 {
+	// clear
 	SDL_RenderClear(video_renderer);
 
-	SDL_RenderCopy(video_renderer, punch_texture, NULL, NULL);
-	//SDL_RenderCopy(video_renderer, debugger_texture, NULL, NULL);
+	// punch
+	//SDL_RenderCopy(video_renderer, punch_texture, NULL, NULL);
+	
+	// debugger
+	SDL_RenderCopy(video_renderer, debugger_texture, NULL, NULL);
+	
+	// scanlines
 	SDL_SetTextureAlphaMod(scanlines_texture, video_scanlines_alpha);
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
-	//const SDL_Rect viewer = { 192, 0, 128, 72 };
-	//SDL_RenderCopy(video_renderer, punch_texture, NULL, &viewer);
+	// viewer
+	const SDL_Rect viewer = { 192, 0, 128, 72 };
+	SDL_RenderCopy(video_renderer, punch_texture, NULL, &viewer);
 
+	// render it
 	SDL_RenderPresent(video_renderer);
 }
 
@@ -484,7 +492,6 @@ void host_t::video_change_scanlines_intensity()
 	} else {
 		video_scanlines_alpha = 0;
 	}
-//	hud->show_notification("Scanlines alpha value = %3u", settings->video_scanlines_alpha);
 }
 
 void host_t::video_toggle_linear_filtering()

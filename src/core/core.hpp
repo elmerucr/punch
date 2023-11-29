@@ -34,9 +34,9 @@ public:
 	void run_blitter();
 	
 	blitter_ic *blitter;
+	mc6809 *cpu;
 private:
 	mmu_t *mmu;
-	mc6809 *cpu;
 };
 
 #endif

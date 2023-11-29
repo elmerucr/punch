@@ -11,6 +11,7 @@
 		4602D30E2B00142D00D77BF3 /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4602D30B2B0013B500D77BF3 /* SDL2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		46414AC42B152C5D0059D0BB /* host.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46414AC22B152C5D0059D0BB /* host.cpp */; };
 		464EB82B2B11E5C20066BF92 /* debugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464EB8292B11E5C20066BF92 /* debugger.cpp */; };
+		466083482B177DCE00D6AA89 /* terminal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466083472B177DCE00D6AA89 /* terminal.cpp */; };
 		4665DC722B0EAC06001F3D4F /* mmu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4665DC702B0EAC06001F3D4F /* mmu.cpp */; };
 		466AC00A2AFC218200ACA0CE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC0092AFC218200ACA0CE /* Assets.xcassets */; };
 		466AC00D2AFC218200ACA0CE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */; };
@@ -43,6 +44,8 @@
 		46414AC32B152C5D0059D0BB /* host.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = host.hpp; path = ../../src/host/host.hpp; sourceTree = "<group>"; };
 		464EB8292B11E5C20066BF92 /* debugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debugger.cpp; path = ../../src/debugger/debugger.cpp; sourceTree = "<group>"; };
 		464EB82A2B11E5C20066BF92 /* debugger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = debugger.hpp; path = ../../src/debugger/debugger.hpp; sourceTree = "<group>"; };
+		466083462B177DCE00D6AA89 /* terminal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = terminal.hpp; path = ../../src/terminal/terminal.hpp; sourceTree = "<group>"; };
+		466083472B177DCE00D6AA89 /* terminal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = terminal.cpp; path = ../../src/terminal/terminal.cpp; sourceTree = "<group>"; };
 		4665DC702B0EAC06001F3D4F /* mmu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mmu.cpp; path = ../../src/mmu/mmu.cpp; sourceTree = "<group>"; };
 		4665DC712B0EAC06001F3D4F /* mmu.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mmu.hpp; path = ../../src/mmu/mmu.hpp; sourceTree = "<group>"; };
 		466AC0022AFC218100ACA0CE /* punch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = punch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,6 +84,15 @@
 				464EB8292B11E5C20066BF92 /* debugger.cpp */,
 			);
 			name = debugger;
+			sourceTree = "<group>";
+		};
+		466083452B177D9A00D6AA89 /* terminal */ = {
+			isa = PBXGroup;
+			children = (
+				466083462B177DCE00D6AA89 /* terminal.hpp */,
+				466083472B177DCE00D6AA89 /* terminal.cpp */,
+			);
+			name = terminal;
 			sourceTree = "<group>";
 		};
 		4665DC6F2B0EABC5001F3D4F /* mmu */ = {
@@ -131,6 +143,7 @@
 		466AC0142AFC219C00ACA0CE /* src */ = {
 			isa = PBXGroup;
 			children = (
+				466083452B177D9A00D6AA89 /* terminal */,
 				466AC0272AFC2F1400ACA0CE /* blitter */,
 				46F88A772B0E59D600579C05 /* core */,
 				464875E72B115307000A92CD /* debugger */,
@@ -271,6 +284,7 @@
 				46F88A7A2B0E5A1E00579C05 /* core.cpp in Sources */,
 				464EB82B2B11E5C20066BF92 /* debugger.cpp in Sources */,
 				4665DC722B0EAC06001F3D4F /* mmu.cpp in Sources */,
+				466083482B177DCE00D6AA89 /* terminal.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
