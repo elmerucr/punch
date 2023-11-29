@@ -25,14 +25,16 @@ debugger_t::debugger_t(core_t *c)
 	
 	terminal = new terminal_t(&character_screen, blitter);
 	terminal->clear();
-	terminal->puts("\n.,0c000 lda #$0e");
-	terminal->puts("\n.,0c002 tfr a,b");
+	terminal->printf("punch v%i.%i.%i (C)%i elmerucr\n",
+	       PUNCH_MAJOR_VERSION,
+	       PUNCH_MINOR_VERSION,
+	       PUNCH_BUILD, PUNCH_YEAR);
+	terminal->puts("\n\n\n\n.,0c000 lda #$0e");
+	terminal->puts("\n.,0c002 tfr a,b\n\n\n\n\n\n\n\n");
 	
 	char output[256];
 	core->cpu->status(output, 256);
 	terminal->puts(output);
-	
-	terminal->printf("\n\n%i\n\n", MC6809_BUILD);
 }
 
 debugger_t::~debugger_t()

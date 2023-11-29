@@ -6,7 +6,7 @@
 
 Screenshot with scanlines.
 
-![punch](./docs/20231126_screenshot.png)
+![punch](./docs/20231129_screenshot.png)
 
 ## Memory Map
 
