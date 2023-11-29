@@ -48,6 +48,7 @@ blitter_ic::blitter_ic()
 	vram[text_buffer.base + 0x18] = 0x72;	// r
 	
 	//surface turn_text;
+	turn_text.index = 0;
 	turn_text.flags_0 = 0b00000000;
 	turn_text.flags_1 = 0b00010000;
 	turn_text.base= 0x30000;
