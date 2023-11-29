@@ -19,7 +19,7 @@ blitter_ic::blitter_ic()
 	framebuffer.bg_col = 0b000000101;
 	
 	/*
-	 * TODO: keep this???
+	 * available font
 	 */
 	font.flags_0 = 0b01000000;
 	font.flags_1 = 0b00000000;
@@ -56,7 +56,7 @@ blitter_ic::blitter_ic()
 	turn_text.h = 24;
 	turn_text.x = 50;
 	turn_text.y = 65;
-	tile_blit(&font, &turn_text, &text_buffer);
+	tile_blit(&text_buffer, &font, &turn_text);
 	
 	for (int i=0; i<184; i++) {
 		vram[0x300+i] = bruce_data[i];
@@ -200,7 +200,7 @@ uint32_t blitter_ic::blit(const surface *src, surface *dest)
 	return pixelcount;
 }
 
-uint32_t blitter_ic::tile_blit(const surface *src, surface *dest, const tile_surface *ts)
+uint32_t blitter_ic::tile_blit(const tile_surface *ts, const surface *src, surface *dst)
 {
 	uint32_t pixelcount = 0;
 	
@@ -220,7 +220,7 @@ uint32_t blitter_ic::tile_blit(const surface *src, surface *dest, const tile_sur
 			source.index = vram[tile++ & VRAM_SIZE_MASK];
 			source.fg_col = vram[fg_color++ & VRAM_SIZE_MASK];
 			source.bg_col = vram[bg_color++ & VRAM_SIZE_MASK];
-			pixelcount += blit(&source, dest);
+			pixelcount += blit(&source, dst);
 			source.x += (source.w << dw);
 		}
 		source.x = ts->x;
@@ -316,8 +316,8 @@ const uint8_t font4x6_orig [96][2] = {
 	{  0x56  ,  0xd0  },   /*'f'*/
 	{  0x55  ,  0x3B  },   /*'g'*/
 	{  0x93  ,  0xb4  },   /*'h'*/
-	{  0x41  ,  0x44  },   /*'i'*/
-	{  0x41  ,  0x51  },   /*'j'*/
+	{  0x41  ,  0x48  },   /*'i'*/  // 010 000 010 010 010  01000001 01001000  41 44
+	{  0x09  ,  0x51  },   /*'j'*/  // adjusted, missing dot, add later, repair
 	{  0x97  ,  0xb4  },   /*'k'*/
 	{  0x49  ,  0x44  },   /*'l'*/
 	{  0x17  ,  0xb6  },   /*'m'*/
@@ -509,6 +509,11 @@ void blitter_ic::init_font_4x6()
 		}
 	}
 	
+	// correction for j
+	font_4x6[(0x6a * 4 * 6) + 1] = C64_LIGHTBLUE;
+	font_4x6[((0x6a + 0x80) * 4 * 6) + 1] = C64_BLUE;
+	
+	// 6 bytes / symbol * 18 symbols = 108
 	for (int i=0; i<(108); i++) {
 		for (int j=0; j<4; j++) {
 			if (blocks[i] & (0b1<<(3-j))) {

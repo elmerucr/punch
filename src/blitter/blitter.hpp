@@ -78,7 +78,7 @@ public:
 	 * all return number of pixels changed
 	 */
 	uint32_t blit(const surface *src, surface *dst);
-	uint32_t tile_blit(const surface *src, surface *dst, const tile_surface *ts);
+	uint32_t tile_blit(const tile_surface *ts, const surface *src, surface *dst);
 	uint32_t clear_surface(const surface *s);
 	
 //	uint32_t rectangle();
