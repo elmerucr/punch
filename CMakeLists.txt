@@ -15,6 +15,7 @@ include_directories(
     src/host/
     src/MC6809/
     src/mmu/
+    src/terminal/
 )
 
 add_subdirectory(src/)
