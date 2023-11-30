@@ -32,9 +32,6 @@ debugger_t::debugger_t(core_t *c)
 	char output[256];
 	core->cpu->status(output, 256);
 	terminal->puts(output);
-	
-	terminal->putsymbol(0x6a);
-	terminal->putsymbol(0x6a + 0x80);
 }
 
 debugger_t::~debugger_t()

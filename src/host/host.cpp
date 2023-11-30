@@ -173,7 +173,7 @@ void host_t::video_init()
 		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED);
 	}
 
-	SDL_SetRenderDrawColor(video_renderer, 0, 0, 0, 255);	// black used for clearing actions
+	SDL_SetRenderDrawColor(video_renderer, 11, 11, 11, 255);	// black used for clearing actions
 	
 	SDL_RendererInfo current_renderer;
 	SDL_GetRendererInfo(video_renderer, &current_renderer);
@@ -199,7 +199,7 @@ void host_t::video_init()
 	scanlines_texture = nullptr;
 	create_scanlines_texture(true);
 	
-	SDL_RenderSetLogicalSize(video_renderer, 320, 180);	// keeps right aspect ratio
+	SDL_RenderSetLogicalSize(video_renderer, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);	// keeps right aspect ratio
 
 	/*
 	 * Make sure mouse cursor isn't visible

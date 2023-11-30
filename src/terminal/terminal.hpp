@@ -14,16 +14,35 @@ public:
 	int puts(const char *text);
 	int printf(const char *format, ...);
 	
+	void cursor_left();
+	void cursor_right();
+	void cursor_up();
+	void cursor_down();
+	void backspace();
+	
+	void activate_cursor();
+	void deactivate_cursor();
+	void process_cursor_state();
+	
 	void add_bottom_row();
 	
+	char *get_command();
+	
+	uint8_t fg_color{0b00110100};
+	uint8_t bg_color{0b00000000};
 private:
 	tile_surface *ts;
 	blitter_ic *blitter;
 	uint16_t characters;
-	uint16_t cursor_pos{0};
+	uint16_t cursor_position{0};
+	uint8_t  cursor_interval{20};
+	uint8_t  cursor_countdown{0};
+	char     cursor_original_char;
+	uint16_t cursor_original_color;
+	uint16_t cursor_original_background_color;
+	bool     cursor_blinking{false};
 	
-	uint8_t fg_color{0b00111000};
-	uint8_t bg_color{0b00000000};
+	char	command_buffer[256];
 };
 
 #endif
