@@ -13,6 +13,7 @@ include_directories(
     src/core/
     src/debugger/
     src/host/
+    src/keyboard/
     src/MC6809/
     src/mmu/
     src/terminal/
@@ -22,4 +23,4 @@ add_subdirectory(src/)
 
 add_executable(punch src/main.cpp)
 
-target_link_libraries(punch core debugger host)
+target_link_libraries(punch core debugger host keyboard)
