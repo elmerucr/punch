@@ -5,10 +5,13 @@
  * Version information
  */
 #define PUNCH_MAJOR_VERSION    0
-#define PUNCH_MINOR_VERSION    1
-#define PUNCH_BUILD            20231130
+#define PUNCH_MINOR_VERSION    2
+#define PUNCH_BUILD            20231202
 #define PUNCH_YEAR             2023
 
+/*
+ * video
+ */
 #define FPS			60
 #define MAX_PIXELS_PER_SCANLINE	320
 #define MAX_SCANLINES		180
@@ -16,6 +19,13 @@
 
 #define VRAM_SIZE		0x100000
 #define VRAM_SIZE_MASK		(VRAM_SIZE-1)
+
+/*
+ * audio
+ */
+#define SAMPLE_RATE		48000
+#define AUDIO_BUFFER_SIZE	6000.0
+#define SID_CLOCK_SPEED		985248
 
 /*
  * "sort of" C64 colors

@@ -16,7 +16,7 @@ blitter_ic::blitter_ic()
 	framebuffer.y = 0;
 	framebuffer.w = MAX_PIXELS_PER_SCANLINE;
 	framebuffer.h = MAX_SCANLINES;
-	framebuffer.bg_col = 0b000000101;
+	framebuffer.bg_col = 0b00000101;
 	
 	/*
 	 * available font
@@ -314,8 +314,8 @@ const uint8_t font4x6_orig [96][2] = {
 	{  0x2e  ,  0xae  },   /*'d'*/
 	{  0x0e  ,  0xce  },   /*'e'*/
 	{  0x56  ,  0xd0  },   /*'f'*/
-	{  0x55  ,  0x3B  },   /*'g'*/
-	{  0x93  ,  0xb4  },   /*'h'*/
+	{  0x75  ,  0x3B  },   /*'g'*/  // 011 101 01 001 110 1
+	{  0x9a  ,  0xb6  },   /*'h'*/  // 10011010 10110110   9a b6
 	{  0x41  ,  0x48  },   /*'i'*/  // 010 000 010 010 010  01000001 01001000  41 44
 	{  0x09  ,  0x51  },   /*'j'*/  // adjusted, missing dot, add later, repair
 	{  0x97  ,  0xb4  },   /*'k'*/

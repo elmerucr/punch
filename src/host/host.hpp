@@ -90,22 +90,22 @@ enum scancodes {
 
 class host_t {
 private:
-//	/*
-//	 * Audio related
-//	 */
-//	SDL_AudioDeviceID audio_device;
-//	SDL_AudioSpec audio_spec_want;
-//	SDL_AudioSpec audio_spec_have;
-//	double audio_bytes_per_ms;
-//	uint8_t audio_bytes_per_sample;
-//	bool audio_running{false};
-//	void audio_init();
-//	void audio_start();
-//	void audio_stop();
-//	
-//	/*
-//	 * Video related
-//	 */
+	/*
+	 * Audio related
+	 */
+	SDL_AudioDeviceID audio_device;
+	SDL_AudioSpec audio_spec_want;
+	SDL_AudioSpec audio_spec_have;
+	double audio_bytes_per_ms;
+	uint8_t audio_bytes_per_sample;
+	bool audio_running{false};
+	void audio_init();
+	void audio_start();
+	void audio_stop();
+	
+	/*
+	 * Video related
+	 */
 //	const struct video_window_size video_window_sizes[9] = {
 ////		{  384, 240 },
 ////		{  480, 300 },
@@ -169,8 +169,8 @@ public:
 //	/*
 //	 * Audio related
 //	 */
-//	inline void queue_audio(void *buffer, unsigned size) { SDL_QueueAudio(audio_device, buffer, size); }
-//	inline unsigned int get_queued_audio_size_bytes() { return SDL_GetQueuedAudioSize(audio_device); }
+	inline void queue_audio(void *buffer, unsigned size) { SDL_QueueAudio(audio_device, buffer, size); }
+	inline unsigned int get_queued_audio_size_bytes() { return SDL_GetQueuedAudioSize(audio_device); }
 //	
 	/*
 	 * Video related
@@ -190,7 +190,7 @@ public:
 	inline bool vsync_enabled() { return vsync; }
 	inline bool vsync_disabled() { return !vsync; }
 //	inline uint8_t get_bytes_per_sample() { return audio_bytes_per_sample; }
-//	inline double get_bytes_per_ms() { return audio_bytes_per_ms; }
+	inline double get_bytes_per_ms() { return audio_bytes_per_ms; }
 //	
 //	//inline uint8_t get_scanlines_alpha() { return video_scanlines_alpha; }
 //	//inline void set_scanline_alpha(uint8_t a) { video_scanlines_alpha = a; }

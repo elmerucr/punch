@@ -26,7 +26,7 @@ public:
 	
 	void add_bottom_row();
 	
-	char *get_command();
+	void get_command(char *c, int length);
 	
 	uint8_t fg_color{0b00110100};
 	uint8_t bg_color{0b00000000};
@@ -42,7 +42,8 @@ private:
 	uint16_t cursor_original_background_color;
 	bool     cursor_blinking{false};
 	
-	char	command_buffer[256];
+	//char	command_buffer[256];
+	//char	*command;
 };
 
 #endif

@@ -21,60 +21,36 @@ int main()
 	host_t *host = new host_t();
 	core_t *core = new core_t();
 	core->reset();
-	debugger_t *debugger = new debugger_t(core);
-	debugger->terminal->activate_cursor();
 	
 	keyboard_t *keyboard = new keyboard_t(host);
 	keyboard->reset();
 	keyboard->enable_events();
 	
-	bool running = true;
+	debugger_t *debugger = new debugger_t(core, keyboard);
 	
-	int32_t cycles = 0;
+	bool running = true;
 	
 	end_of_frame_time = std::chrono::steady_clock::now();
 	
-	uint8_t symbol = 0;
-	
 	while (running) {
+		/*
+		 * Audio: Measure audio_buffer and determine cycles to run
+		 */
+		uint32_t audio_buffer = host->get_queued_audio_size_bytes();
+//		stats->set_queued_audio_bytes(audio_buffer);
+		// note that we need int32_t and not uint32_t!
+		int32_t cycles = SID_CLOCK_SPEED * (AUDIO_BUFFER_SIZE - audio_buffer) / (host->get_bytes_per_ms() * 1000);
+		// adjust to needed buffer size + change to cycles
+		cycles += SID_CLOCK_SPEED / FPS;
+		
 		if (host->events_process_events() == QUIT_EVENT) running = false;
 		
 		keyboard->process();
 		
-		cycles += 985248;
-		
 		core->run(cycles);
 		core->run_blitter();
 		
-		debugger->terminal->process_cursor_state();
-		while (keyboard->events_waiting()) {
-			debugger->terminal->deactivate_cursor();
-			symbol = keyboard->pop_event();
-			switch (symbol) {
-				case ASCII_CURSOR_LEFT:
-					debugger->terminal->cursor_left();
-					break;
-				case ASCII_CURSOR_RIGHT:
-					debugger->terminal->cursor_right();
-					break;
-				case ASCII_CURSOR_UP:
-					debugger->terminal->cursor_up();
-					break;
-				case ASCII_CURSOR_DOWN:
-					debugger->terminal->cursor_down();
-					break;
-				case ASCII_BACKSPACE:
-					debugger->terminal->backspace();
-					break;
-				case ASCII_LF:
-					printf("\n%s", debugger->terminal->get_command());
-					// fall through to default
-				default:
-					debugger->terminal->putchar(symbol);
-					break;
-			}
-			debugger->terminal->activate_cursor();
-		}
+		debugger->run();
 		debugger->redraw();
 		
 		host->update_textures(&core->blitter->vram[(core->blitter->framebuffer_bank & 0x0f) << 16], &debugger->blitter->vram[(debugger->blitter->framebuffer_bank & 0x0f) << 16]);

@@ -162,6 +162,7 @@
 				465A5E582B17C02B0039B1C0 /* keyboard */,
 				46F181532B00E77E00E7FDC8 /* MC6809 */,
 				4665DC6F2B0EABC5001F3D4F /* mmu */,
+				466B9A762B1A6B2500CC5501 /* sound */,
 				466083452B177D9A00D6AA89 /* terminal */,
 				466AC0152AFC220900ACA0CE /* main.cpp */,
 				466AC0232AFC29B100ACA0CE /* common.hpp */,
@@ -193,6 +194,13 @@
 				466AC0292AFC304800ACA0CE /* blitter.cpp */,
 			);
 			name = blitter;
+			sourceTree = "<group>";
+		};
+		466B9A762B1A6B2500CC5501 /* sound */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = sound;
 			sourceTree = "<group>";
 		};
 		46F181532B00E77E00E7FDC8 /* MC6809 */ = {

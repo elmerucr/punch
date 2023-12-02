@@ -2,6 +2,7 @@
 #include "terminal.hpp"
 #include <cstdio>
 #include <cstdarg>
+#include <cstring>
 
 terminal_t::terminal_t(tile_surface *t, blitter_ic *b)
 {
@@ -243,18 +244,40 @@ void terminal_t::backspace()
 	}
 }
 
-char *terminal_t::get_command()
+///*
+// * https://gist.github.com/kenkam/790090
+// */
+//inline char *trim_space(char *str)
+//{
+//	char *end;
+//	/* skip leading whitespace */
+//	while (*str == ASCII_SPACE) {
+//		str = str + 1;
+//	}
+//	/* remove trailing whitespace */
+//	end = str + strlen(str) - 1;
+//	while (end > str && (*end == ASCII_SPACE)) {
+//		end = end - 1;
+//	}
+//	/* write null character */
+//	*(end+1) = '\0';
+//	return str;
+//}
+
+void terminal_t::get_command(char *c, int l)
 {
-	int length = ts->columns < 255 ? ts->columns : 255;
+	int length = ts->columns < (l-1) ? ts->columns : (l-1);
 	
 	uint16_t pos = cursor_position - (cursor_position % ts->columns);
 	
 	for (int i=0; i<length; i++) {
-		command_buffer[i] = blitter->vram[ts->base + pos];
-		pos++;
+		c[i] = blitter->vram[ts->base + pos + i];
 	}
+	c[length] = 0;
 	
-	command_buffer[length] = 0;
+	//command = command_buffer;
 	
-	return command_buffer;
+	//command = trim_space(command);
+	
+//	while (*command == '.') command++;
 }
