@@ -148,10 +148,10 @@ void debugger_t::status()
 	core->cpu->status(text_buffer, 2048);
 	terminal->printf("\n%s\n", text_buffer);
 	uint16_t pc = core->cpu->get_pc();
-	for (int i=0; i<5; i++) {
+	for (int i=0; i<8; i++) {
 		pc += core->cpu->disassemble_instruction(text_buffer, pc);
 		terminal->printf("\n%s", text_buffer);
 	}
-	core->cpu->stacks(text_buffer, 2048, 5);
+	core->cpu->stacks(text_buffer, 2048, 8);
 	terminal->printf("\n\n%s\n", text_buffer);
 }

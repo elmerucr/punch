@@ -139,6 +139,7 @@ private:
 	SDL_Texture *punch_texture;
 	SDL_Texture *debugger_texture;
 	SDL_Texture *scanlines_texture;
+	//SDL_Texture *intermediate;
 
 	int window_width;
 	int window_height;

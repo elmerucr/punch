@@ -169,13 +169,13 @@ void host_t::video_init()
 	printf("[SDL] Display refresh rate of current display is %iHz\n", dm.refresh_rate);
 	if (dm.refresh_rate == FPS) {
 		printf("[SDL] Display: this is equal to the FPS of E64, trying for vsync\n");
-		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	} else {
 		printf("[SDL] Display: this differs from the FPS of E64, going for software FPS\n");
-		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED);
+		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	}
 
-	SDL_SetRenderDrawColor(video_renderer, 11, 11, 11, 255);	// black used for clearing actions
+	SDL_SetRenderDrawColor(video_renderer, 11, 11, 11, 255);
 	
 	SDL_RendererInfo current_renderer;
 	SDL_GetRendererInfo(video_renderer, &current_renderer);
@@ -185,6 +185,7 @@ void host_t::video_init()
 	printf("[SDL] Renderer %saccelerated\n",
 	       (current_renderer.flags & SDL_RENDERER_ACCELERATED) ? "" : "not ");
 	printf("[SDL] Renderer vsync is %s\n", vsync ? "enabled" : "disabled");
+	printf("[SDL] Renderer does%s support rendering to target texture\n", current_renderer.flags & SDL_RENDERER_TARGETTEXTURE ? "" : "n't");
 	
 	/*
 	 * Create two textures that are able to refresh very frequently
@@ -194,6 +195,8 @@ void host_t::video_init()
 	
 	create_punch_texture(video_linear_filtering);
 	create_debugger_texture(video_linear_filtering);
+	
+	//intermediate = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_TARGET, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 
 	/*
 	 * Scanlines: A static texture that mimics scanlines
@@ -211,6 +214,7 @@ void host_t::video_init()
 
 void host_t::video_stop()
 {
+	//SDL_DestroyTexture(intermediate);
 	SDL_DestroyTexture(scanlines_texture);
 	SDL_DestroyTexture(debugger_texture);
 	SDL_DestroyTexture(punch_texture);
