@@ -25,14 +25,30 @@ debugger_t::debugger_t(core_t *c, keyboard_t *k)
 	terminal->clear();
 	print_version();
 	
-	core->cpu->status(text_buffer, 2048);
-	terminal->printf("\n\n%s", text_buffer);
+//	core->cpu->status(text_buffer, 2048);
+//	terminal->printf("\n\n%s", text_buffer);
+//	core->cpu->disassemble_instruction(text_buffer, core->cpu->get_pc());
+//	terminal->printf("\n%s", text_buffer);
 	prompt();
 	terminal->activate_cursor();
 }
 
 void debugger_t::print_version()
 {
+	const uint8_t symbol[19] = {
+		ASCII_LF,
+		0x00, 0x08, 0x0c, 0x00, ASCII_LF,
+		0x08, 0x01, 0x00, 0x09, ASCII_LF,
+		0x02, 0x04, 0x00, 0x06 ,ASCII_LF,
+		0x00, 0x02, 0x03
+	};
+	for (int i=0; i<19; i++) {
+		if (symbol[i] == ASCII_LF) {
+			terminal->putchar(ASCII_LF);
+		} else {
+			terminal->putsymbol(symbol[i]);
+		}
+	}
 	terminal->printf("\npunch v%i.%i.%i (C)%i elmerucr",
 	       PUNCH_MAJOR_VERSION,
 	       PUNCH_MINOR_VERSION,
@@ -108,10 +124,14 @@ void debugger_t::process_command(char *c)
 		//have_prompt = false;
 	} else if (strcmp(token0, "clear") == 0) {
 		terminal->clear();
-	} else if (strcmp(token0, "r") == 0) {
-		core->cpu->status(text_buffer, 2048);
-		terminal->printf("\n%s", text_buffer);
-	} else if (strcmp(token0, "v") == 0) {
+	} else if (strcmp(token0, "n") == 0) {
+		core->run(0);
+		status();
+	} else if (strcmp(token0, "reset") == 0) {
+		core->reset();
+	} else if (strcmp(token0, "s") == 0) {
+		status();
+	} else if (strcmp(token0, "ver") == 0) {
 		print_version();
 	}
 	
@@ -121,4 +141,17 @@ void debugger_t::process_command(char *c)
 void debugger_t::prompt()
 {
 	terminal->printf("\n.");
+}
+
+void debugger_t::status()
+{
+	core->cpu->status(text_buffer, 2048);
+	terminal->printf("\n%s\n", text_buffer);
+	uint16_t pc = core->cpu->get_pc();
+	for (int i=0; i<5; i++) {
+		pc += core->cpu->disassemble_instruction(text_buffer, pc);
+		terminal->printf("\n%s", text_buffer);
+	}
+	core->cpu->stacks(text_buffer, 2048, 5);
+	terminal->printf("\n\n%s\n", text_buffer);
 }

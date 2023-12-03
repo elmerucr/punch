@@ -145,7 +145,9 @@ void host_t::video_init()
 	printf("[SDL] Display current desktop dimension: %i x %i\n", dm.w, dm.h);
 	video_scaling_max = 1;
 	while (((video_scaling_max * MAX_PIXELS_PER_SCANLINE) < dm.w) && ((video_scaling_max * ((10 * MAX_SCANLINES) / 9)) < dm.h)) video_scaling_max++;
-	video_scaling = (3 * video_scaling_max) / 4;
+	video_scaling_max--;
+	video_scaling = video_scaling_max;
+	//video_scaling = (3 * video_scaling_max) / 4;
 	printf("[SDL] Max window scaling is %i, defaulting to %i\n", video_scaling_max, video_scaling);
 	
 	/*
@@ -505,7 +507,7 @@ void host_t::video_increase_window_size()
 {
 	if (!video_fullscreen) {
 		if (video_scaling < video_scaling_max) video_scaling++;
-		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * MAX_SCANLINES);
+		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * ((10 * MAX_SCANLINES) / 9));
 		SDL_GetWindowSize(video_window, &window_width, &window_height);
 		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	}
@@ -515,7 +517,7 @@ void host_t::video_decrease_window_size()
 {
 	if (!video_fullscreen) {
 		if (video_scaling > 1) video_scaling--;
-		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * MAX_SCANLINES);
+		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * ((10 * MAX_SCANLINES) / 9));
 		SDL_GetWindowSize(video_window, &window_width, &window_height);
 		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	}

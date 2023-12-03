@@ -22,6 +22,7 @@ public:
 	void process_command(char *c);
 	void prompt();
 	void print_version();
+	void status();
 private:
 	tile_surface character_screen;
 	

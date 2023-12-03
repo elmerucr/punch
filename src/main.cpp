@@ -47,7 +47,7 @@ int main()
 		
 		keyboard->process();
 		
-		core->run(cycles);
+		//core->run(cycles);
 		core->run_blitter();
 		
 		debugger->run();
