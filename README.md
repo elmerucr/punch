@@ -1,6 +1,6 @@
 # punch
 
-![icon](./docs/punch_icon_128x128.png)
+![icon](./docs/punch_icon_80x80.png)
 
 ## Screenshots
 
