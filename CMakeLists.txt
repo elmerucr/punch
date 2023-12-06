@@ -16,6 +16,7 @@ include_directories(
     src/keyboard/
     src/MC6809/
     src/terminal/
+    src/timer/
 )
 
 add_subdirectory(src/)
