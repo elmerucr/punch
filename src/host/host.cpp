@@ -195,8 +195,6 @@ void host_t::video_init()
 	
 	create_punch_texture(video_linear_filtering);
 	create_debugger_texture(video_linear_filtering);
-	
-	//intermediate = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_TARGET, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 
 	/*
 	 * Scanlines: A static texture that mimics scanlines
@@ -214,7 +212,6 @@ void host_t::video_init()
 
 void host_t::video_stop()
 {
-	//SDL_DestroyTexture(intermediate);
 	SDL_DestroyTexture(scanlines_texture);
 	SDL_DestroyTexture(debugger_texture);
 	SDL_DestroyTexture(punch_texture);
@@ -257,7 +254,7 @@ void host_t::update_screen()
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
 	// viewer
-	const SDL_Rect viewer = { 256, 0, 64, 36 };
+	const SDL_Rect viewer = { 192, 0, 128, 72 };
 	SDL_RenderCopy(video_renderer, punch_texture, NULL, &viewer);
 
 	// render it

@@ -71,17 +71,17 @@ blitter_ic::blitter_ic()
 	bruce.x = 170;
 	bruce.y = 42;
 	
-	for (int i=0; i< 169; i++) {
+	for (int i=0; i < (14*18); i++) {
 		vram[0x400+i] = punch_data[i];
 	}
 	punch.base = 0x400;
 	punch.keycolor = 0x01;
 	punch.flags_0 = 0b00000001;
 	punch.flags_1 = 0b00000000;
-	punch.w = 13;
-	punch.h = 13;
+	punch.w = 14;
+	punch.h = 18;
 	punch.x = 190;
-	punch.y = 52;
+	punch.y = 47;
 }
 
 blitter_ic::~blitter_ic()
@@ -524,5 +524,26 @@ void blitter_ic::init_font_4x6()
 				font_4x6[(128*4*6)+(i*4)+j] = C64_LIGHTBLUE;
 			}
 		}
+	}
+}
+
+uint8_t blitter_ic::io_read8(uint8_t address)
+{
+	switch (address & 0x0f) {
+		case 0x00:
+			return framebuffer.bg_col;
+		default:
+			return 0x00;
+	}
+}
+
+void blitter_ic::io_write8(uint8_t address, uint8_t value)
+{
+	switch (address & 0x0f) {
+		case 0x00:
+			framebuffer.bg_col = value;
+			break;
+		default:
+			break;
 	}
 }

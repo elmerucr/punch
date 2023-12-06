@@ -15,7 +15,6 @@ include_directories(
     src/host/
     src/keyboard/
     src/MC6809/
-    src/mmu/
     src/terminal/
 )
 

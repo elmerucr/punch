@@ -4,25 +4,11 @@
 #include <cstdint>
 #include "blitter.hpp"
 #include "mc6809.hpp"
-#include "mmu.hpp"
+#include "exceptions.hpp"
+#include "timer.hpp"
 
-class cpu_t : public mc6809 {
-public:
-	cpu_t(mmu_t *m) {
-		mmu = m;
-	}
-	
-	uint8_t read8(uint16_t address) const {
-		return mmu->read8(address);
-	}
-	
-	void write8(uint16_t address, uint8_t value) const {
-		mmu->write8(address, value);
-	}
-	
-private:
-	mmu_t *mmu;
-};
+#define	BLITTER_PAGE	0x04
+#define	TIMER_PAGE	0x05
 
 class core_t {
 public:
@@ -30,13 +16,34 @@ public:
 	~core_t();
 	
 	void reset();
-	void run(uint32_t cycles);
+	void run(int32_t cycles);
 	void run_blitter();
 	
+	uint8_t read8(uint16_t address);
+	void write8(uint16_t address, uint8_t value);
+	
 	blitter_ic *blitter;
+	exceptions_ic *exceptions;
+	timer_ic *timer;
 	mc6809 *cpu;
+};
+
+class cpu_t : public mc6809 {
+public:
+	cpu_t(core_t *c) {
+		core = c;
+	}
+	
+	uint8_t read8(uint16_t address) const {
+		return core->read8(address);
+	}
+	
+	void write8(uint16_t address, uint8_t value) const {
+		core->write8(address, value);
+	}
+	
 private:
-	mmu_t *mmu;
+	core_t *core;
 };
 
 #endif

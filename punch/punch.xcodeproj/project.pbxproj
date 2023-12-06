@@ -9,11 +9,12 @@
 /* Begin PBXBuildFile section */
 		4602D30C2B0013B500D77BF3 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4602D30B2B0013B500D77BF3 /* SDL2.framework */; };
 		4602D30E2B00142D00D77BF3 /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4602D30B2B0013B500D77BF3 /* SDL2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4637DD2D2B1FCB700059257C /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4637DD2B2B1FCB700059257C /* timer.cpp */; };
+		4637DD302B1FCD2F0059257C /* exceptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4637DD2F2B1FCD2F0059257C /* exceptions.cpp */; };
 		46414AC42B152C5D0059D0BB /* host.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46414AC22B152C5D0059D0BB /* host.cpp */; };
 		464EB82B2B11E5C20066BF92 /* debugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464EB8292B11E5C20066BF92 /* debugger.cpp */; };
 		465A5E5B2B17C04D0039B1C0 /* keyboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465A5E592B17C04D0039B1C0 /* keyboard.cpp */; };
 		466083482B177DCE00D6AA89 /* terminal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466083472B177DCE00D6AA89 /* terminal.cpp */; };
-		4665DC722B0EAC06001F3D4F /* mmu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4665DC702B0EAC06001F3D4F /* mmu.cpp */; };
 		466AC00A2AFC218200ACA0CE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC0092AFC218200ACA0CE /* Assets.xcassets */; };
 		466AC00D2AFC218200ACA0CE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */; };
 		466AC0162AFC220900ACA0CE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0152AFC220900ACA0CE /* main.cpp */; };
@@ -41,6 +42,10 @@
 
 /* Begin PBXFileReference section */
 		4602D30B2B0013B500D77BF3 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
+		4637DD2B2B1FCB700059257C /* timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = timer.cpp; path = ../../src/timer/timer.cpp; sourceTree = "<group>"; };
+		4637DD2C2B1FCB700059257C /* timer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = timer.hpp; path = ../../src/timer/timer.hpp; sourceTree = "<group>"; };
+		4637DD2E2B1FCD2F0059257C /* exceptions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = exceptions.hpp; path = ../../src/MC6809/exceptions.hpp; sourceTree = "<group>"; };
+		4637DD2F2B1FCD2F0059257C /* exceptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exceptions.cpp; path = ../../src/MC6809/exceptions.cpp; sourceTree = "<group>"; };
 		46414AC22B152C5D0059D0BB /* host.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = host.cpp; path = ../../src/host/host.cpp; sourceTree = "<group>"; };
 		46414AC32B152C5D0059D0BB /* host.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = host.hpp; path = ../../src/host/host.hpp; sourceTree = "<group>"; };
 		464EB8292B11E5C20066BF92 /* debugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debugger.cpp; path = ../../src/debugger/debugger.cpp; sourceTree = "<group>"; };
@@ -49,8 +54,6 @@
 		465A5E5A2B17C04D0039B1C0 /* keyboard.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = keyboard.hpp; path = ../../src/keyboard/keyboard.hpp; sourceTree = "<group>"; };
 		466083462B177DCE00D6AA89 /* terminal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = terminal.hpp; path = ../../src/terminal/terminal.hpp; sourceTree = "<group>"; };
 		466083472B177DCE00D6AA89 /* terminal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = terminal.cpp; path = ../../src/terminal/terminal.cpp; sourceTree = "<group>"; };
-		4665DC702B0EAC06001F3D4F /* mmu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mmu.cpp; path = ../../src/mmu/mmu.cpp; sourceTree = "<group>"; };
-		4665DC712B0EAC06001F3D4F /* mmu.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mmu.hpp; path = ../../src/mmu/mmu.hpp; sourceTree = "<group>"; };
 		466AC0022AFC218100ACA0CE /* punch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = punch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		466AC0092AFC218200ACA0CE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -80,6 +83,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4637DD272B1FC55B0059257C /* timer */ = {
+			isa = PBXGroup;
+			children = (
+				4637DD2C2B1FCB700059257C /* timer.hpp */,
+				4637DD2B2B1FCB700059257C /* timer.cpp */,
+			);
+			name = timer;
+			sourceTree = "<group>";
+		};
 		464875E72B115307000A92CD /* debugger */ = {
 			isa = PBXGroup;
 			children = (
@@ -105,15 +117,6 @@
 				466083472B177DCE00D6AA89 /* terminal.cpp */,
 			);
 			name = terminal;
-			sourceTree = "<group>";
-		};
-		4665DC6F2B0EABC5001F3D4F /* mmu */ = {
-			isa = PBXGroup;
-			children = (
-				4665DC712B0EAC06001F3D4F /* mmu.hpp */,
-				4665DC702B0EAC06001F3D4F /* mmu.cpp */,
-			);
-			name = mmu;
 			sourceTree = "<group>";
 		};
 		466ABFF92AFC218100ACA0CE = {
@@ -161,9 +164,9 @@
 				466AC0222AFC295300ACA0CE /* host */,
 				465A5E582B17C02B0039B1C0 /* keyboard */,
 				46F181532B00E77E00E7FDC8 /* MC6809 */,
-				4665DC6F2B0EABC5001F3D4F /* mmu */,
 				466B9A762B1A6B2500CC5501 /* sound */,
 				466083452B177D9A00D6AA89 /* terminal */,
+				4637DD272B1FC55B0059257C /* timer */,
 				466AC0152AFC220900ACA0CE /* main.cpp */,
 				466AC0232AFC29B100ACA0CE /* common.hpp */,
 			);
@@ -211,6 +214,8 @@
 				46F181572B00E79800E7FDC8 /* mc6809_addressing_modes.cpp */,
 				46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */,
 				46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */,
+				4637DD2E2B1FCD2F0059257C /* exceptions.hpp */,
+				4637DD2F2B1FCD2F0059257C /* exceptions.cpp */,
 			);
 			name = MC6809;
 			sourceTree = "<group>";
@@ -300,12 +305,13 @@
 				465A5E5B2B17C04D0039B1C0 /* keyboard.cpp in Sources */,
 				46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */,
 				46414AC42B152C5D0059D0BB /* host.cpp in Sources */,
+				4637DD302B1FCD2F0059257C /* exceptions.cpp in Sources */,
 				46F1815C2B00E79800E7FDC8 /* mc6809.cpp in Sources */,
 				466AC0162AFC220900ACA0CE /* main.cpp in Sources */,
 				466AC02A2AFC304800ACA0CE /* blitter.cpp in Sources */,
 				46F88A7A2B0E5A1E00579C05 /* core.cpp in Sources */,
 				464EB82B2B11E5C20066BF92 /* debugger.cpp in Sources */,
-				4665DC722B0EAC06001F3D4F /* mmu.cpp in Sources */,
+				4637DD2D2B1FCB700059257C /* timer.cpp in Sources */,
 				466083482B177DCE00D6AA89 /* terminal.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

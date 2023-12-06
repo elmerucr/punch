@@ -3,11 +3,6 @@
 
 #include <SDL2/SDL.h>
 
-//struct video_window_size {
-//	uint16_t x;
-//	uint16_t y;
-//};
-
 enum events_output_state {
 	QUIT_EVENT = -1,
 	NO_EVENT = 0,
@@ -106,27 +101,6 @@ private:
 	/*
 	 * Video related
 	 */
-//	const struct video_window_size video_window_sizes[9] = {
-////		{  384, 240 },
-////		{  480, 300 },
-////		{  512, 320 },
-////		{  640, 400 },
-////		{  768, 480 },
-////		{  960, 600 },
-////		{ 1024, 640 },
-////		{ 1152, 720 },
-////		{ 1280, 800 }
-//		{  384, 216 },
-//		{  480, 270 },
-//		{  512, 288 },
-//		{  640, 360 },
-//		{  768, 432 },
-//		{  960, 540 },
-//		{ 1024, 576 },
-//		{ 1152, 648 },
-//		{ 1280, 720 }
-//	};
-//	
 	uint8_t video_scaling_max;
 	uint8_t video_scaling;
 	uint8_t video_scanlines_alpha{64};
@@ -139,7 +113,6 @@ private:
 	SDL_Texture *punch_texture;
 	SDL_Texture *debugger_texture;
 	SDL_Texture *scanlines_texture;
-	//SDL_Texture *intermediate;
 
 	int window_width;
 	int window_height;
@@ -147,11 +120,7 @@ private:
 	void create_punch_texture(bool linear_filtering);
 	void create_debugger_texture(bool linear_filtering);
 	void create_scanlines_texture(bool linear_filtering);
-//	void create_textures();
-//	
-//	//bool linear_filtering{false};
-//	bool scanlines_linear_filtering{true}; // should always be true
-//	
+
 	void video_init();
 	void video_stop();
 	
