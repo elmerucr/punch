@@ -9,6 +9,7 @@ find_package(sdl2 REQUIRED)
 include_directories(
     ${SDL2_INCLUDE_DIRS}
     src/
+    src/app/
     src/blitter/
     src/core/
     src/debugger/
@@ -23,4 +24,4 @@ add_subdirectory(src/)
 
 add_executable(punch src/main.cpp)
 
-target_link_libraries(punch core debugger host keyboard)
+target_link_libraries(punch app)
