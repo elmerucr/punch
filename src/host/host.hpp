@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include "common.hpp"
+#include "app.hpp"
 
 enum events_output_state {
 	QUIT_EVENT = -1,
@@ -132,8 +133,10 @@ private:
 	void events_wait_until_key_released(SDL_KeyCode key);
 	
 public:
-	host_t();
+	host_t(app_t *a);
 	~host_t();
+	
+	app_t *app;
 	
 	char *sdl_preference_path;
 	

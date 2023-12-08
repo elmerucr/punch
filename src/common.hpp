@@ -9,11 +9,6 @@
 #define PUNCH_BUILD            20231208
 #define PUNCH_YEAR             2023
 
-enum mode {
-	DEBUG_MODE = 0,
-	RUN_MODE = 1
-};
-
 /*
  * video
  */

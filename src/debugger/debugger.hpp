@@ -1,6 +1,7 @@
 #ifndef DEBUGGER_HPP
 #define DEBUGGER_HPP
 
+#include "app.hpp"
 #include "blitter.hpp"
 #include "core.hpp"
 #include "keyboard.hpp"
@@ -8,8 +9,10 @@
 
 class debugger_t {
 public:
-	debugger_t(core_t *c, keyboard_t *k);
+	debugger_t(app_t *a);
 	~debugger_t();
+	
+	app_t *app;
 	
 	void redraw();
 	
@@ -26,8 +29,8 @@ public:
 private:
 	tile_surface character_screen;
 	
-	core_t *core;
-	keyboard_t *keyboard;
+//	core_t *core;
+//	keyboard_t *keyboard;
 	
 	char text_buffer[2048];
 };

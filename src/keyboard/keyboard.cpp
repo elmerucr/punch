@@ -5,8 +5,8 @@
  * Copyright © 2023 elmerucr. All rights reserved.
  */
 
-#include "keyboard.hpp"
 #include "common.hpp"
+#include "keyboard.hpp"
 #include <iostream>
 
 #define SHIFT_PRESSED   0b00000001
@@ -159,9 +159,9 @@ bool scancode_not_modifier[] =
     true
 };
 
-keyboard_t::keyboard_t(host_t *h)
+keyboard_t::keyboard_t(app_t *a)
 {
-	host = h;
+	app = a;
 	
 	repeat_delay_ms = 500;
 	repeat_speed_ms = 50;
@@ -172,13 +172,13 @@ keyboard_t::keyboard_t(host_t *h)
 void keyboard_t::process()
 {
        uint8_t modifier_keys_status =
-		((host->keyboard_state[SCANCODE_LSHIFT] & 0b1) ? SHIFT_PRESSED : 0) |
-		((host->keyboard_state[SCANCODE_RSHIFT] & 0b1) ? SHIFT_PRESSED : 0) |
-		((host->keyboard_state[SCANCODE_LCTRL ] & 0b1) ? CTRL_PRESSED  : 0) |
-		((host->keyboard_state[SCANCODE_RCTRL ] & 0b1) ? CTRL_PRESSED  : 0) ;
+		((app->host->keyboard_state[SCANCODE_LSHIFT] & 0b1) ? SHIFT_PRESSED : 0) |
+		((app->host->keyboard_state[SCANCODE_RSHIFT] & 0b1) ? SHIFT_PRESSED : 0) |
+		((app->host->keyboard_state[SCANCODE_LCTRL ] & 0b1) ? CTRL_PRESSED  : 0) |
+		((app->host->keyboard_state[SCANCODE_RCTRL ] & 0b1) ? CTRL_PRESSED  : 0) ;
 	
 	for (int i=0; i<128; i++) {
-		switch (host->keyboard_state[i] & 0b11) {
+		switch (app->host->keyboard_state[i] & 0b11) {
 			case 0b01:
 				// event key down
 				if (generate_events && scancode_not_modifier[i]) {

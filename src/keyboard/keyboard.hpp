@@ -8,12 +8,14 @@
 #ifndef KEYBOARD_HPP
 #define KEYBOARD_HPP
 
-#include "host.hpp"
+#include <cstdint>
+#include "app.hpp"
 #include "common.hpp"
+#include "host.hpp"
 
 class keyboard_t {
 private:
-	host_t *host;
+	//host_t *host;
 	
 	bool generate_events{false};
 	
@@ -34,7 +36,9 @@ private:
 	uint8_t head;
 	uint8_t tail;
 public:
-	keyboard_t(host_t *h);
+	keyboard_t(app_t *a);
+	
+	app_t *app;
 	
 	void reset();
 	void process();

@@ -2,10 +2,12 @@
 #include "common.hpp"
 #include <cstdio>
 
-debugger_t::debugger_t(core_t *c, keyboard_t *k)
+debugger_t::debugger_t(app_t *a)
 {
-	core = c;
-	keyboard = k;
+	app = a;
+	
+	//core = c;
+	//keyboard = k;
 	
 	blitter = new blitter_ic();
 	blitter->framebuffer_bank = 0x0e;
@@ -73,9 +75,9 @@ void debugger_t::run()
 	
 	terminal->process_cursor_state();
 	
-	while (keyboard->events_waiting()) {
+	while (app->keyboard->events_waiting()) {
 		terminal->deactivate_cursor();
-		symbol = keyboard->pop_event();
+		symbol = app->keyboard->pop_event();
 		switch (symbol) {
 			case ASCII_CURSOR_LEFT:
 				terminal->cursor_left();
@@ -125,10 +127,10 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "clear") == 0) {
 		terminal->clear();
 	} else if (strcmp(token0, "n") == 0) {
-		core->run(0);
+		app->core->run(0);
 		status();
 	} else if (strcmp(token0, "reset") == 0) {
-		core->reset();
+		app->core->reset();
 	} else if (strcmp(token0, "s") == 0) {
 		status();
 	} else if (strcmp(token0, "ver") == 0) {
@@ -145,13 +147,13 @@ void debugger_t::prompt()
 
 void debugger_t::status()
 {
-	core->cpu->status(text_buffer, 2048);
+	app->core->cpu->status(text_buffer, 2048);
 	terminal->printf("\n%s\n", text_buffer);
-	uint16_t pc = core->cpu->get_pc();
+	uint16_t pc = app->core->cpu->get_pc();
 	for (int i=0; i<8; i++) {
-		pc += core->cpu->disassemble_instruction(text_buffer, pc);
+		pc += app->core->cpu->disassemble_instruction(text_buffer, pc);
 		terminal->printf("\n%s", text_buffer);
 	}
-	core->cpu->stacks(text_buffer, 2048, 8);
+	app->core->cpu->stacks(text_buffer, 2048, 8);
 	terminal->printf("\n\n%s\n", text_buffer);
 }

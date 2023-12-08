@@ -1,8 +1,10 @@
 #include "common.hpp"
 #include "core.hpp"
 
-core_t::core_t()
+core_t::core_t(app_t *a)
 {
+	app = a;
+	
 	blitter = new blitter_ic();
 
 	cpu = new cpu_t(this);

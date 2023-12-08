@@ -3,8 +3,10 @@
 #include <thread>
 #include <chrono>
 
-host_t::host_t()
+host_t::host_t(app_t *a)
 {
+	app = a;
+	
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
 	/*
@@ -374,7 +376,7 @@ enum events_output_state host_t::events_process_events()
 					video_increase_window_size();
 				} else if(event.key.keysym.sym == SDLK_F9) {
 					events_wait_until_key_released(SDLK_F9);
-					printf("switching modes\n");
+					app->switch_mode();
 //				} else if(event.key.keysym.sym == SDLK_F10) {
 //					hud->toggle_stats();
 //				} else if((event.key.keysym.sym == SDLK_w) && alt_pressed) {

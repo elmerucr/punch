@@ -2,6 +2,7 @@
 #define CORE_HPP
 
 #include <cstdint>
+#include "app.hpp"
 #include "blitter.hpp"
 #include "mc6809.hpp"
 #include "exceptions.hpp"
@@ -12,8 +13,10 @@
 
 class core_t {
 public:
-	core_t();
+	core_t(app_t *a);
 	~core_t();
+	
+	app_t *app;
 	
 	void reset();
 	void run(int32_t cycles);
