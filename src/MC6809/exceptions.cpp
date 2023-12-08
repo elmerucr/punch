@@ -25,19 +25,6 @@ uint8_t exceptions_ic::connect_device()
 	return return_value;
 }
 
-void exceptions_ic::update_status()
-{
-	bool result =	(!(irq_input_pins[0])) |
-			(!(irq_input_pins[1])) |
-			(!(irq_input_pins[2])) |
-			(!(irq_input_pins[3])) |
-			(!(irq_input_pins[4])) |
-			(!(irq_input_pins[5])) |
-			(!(irq_input_pins[6])) |
-			(!(irq_input_pins[7])) ;
-	irq_output_pin = !result;
-}
-
 void exceptions_ic::pull(uint8_t device)
 {
 	irq_input_pins[device & 0x7] = false;

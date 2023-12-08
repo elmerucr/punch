@@ -10,6 +10,9 @@
 
 int main()
 {
+	enum mode current_mode = DEBUG_MODE;
+//	enum mode current_mode = RUN_MODE;
+	
 	std::chrono::time_point<std::chrono::steady_clock> app_start_time = std::chrono::steady_clock::now();
 	std::chrono::time_point<std::chrono::steady_clock> end_of_frame_time;
 	
@@ -37,23 +40,35 @@ int main()
 		 * Audio: Measure audio_buffer and determine cycles to run
 		 */
 		uint32_t audio_buffer = host->get_queued_audio_size_bytes();
+		
 //		stats->set_queued_audio_bytes(audio_buffer);
-		// note that we need int32_t and not uint32_t!
+		
+		/*
+		 * Use int32_t, not uint32_t! Adjust to needed buffer size + change to cycles.
+		 */
 		int32_t cycles = SID_CLOCK_SPEED * (AUDIO_BUFFER_SIZE - audio_buffer) / (host->get_bytes_per_ms() * 1000);
-		// adjust to needed buffer size + change to cycles
+		/*
+		 * Add number of cycles needed for one frame
+		 */
 		cycles += SID_CLOCK_SPEED / FPS;
 		
 		if (host->events_process_events() == QUIT_EVENT) running = false;
 		
 		keyboard->process();
 		
-		core->run(cycles);
-		core->run_blitter();
-		
-		debugger->run();
-		debugger->redraw();
-		
-		host->update_textures(&core->blitter->vram[(core->blitter->framebuffer_bank & 0x0f) << 16], &debugger->blitter->vram[(debugger->blitter->framebuffer_bank & 0x0f) << 16]);
+		switch (current_mode) {
+			case RUN_MODE:
+				core->run(cycles);
+				break;
+			case DEBUG_MODE:
+				debugger->run();
+				debugger->redraw();
+				host->update_debugger_texture(&debugger->blitter->vram[(debugger->blitter->framebuffer_bank & 0x0f) << 16]);
+				break;
+		}
+
+		core->run_blitter(); // run always
+		host->update_core_texture(&core->blitter->vram[(core->blitter->framebuffer_bank & 0x0f) << 16]);
 		
 		/*
 		 * If vsync is enabled, the update screen function takes more
@@ -78,7 +93,7 @@ int main()
 			}
 		}
 		
-		host->update_screen();
+		host->update_screen(current_mode);
 	}
 
 	printf("[punch] %.2f seconds running time\n", (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - app_start_time).count() / 1000);

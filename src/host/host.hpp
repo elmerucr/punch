@@ -2,6 +2,7 @@
 #define HOST_HPP
 
 #include <SDL2/SDL.h>
+#include "common.hpp"
 
 enum events_output_state {
 	QUIT_EVENT = -1,
@@ -110,14 +111,14 @@ private:
 	SDL_Window *video_window;
 	SDL_Renderer *video_renderer;
 	bool vsync;
-	SDL_Texture *punch_texture;
+	SDL_Texture *core_texture;
 	SDL_Texture *debugger_texture;
 	SDL_Texture *scanlines_texture;
 
 	int window_width;
 	int window_height;
 
-	void create_punch_texture(bool linear_filtering);
+	void create_core_texture(bool linear_filtering);
 	void create_debugger_texture(bool linear_filtering);
 	void create_scanlines_texture(bool linear_filtering);
 
@@ -145,8 +146,9 @@ public:
 	/*
 	 * Video related
 	 */
-	void update_textures(uint8_t *punch, uint8_t *debugger);
-	void update_screen();
+	void update_core_texture(uint8_t *core);
+	void update_debugger_texture(uint8_t *debugger);
+	void update_screen(enum mode cm);
 //	void update_title();
 	void video_increase_window_size();
 	void video_decrease_window_size();

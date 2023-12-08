@@ -1,6 +1,5 @@
 
 #include "host.hpp"
-#include "common.hpp"
 #include <thread>
 #include <chrono>
 
@@ -190,10 +189,10 @@ void host_t::video_init()
 	/*
 	 * Create two textures that are able to refresh very frequently
 	 */
-	punch_texture = nullptr;
+	core_texture = nullptr;
 	debugger_texture = nullptr;
 	
-	create_punch_texture(video_linear_filtering);
+	create_core_texture(video_linear_filtering);
 	create_debugger_texture(video_linear_filtering);
 
 	/*
@@ -214,7 +213,7 @@ void host_t::video_stop()
 {
 	SDL_DestroyTexture(scanlines_texture);
 	SDL_DestroyTexture(debugger_texture);
-	SDL_DestroyTexture(punch_texture);
+	SDL_DestroyTexture(core_texture);
 	SDL_DestroyRenderer(video_renderer);
 	SDL_DestroyWindow(video_window);
 }
@@ -232,32 +231,38 @@ void host_t::video_stop()
 ////	}
 //}
 
-void host_t::update_textures(uint8_t *punch, uint8_t *debugger)
+void host_t::update_core_texture(uint8_t *core)
 {
-	SDL_UpdateTexture(punch_texture, NULL, punch, MAX_PIXELS_PER_SCANLINE * sizeof(uint8_t));
+	SDL_UpdateTexture(core_texture, NULL, core, MAX_PIXELS_PER_SCANLINE * sizeof(uint8_t));
+}
+
+void host_t::update_debugger_texture(uint8_t *debugger)
+{
 	SDL_UpdateTexture(debugger_texture, NULL, debugger, MAX_PIXELS_PER_SCANLINE * sizeof(uint8_t));
 }
 
-void host_t::update_screen()
+void host_t::update_screen(enum mode cm)
 {
-	// clear
 	SDL_RenderClear(video_renderer);
-
-	// punch
-	//SDL_RenderCopy(video_renderer, punch_texture, NULL, NULL);
 	
-	// debugger
-	SDL_RenderCopy(video_renderer, debugger_texture, NULL, NULL);
+	switch (cm) {
+		case DEBUG_MODE:
+			SDL_RenderCopy(video_renderer, debugger_texture, NULL, NULL);
+			break;
+		case RUN_MODE:
+			SDL_RenderCopy(video_renderer, core_texture, NULL, NULL);
+			break;
+	}
 	
-	// scanlines
 	SDL_SetTextureAlphaMod(scanlines_texture, video_scanlines_alpha);
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
-	// viewer
-	const SDL_Rect viewer = { 192, 0, 128, 72 };
-	SDL_RenderCopy(video_renderer, punch_texture, NULL, &viewer);
+	if (cm == DEBUG_MODE) {
+		const SDL_Rect viewer = { 192, 0, 128, 72 };
+		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
+	}
 
-	// render it
+
 	SDL_RenderPresent(video_renderer);
 }
 
@@ -266,9 +271,9 @@ void host_t::update_screen()
  * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics
  */
 
-void host_t::create_punch_texture(bool linear_filtering)
+void host_t::create_core_texture(bool linear_filtering)
 {
-	if (punch_texture) SDL_DestroyTexture(punch_texture);
+	if (core_texture) SDL_DestroyTexture(core_texture);
 	
 	if (linear_filtering) {
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
@@ -276,10 +281,10 @@ void host_t::create_punch_texture(bool linear_filtering)
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
 	
-	punch_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_RGB332,
+	core_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_RGB332,
 				    SDL_TEXTUREACCESS_STREAMING,
 				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
-	SDL_SetTextureBlendMode(punch_texture, SDL_BLENDMODE_NONE);
+	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
 }
 
 void host_t::create_debugger_texture(bool linear_filtering)
@@ -345,10 +350,11 @@ enum events_output_state host_t::events_process_events()
 		switch(event.type) {
 			case SDL_KEYDOWN:
 				return_value = KEYPRESS_EVENT;
-				if( (event.key.keysym.sym == SDLK_f) && alt_pressed ) {
+				if ((event.key.keysym.sym == SDLK_f) && alt_pressed) {
 					events_wait_until_key_released(SDLK_f);
 					video_toggle_fullscreen();
-				} else if( (event.key.keysym.sym == SDLK_s) && alt_pressed ) {
+//				} else if (event.key.keysym.sym == SDLK_F1) {
+				} else if ((event.key.keysym.sym == SDLK_s) && alt_pressed ) {
 					video_change_scanlines_intensity();
 				} else if ((event.key.keysym.sym == SDLK_b) && alt_pressed) {
 					video_toggle_linear_filtering();
@@ -366,6 +372,9 @@ enum events_output_state host_t::events_process_events()
 					// increase screen size
 					events_wait_until_key_released(SDLK_EQUALS);
 					video_increase_window_size();
+				} else if(event.key.keysym.sym == SDLK_F9) {
+					events_wait_until_key_released(SDLK_F9);
+					printf("switching modes\n");
 //				} else if(event.key.keysym.sym == SDLK_F10) {
 //					hud->toggle_stats();
 //				} else if((event.key.keysym.sym == SDLK_w) && alt_pressed) {
@@ -500,7 +509,7 @@ void host_t::video_change_scanlines_intensity()
 void host_t::video_toggle_linear_filtering()
 {
 	video_linear_filtering = !video_linear_filtering;
-	create_punch_texture(video_linear_filtering);
+	create_core_texture(video_linear_filtering);
 	create_debugger_texture(video_linear_filtering);
 }
 
