@@ -1,5 +1,7 @@
 
 #include "host.hpp"
+#include "core.hpp"
+#include "debugger.hpp"
 #include <thread>
 #include <chrono>
 
@@ -243,11 +245,11 @@ void host_t::update_debugger_texture(uint8_t *debugger)
 	SDL_UpdateTexture(debugger_texture, NULL, debugger, MAX_PIXELS_PER_SCANLINE * sizeof(uint8_t));
 }
 
-void host_t::update_screen(enum mode cm)
+void host_t::update_screen()
 {
 	SDL_RenderClear(video_renderer);
 	
-	switch (cm) {
+	switch (app->current_mode) {
 		case DEBUG_MODE:
 			SDL_RenderCopy(video_renderer, debugger_texture, NULL, NULL);
 			break;
@@ -259,11 +261,10 @@ void host_t::update_screen(enum mode cm)
 	SDL_SetTextureAlphaMod(scanlines_texture, video_scanlines_alpha);
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
-	if (cm == DEBUG_MODE) {
-		const SDL_Rect viewer = { 192, 0, 128, 72 };
+	if (app->current_mode == DEBUG_MODE) {
+		const SDL_Rect viewer = { 256, 0, 64, 36 };
 		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
 	}
-
 
 	SDL_RenderPresent(video_renderer);
 }
@@ -356,6 +357,10 @@ enum events_output_state host_t::events_process_events()
 					events_wait_until_key_released(SDLK_f);
 					video_toggle_fullscreen();
 //				} else if (event.key.keysym.sym == SDLK_F1) {
+//					if (app->current_mode == DEBUG_MODE) {
+//						app->core->run(0);
+//						app->debugger->status();
+//					}
 				} else if ((event.key.keysym.sym == SDLK_s) && alt_pressed ) {
 					video_change_scanlines_intensity();
 				} else if ((event.key.keysym.sym == SDLK_b) && alt_pressed) {

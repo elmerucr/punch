@@ -151,7 +151,7 @@ public:
 	 */
 	void update_core_texture(uint8_t *core);
 	void update_debugger_texture(uint8_t *debugger);
-	void update_screen(enum mode cm);
+	void update_screen();
 //	void update_title();
 	void video_increase_window_size();
 	void video_decrease_window_size();

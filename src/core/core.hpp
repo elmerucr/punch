@@ -11,6 +11,19 @@
 #define	BLITTER_PAGE	0x04
 #define	TIMER_PAGE	0x05
 
+class cpu_t : public mc6809 {
+public:
+	cpu_t(app_t *a) {
+		app = a;
+	}
+	
+	uint8_t read8(uint16_t address) const;
+	void write8(uint16_t address, uint8_t value) const;
+	
+private:
+	app_t *app;
+};
+
 class core_t {
 public:
 	core_t(app_t *a);
@@ -28,25 +41,7 @@ public:
 	blitter_ic *blitter;
 	exceptions_ic *exceptions;
 	timer_ic *timer;
-	mc6809 *cpu;
-};
-
-class cpu_t : public mc6809 {
-public:
-	cpu_t(core_t *c) {
-		core = c;
-	}
-	
-	uint8_t read8(uint16_t address) const {
-		return core->read8(address);
-	}
-	
-	void write8(uint16_t address, uint8_t value) const {
-		core->write8(address, value);
-	}
-	
-private:
-	core_t *core;
+	cpu_t *cpu;
 };
 
 #endif

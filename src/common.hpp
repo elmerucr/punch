@@ -1,3 +1,10 @@
+/*
+ * common.hpp
+ * punch
+ *
+ * Copyright © 2023 elmerucr. All rights reserved.
+ */
+
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
@@ -6,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    3
-#define PUNCH_BUILD            20231208
+#define PUNCH_BUILD            20231210
 #define PUNCH_YEAR             2023
 
 /*

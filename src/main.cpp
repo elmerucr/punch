@@ -14,3 +14,6 @@ int main(int argc, char **argv)
 	delete app;
 	return 0;
 }
+
+// TODO: F1 in debug mode: remove garbage when pressing
+//

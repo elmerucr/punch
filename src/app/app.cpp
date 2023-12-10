@@ -20,6 +20,9 @@ app_t::app_t()
 	       PUNCH_MINOR_VERSION,
 	       PUNCH_BUILD, PUNCH_YEAR);
 	
+//	current_mode = DEBUG_MODE;
+	current_mode = RUN_MODE;
+	
 	host = new host_t(this);
 	
 	core = new core_t(this);
@@ -99,7 +102,7 @@ void app_t::run()
 				break;
 		}
 
-		core->run_blitter(); // run always
+		core->run_blitter(); // run always?
 		host->update_core_texture(&core->blitter->vram[(core->blitter->framebuffer_bank & 0x0f) << 16]);
 		
 		/*
@@ -125,6 +128,6 @@ void app_t::run()
 			}
 		}
 		
-		host->update_screen(current_mode);
+		host->update_screen();
 	}
 }

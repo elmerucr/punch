@@ -79,6 +79,11 @@ void debugger_t::run()
 		terminal->deactivate_cursor();
 		symbol = app->keyboard->pop_event();
 		switch (symbol) {
+			case ASCII_F1:
+				app->core->run(0);
+				status();
+				prompt();
+				break;
 			case ASCII_CURSOR_LEFT:
 				terminal->cursor_left();
 				break;
@@ -155,5 +160,5 @@ void debugger_t::status()
 		terminal->printf("\n%s", text_buffer);
 	}
 	app->core->cpu->stacks(text_buffer, 2048, 8);
-	terminal->printf("\n\n%s\n", text_buffer);
+	terminal->printf("\n\n%s", text_buffer);
 }

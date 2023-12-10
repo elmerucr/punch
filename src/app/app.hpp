@@ -34,8 +34,7 @@ public:
 	keyboard_t *keyboard;
 	debugger_t *debugger;
 	
-//	enum mode current_mode{DEBUG_MODE};
-	enum mode current_mode{RUN_MODE};
+	enum mode current_mode;
 	void switch_mode();
 	void switch_to_debug_mode();
 	void switch_to_run_mode();
