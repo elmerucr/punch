@@ -5,6 +5,9 @@
 blitter_ic::blitter_ic()
 {
 	vram = new uint8_t[VRAM_SIZE];
+	for (int i = 0; i < VRAM_SIZE; i++) {
+		vram[i] = (i & 0x40) ? 0xff : 0x00;
+	}
 	
 	font_4x6 = new uint8_t[8192];
 	for (int i = 0; i < 8192; i++) font_4x6[i] = 0;

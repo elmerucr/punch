@@ -130,7 +130,6 @@ private:
 	 * events related
 	 */
 	const uint8_t *sdl_keyboard_state;
-	void events_wait_until_key_released(SDL_KeyCode key);
 	
 public:
 	host_t(app_t *a);
@@ -180,6 +179,7 @@ public:
 	 */
 	enum events_output_state events_process_events();
 	uint8_t keyboard_state[128];
+	void events_wait_until_key_released(SDL_KeyCode key);
 };
 
 #endif

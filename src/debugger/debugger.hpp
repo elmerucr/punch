@@ -26,6 +26,8 @@ public:
 	void prompt();
 	void print_version();
 	void status();
+	
+	void memory_dump(uint16_t address, int rows);
 private:
 	tile_surface character_screen;
 	
@@ -33,6 +35,8 @@ private:
 //	keyboard_t *keyboard;
 	
 	char text_buffer[2048];
+	
+	bool hex_string_to_int(const char *temp_string, uint32_t *return_value);
 };
 
 #endif

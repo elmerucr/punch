@@ -78,7 +78,9 @@ void core_t::reset()
 void core_t::run(int32_t cycles)
 {
 	 do {
-		cycles -= cpu->execute();
+		uint8_t cycles_done = cpu->execute();
+		timer->run(cycles_done);
+		cycles -= cycles_done;
 	 } while (cycles > 0);
 }
 

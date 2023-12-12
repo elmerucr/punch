@@ -162,10 +162,6 @@ bool scancode_not_modifier[] =
 keyboard_t::keyboard_t(app_t *a)
 {
 	app = a;
-	
-	repeat_delay_ms = 500;
-	repeat_speed_ms = 50;
-	
 	reset();
 }
 
@@ -244,5 +240,7 @@ uint8_t keyboard_t::pop_event()
 
 void keyboard_t::reset()
 {
+	repeat_delay_ms = 500;
+	repeat_speed_ms = 50;
 	head = tail = 0;
 }

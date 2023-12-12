@@ -110,27 +110,19 @@ int terminal_t::printf(const char *format, ...)
 
 void terminal_t::activate_cursor()
 {
-	//blitter->vram[ts->base + cursor_position] ^= 0x80;
 	cursor_original_char = blitter->vram[(ts->base + cursor_position) & VRAM_SIZE_MASK];
 	cursor_original_color = blitter->vram[(ts->base + characters + cursor_position) & VRAM_SIZE_MASK];
 	cursor_original_background_color = blitter->vram[(ts->base + (2 * characters) + cursor_position) & VRAM_SIZE_MASK];
-//	blit[number].cursor_original_char = terminal_get_tile(number, blit[number].cursor_position);
-//	blit[number].cursor_original_color = terminal_get_tile_fg_color(number, blit[number].cursor_position);
-//	blit[number].cursor_original_background_color = terminal_get_tile_bg_color(number, blit[number].cursor_position);
 	cursor_blinking = true;
 	cursor_countdown = 0;
 }
 
 void terminal_t::deactivate_cursor()
 {
-	//blitter->vram[(ts->base + cursor_position) & VRAM_SIZE_MASK] ^= 0x80;
 	cursor_blinking = false;
 	blitter->vram[(ts->base + cursor_position) & VRAM_SIZE_MASK] = cursor_original_char;
 	blitter->vram[(ts->base + characters + cursor_position) & VRAM_SIZE_MASK] = cursor_original_color;
 	blitter->vram[(ts->base + (2 * characters) + cursor_position) & VRAM_SIZE_MASK] = cursor_original_background_color;
-//	terminal_set_tile(no, blit[no].cursor_position, blit[no].cursor_original_char);
-//	terminal_set_tile_fg_color(no, blit[no].cursor_position, blit[no].cursor_original_color);
-//	terminal_set_tile_bg_color(no, blit[no].cursor_position, blit[no].cursor_original_background_color);
 }
 
 void terminal_t::process_cursor_state()
@@ -143,11 +135,6 @@ void terminal_t::process_cursor_state()
 			} else {
 				blitter->vram[(ts->base + characters + cursor_position) & VRAM_SIZE_MASK] = cursor_original_color;
 			}
-//			if ((terminal_get_tile(no, blit[no].cursor_position) & 0x80) != (blit[no].cursor_original_char & 0x80)) {
-//				terminal_set_tile_fg_color(no, blit[no].cursor_position, blit[no].foreground_color);
-//			} else {
-//				terminal_set_tile_fg_color(no, blit[no].cursor_position, blit[no].cursor_original_color);
-//			}
 			cursor_countdown += cursor_interval;
 		}
 		cursor_countdown--;

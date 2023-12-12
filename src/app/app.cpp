@@ -20,9 +20,6 @@ app_t::app_t()
 	       PUNCH_MINOR_VERSION,
 	       PUNCH_BUILD, PUNCH_YEAR);
 	
-//	current_mode = DEBUG_MODE;
-	current_mode = RUN_MODE;
-	
 	host = new host_t(this);
 	
 	core = new core_t(this);
@@ -33,6 +30,9 @@ app_t::app_t()
 	keyboard->enable_events();
 	
 	debugger = new debugger_t(this);
+	
+//	switch_to_run_mode();
+	switch_to_debug_mode();
 }
 
 app_t::~app_t()
@@ -48,6 +48,7 @@ app_t::~app_t()
 void app_t::switch_mode()
 {
 	if (current_mode == RUN_MODE) {
+		debugger->terminal->printf("\nUser switch to debug mode");
 		switch_to_debug_mode();
 	} else {
 		switch_to_run_mode();
@@ -56,11 +57,14 @@ void app_t::switch_mode()
 
 void app_t::switch_to_debug_mode()
 {
+	debugger->prompt();
+	debugger->terminal->activate_cursor();
 	current_mode = DEBUG_MODE;
 }
 
 void app_t::switch_to_run_mode()
 {
+	debugger->terminal->deactivate_cursor();
 	current_mode = RUN_MODE;
 }
 
