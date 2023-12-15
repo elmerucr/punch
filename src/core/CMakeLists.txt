@@ -1,3 +1,0 @@
-add_library(core STATIC core.cpp)
-
-target_link_libraries(core blitter debugger MC6809 timer)
