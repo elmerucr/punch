@@ -27,9 +27,11 @@ public:
 	void print_version();
 	void status();
 	
-	void memory_dump(uint16_t address, int rows);
+	void memory_dump(uint16_t address);
 private:
 	tile_surface character_screen;
+	
+	uint8_t irq_no;
 	
 //	core_t *core;
 //	keyboard_t *keyboard;

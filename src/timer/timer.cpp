@@ -12,7 +12,7 @@
 timer_ic::timer_ic(exceptions_ic *unit)
 {
 	exceptions = unit;
-	irq_number = exceptions->connect_device();
+	irq_number = exceptions->connect_device("timer");
 }
 
 void timer_ic::reset()

@@ -18,17 +18,24 @@ core_t::core_t(app_t *a)
 	blitter->vram[0xfffe] = 0x02;
 	blitter->vram[0xffff] = 0x00;
 	
-	blitter->vram[0x0200] = 0x86;	// lda #$21
-	blitter->vram[0x0201] = 0x21;
-	blitter->vram[0x0202] = 0xb7;	// sta $0400
-	blitter->vram[0x0203] = 0x04;
-	blitter->vram[0x0204] = 0x00;
-	blitter->vram[0x0205] = 0x7c;	// inc $0400
-	blitter->vram[0x0206] = 0x04;
-	blitter->vram[0x0207] = 0x00;
-	blitter->vram[0x0208] = 0x7e;	// jmp $0205
-	blitter->vram[0x0209] = 0x02;
-	blitter->vram[0x020a] = 0x05;
+	blitter->vram[0x0200] = 0x10;	// lds #$fff0
+	blitter->vram[0x0201] = 0xce;
+	blitter->vram[0x0202] = 0xff;
+	blitter->vram[0x0203] = 0xf0;
+	blitter->vram[0x0204] = 0x1c;	// andcc #%10101111	; enable firq/irq
+	blitter->vram[0x0205] = 0b10101111;
+					
+	blitter->vram[0x0206] = 0x86;	// lda #$21
+	blitter->vram[0x0207] = 0x21;
+	blitter->vram[0x0208] = 0xb7;	// sta $0400
+	blitter->vram[0x0209] = 0x04;
+	blitter->vram[0x020a] = 0x00;
+	blitter->vram[0x020b] = 0x7c;	// inc $0400
+	blitter->vram[0x020c] = 0x04;
+	blitter->vram[0x020d] = 0x00;
+	blitter->vram[0x020e] = 0x7e;	// jmp $020b
+	blitter->vram[0x020f] = 0x02;
+	blitter->vram[0x0210] = 0x0b;
 }
 
 core_t::~core_t()

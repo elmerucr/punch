@@ -38,6 +38,8 @@ debugger_t::debugger_t(app_t *a)
 {
 	app = a;
 	
+	irq_no = app->core->exceptions->connect_device("debugger");
+	
 	//core = c;
 	//keyboard = k;
 	
@@ -45,7 +47,7 @@ debugger_t::debugger_t(app_t *a)
 	blitter->framebuffer_bank = 0x0e;
 	blitter->framebuffer.bg_col = 0b00000000;
 	
-	blitter->font.flags_0 = 0b01000011;
+	blitter->font.flags_0 = 0b01000111;
 	blitter->font.flags_1 = 0b00000000;
 	blitter->font.keycolor = C64_BLUE;
 
@@ -56,6 +58,7 @@ debugger_t::debugger_t(app_t *a)
 	character_screen.y = 0;
 	
 	terminal = new terminal_t(&character_screen, blitter);
+	terminal->bg_color = 0b00000000;
 	terminal->clear();
 	print_version();
 	
@@ -163,6 +166,9 @@ void debugger_t::process_command(char *c)
 		//have_prompt = false;
 	} else if (strcmp(token0, "clear") == 0) {
 		terminal->clear();
+	} else if (strcmp(token0, "irq") == 0) {
+		app->core->exceptions->toggle(irq_no);
+		status();
 	} else if (strcmp(token0, "m") == 0) {
 		have_prompt = false;
 		token1 = strtok(NULL, " ");
@@ -175,7 +181,7 @@ void debugger_t::process_command(char *c)
 		if (token1 == NULL) {
 			for (int i=0; i<lines_remaining; i++) {
 				terminal->putchar('\n');
-				memory_dump(temp_pc, 1);
+				memory_dump(temp_pc);
 				temp_pc = (temp_pc + 8) & 0xffff;
 			}
 		} else {
@@ -185,7 +191,7 @@ void debugger_t::process_command(char *c)
 			} else {
 				for (int i=0; i<lines_remaining; i++) {
 					terminal->putchar('\n');
-					memory_dump(temp_pc & 0xffff, 1);
+					memory_dump(temp_pc & 0xffff);
 					temp_pc = (temp_pc + 8) & 0xffff;
 				}
 			}
@@ -218,8 +224,9 @@ void debugger_t::prompt()
 
 void debugger_t::status()
 {
+	terminal->clear();
 	app->core->cpu->status(text_buffer, 2048);
-	terminal->printf("\n%s\n", text_buffer);
+	terminal->printf("%s\n", text_buffer);
 	uint16_t pc = app->core->cpu->get_pc();
 	for (int i=0; i<8; i++) {
 		pc += app->core->cpu->disassemble_instruction(text_buffer, pc);
@@ -227,32 +234,38 @@ void debugger_t::status()
 	}
 	app->core->cpu->stacks(text_buffer, 2048, 8);
 	terminal->printf("\n\n%s", text_buffer);
+	app->core->exceptions->status(text_buffer, 2048);
+	terminal->printf("\n\n%s", text_buffer);
 }
 
-void debugger_t::memory_dump(uint16_t address, int rows)
+void debugger_t::memory_dump(uint16_t address)
 {
-    address = address & 0xffff;
-    
-	for (int i = 0; i < rows; i++) {
-		uint32_t temp_address = address;
-		terminal->printf("\r.:%04x ", temp_address);
-		for (int i=0; i<8; i++) {
-			terminal->printf("%02x ", app->core->read8(temp_address));
-			temp_address++;
-			temp_address &= 0xffff;
-		}
-		temp_address = address;
-		for (int i=0; i<8; i++) {
-			uint8_t temp_byte = app->core->read8(temp_address);
-			terminal->putsymbol(temp_byte);
-			temp_address++;
-			temp_address &= 0xffff;
-		}
-		address += 8;
-		address &= 0xffff;
+	address = address & 0xffff;
+
+	uint32_t temp_address = address;
+	terminal->printf("\r.:%04x ", temp_address);
+	for (int i=0; i<8; i++) {
+		terminal->printf("%02x ", app->core->read8(temp_address));
+		temp_address++;
+		temp_address &= 0xffff;
+	}
+	temp_address = address;
+
+	terminal->bg_color = 0b00000100;
+
+	for (int i=0; i<8; i++) {
+		uint8_t temp_byte = app->core->read8(temp_address);
+		terminal->putsymbol(temp_byte);
+		temp_address++;
+		temp_address &= 0xffff;
+	}
+
+	terminal->bg_color = 0b00000000;
+
+	address += 8;
+	address &= 0xffff;
        
-		for (int i=0; i<32; i++) {
-			terminal->cursor_left();
-		}
+	for (int i=0; i<32; i++) {
+		terminal->cursor_left();
 	}
 }
