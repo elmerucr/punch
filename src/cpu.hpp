@@ -1,3 +1,10 @@
+/*
+ * cpu.hpp
+ * punch
+ *
+ * Copyright © 2023 elmerucr. All rights reserved.
+ */
+
 #ifndef CPU_HPP
 #define CPU_HPP
 

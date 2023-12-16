@@ -1,3 +1,10 @@
+/*
+ * cpu.cpp
+ * punch
+ *
+ * Copyright © 2023 elmerucr. All rights reserved.
+ */
+
 #include "cpu.hpp"
 #include "core.hpp"
 
