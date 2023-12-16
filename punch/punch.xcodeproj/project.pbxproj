@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		4602D30C2B0013B500D77BF3 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4602D30B2B0013B500D77BF3 /* SDL2.framework */; };
 		4602D30E2B00142D00D77BF3 /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4602D30B2B0013B500D77BF3 /* SDL2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		461AD6602B2E2642006BAD70 /* exceptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461AD65E2B2E2642006BAD70 /* exceptions.cpp */; };
 		4637DD2D2B1FCB700059257C /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4637DD2B2B1FCB700059257C /* timer.cpp */; };
-		4637DD302B1FCD2F0059257C /* exceptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4637DD2F2B1FCD2F0059257C /* exceptions.cpp */; };
 		46414AC42B152C5D0059D0BB /* host.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46414AC22B152C5D0059D0BB /* host.cpp */; };
 		464EB82B2B11E5C20066BF92 /* debugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464EB8292B11E5C20066BF92 /* debugger.cpp */; };
 		465A5E5B2B17C04D0039B1C0 /* keyboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 465A5E592B17C04D0039B1C0 /* keyboard.cpp */; };
@@ -20,6 +20,7 @@
 		466AC00D2AFC218200ACA0CE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */; };
 		466AC0162AFC220900ACA0CE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0152AFC220900ACA0CE /* main.cpp */; };
 		466AC02A2AFC304800ACA0CE /* blitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0292AFC304800ACA0CE /* blitter.cpp */; };
+		469AE7A12B2E1E5D00EB3B08 /* cpu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 469AE79F2B2E1E5D00EB3B08 /* cpu.cpp */; };
 		46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */; };
 		46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */; };
 		46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181572B00E79800E7FDC8 /* mc6809_addressing_modes.cpp */; };
@@ -43,10 +44,10 @@
 
 /* Begin PBXFileReference section */
 		4602D30B2B0013B500D77BF3 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
+		461AD65E2B2E2642006BAD70 /* exceptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exceptions.cpp; path = ../../src/exceptions.cpp; sourceTree = "<group>"; };
+		461AD65F2B2E2642006BAD70 /* exceptions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = exceptions.hpp; path = ../../src/exceptions.hpp; sourceTree = "<group>"; };
 		4637DD2B2B1FCB700059257C /* timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = timer.cpp; path = ../../src/timer/timer.cpp; sourceTree = "<group>"; };
 		4637DD2C2B1FCB700059257C /* timer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = timer.hpp; path = ../../src/timer/timer.hpp; sourceTree = "<group>"; };
-		4637DD2E2B1FCD2F0059257C /* exceptions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = exceptions.hpp; path = ../../src/MC6809/exceptions.hpp; sourceTree = "<group>"; };
-		4637DD2F2B1FCD2F0059257C /* exceptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exceptions.cpp; path = ../../src/MC6809/exceptions.cpp; sourceTree = "<group>"; };
 		46414AC22B152C5D0059D0BB /* host.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = host.cpp; path = ../../src/host/host.cpp; sourceTree = "<group>"; };
 		46414AC32B152C5D0059D0BB /* host.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = host.hpp; path = ../../src/host/host.hpp; sourceTree = "<group>"; };
 		464EB8292B11E5C20066BF92 /* debugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = debugger.cpp; path = ../../src/debugger/debugger.cpp; sourceTree = "<group>"; };
@@ -65,6 +66,8 @@
 		466AC0232AFC29B100ACA0CE /* common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = common.hpp; path = ../../src/common.hpp; sourceTree = "<group>"; };
 		466AC0292AFC304800ACA0CE /* blitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blitter.cpp; path = ../../src/blitter/blitter.cpp; sourceTree = "<group>"; };
 		466AC02B2AFC31F100ACA0CE /* blitter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blitter.hpp; path = ../../src/blitter/blitter.hpp; sourceTree = "<group>"; };
+		469AE79F2B2E1E5D00EB3B08 /* cpu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cpu.cpp; path = ../../src/cpu.cpp; sourceTree = "<group>"; };
+		469AE7A02B2E1E5D00EB3B08 /* cpu.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cpu.hpp; path = ../../src/cpu.hpp; sourceTree = "<group>"; };
 		46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_disassembler.cpp; path = ../../src/MC6809/mc6809_disassembler.cpp; sourceTree = "<group>"; };
 		46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_instructions.cpp; path = ../../src/MC6809/mc6809_instructions.cpp; sourceTree = "<group>"; };
 		46F181562B00E79800E7FDC8 /* mc6809.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mc6809.hpp; path = ../../src/MC6809/mc6809.hpp; sourceTree = "<group>"; };
@@ -172,16 +175,20 @@
 			children = (
 				466055E02B23B0F900C549AA /* app */,
 				466AC0272AFC2F1400ACA0CE /* blitter */,
+				466AC0232AFC29B100ACA0CE /* common.hpp */,
 				46F88A772B0E59D600579C05 /* core */,
+				469AE79F2B2E1E5D00EB3B08 /* cpu.cpp */,
+				469AE7A02B2E1E5D00EB3B08 /* cpu.hpp */,
 				464875E72B115307000A92CD /* debugger */,
+				461AD65E2B2E2642006BAD70 /* exceptions.cpp */,
+				461AD65F2B2E2642006BAD70 /* exceptions.hpp */,
 				466AC0222AFC295300ACA0CE /* host */,
 				465A5E582B17C02B0039B1C0 /* keyboard */,
+				466AC0152AFC220900ACA0CE /* main.cpp */,
 				46F181532B00E77E00E7FDC8 /* MC6809 */,
 				466B9A762B1A6B2500CC5501 /* sound */,
 				466083452B177D9A00D6AA89 /* terminal */,
 				4637DD272B1FC55B0059257C /* timer */,
-				466AC0152AFC220900ACA0CE /* main.cpp */,
-				466AC0232AFC29B100ACA0CE /* common.hpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -227,8 +234,6 @@
 				46F181572B00E79800E7FDC8 /* mc6809_addressing_modes.cpp */,
 				46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */,
 				46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */,
-				4637DD2E2B1FCD2F0059257C /* exceptions.hpp */,
-				4637DD2F2B1FCD2F0059257C /* exceptions.cpp */,
 			);
 			name = MC6809;
 			sourceTree = "<group>";
@@ -316,15 +321,16 @@
 				46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */,
 				46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */,
 				465A5E5B2B17C04D0039B1C0 /* keyboard.cpp in Sources */,
+				469AE7A12B2E1E5D00EB3B08 /* cpu.cpp in Sources */,
 				46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */,
 				46414AC42B152C5D0059D0BB /* host.cpp in Sources */,
-				4637DD302B1FCD2F0059257C /* exceptions.cpp in Sources */,
 				46F1815C2B00E79800E7FDC8 /* mc6809.cpp in Sources */,
 				466AC0162AFC220900ACA0CE /* main.cpp in Sources */,
 				466AC02A2AFC304800ACA0CE /* blitter.cpp in Sources */,
 				46F88A7A2B0E5A1E00579C05 /* core.cpp in Sources */,
 				464EB82B2B11E5C20066BF92 /* debugger.cpp in Sources */,
 				466055E52B23B12D00C549AA /* app.cpp in Sources */,
+				461AD6602B2E2642006BAD70 /* exceptions.cpp in Sources */,
 				4637DD2D2B1FCB700059257C /* timer.cpp in Sources */,
 				466083482B177DCE00D6AA89 /* terminal.cpp in Sources */,
 			);

@@ -22,6 +22,6 @@ include_directories(
 
 add_subdirectory(src/)
 
-add_executable(punch src/main.cpp)
+add_executable(punch src/cpu.cpp src/exceptions.cpp src/main.cpp)
 
 target_link_libraries(punch app)
