@@ -6,8 +6,12 @@
 #include "blitter.hpp"
 #include "cpu.hpp"
 #include "exceptions.hpp"
+#include "sound.hpp"
 #include "timer.hpp"
 
+// core page
+// inspect vram page
+// sound pages 4- 7 ?
 #define	BLITTER_PAGE	0x04
 #define	TIMER_PAGE	0x05
 
@@ -28,6 +32,7 @@ public:
 	blitter_ic *blitter;
 	exceptions_ic *exceptions;
 	timer_ic *timer;
+	sound_ic *sound;
 	cpu_t *cpu;
 };
 

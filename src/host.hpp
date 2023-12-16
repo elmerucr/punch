@@ -163,7 +163,7 @@ public:
 //	uint16_t current_window_height() { return video_window_sizes[current_window_size].y; }
 	inline bool vsync_enabled() { return vsync; }
 	inline bool vsync_disabled() { return !vsync; }
-//	inline uint8_t get_bytes_per_sample() { return audio_bytes_per_sample; }
+	inline uint8_t get_bytes_per_sample() { return audio_bytes_per_sample; }
 	inline double get_bytes_per_ms() { return audio_bytes_per_ms; }
 //	
 //	//inline uint8_t get_scanlines_alpha() { return video_scanlines_alpha; }
