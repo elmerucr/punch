@@ -9,19 +9,12 @@ find_package(sdl2 REQUIRED)
 include_directories(
     ${SDL2_INCLUDE_DIRS}
     src/
-    src/app/
-    src/blitter/
-    src/core/
-    src/debugger/
-    src/host/
-    src/keyboard/
     src/MC6809/
-    src/terminal/
-    src/timer/
+    src/resid-0.16/
 )
 
 add_subdirectory(src/)
 
-add_executable(punch src/cpu.cpp src/exceptions.cpp src/main.cpp)
+add_executable(punch)
 
 target_link_libraries(punch app)

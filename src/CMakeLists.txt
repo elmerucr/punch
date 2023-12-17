@@ -1,9 +1,20 @@
-add_subdirectory(app/)
-add_subdirectory(blitter/)
-add_subdirectory(core/)
-add_subdirectory(debugger/)
-add_subdirectory(host/)
-add_subdirectory(keyboard/)
+add_library(app STATIC
+	analog.cpp
+	app.cpp
+	blitter.cpp
+	core.cpp
+	cpu.cpp
+	debugger.cpp
+	exceptions.cpp
+	host.cpp
+	keyboard.cpp
+	main.cpp
+	sound.cpp
+	terminal.cpp
+	timer.cpp
+)
+
+target_link_libraries(app MC6809 resid)
+
 add_subdirectory(MC6809/)
-add_subdirectory(terminal/)
-add_subdirectory(timer/)
+add_subdirectory(resid-0.16/)
