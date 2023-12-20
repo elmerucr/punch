@@ -6,18 +6,16 @@
 
 Screenshot with scanlines.
 
-![punch](./docs/20231203_screenshot.png)
+![punch](./docs/20231220_screenshot.png)
 
 ## Memory Map
 
 ### Addressable by Blitter & MC6809
 
 * ```$00000-$000ff``` direct page (register = $00)
-* ```$00100-$003ff``` available ram (768 bytes)
-* ```$00400-$0040f``` core registers
-* ```$00400-...``` blitter...
-* sound
-* page into blitter ram?
+* ```$00100-$007ff``` available ram + sp (768 bytes)
+* ```$00800-$00fff``` io
+* ```$01000-$0ffef``` 60kb - 16b ram
 
 ### Addressable by Blitter only
 
