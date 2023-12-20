@@ -31,6 +31,7 @@ public:
 	void process_cursor_state();
 	
 	void add_bottom_row();
+	void add_top_row();
 	
 	void get_command(char *c, int length);
 	

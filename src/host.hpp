@@ -105,16 +105,16 @@ private:
 	 */
 	uint8_t video_scaling_max;
 	uint8_t video_scaling;
-	uint8_t video_scanlines_alpha{64};
+	uint8_t video_scanlines_alpha{128};
 
 	bool video_fullscreen{false};
-	bool video_linear_filtering{true};
+	bool video_linear_filtering{false};
 	SDL_Window *video_window;
 	SDL_Renderer *video_renderer;
 	bool vsync;
-	SDL_Texture *core_texture;
-	SDL_Texture *debugger_texture;
-	SDL_Texture *scanlines_texture;
+	SDL_Texture *core_texture{nullptr};
+	SDL_Texture *debugger_texture{nullptr};
+	SDL_Texture *scanlines_texture{nullptr};
 
 	int window_width;
 	int window_height;

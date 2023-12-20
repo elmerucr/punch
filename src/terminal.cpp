@@ -164,21 +164,16 @@ void terminal_t::cursor_up()
 
 	if (cursor_position >= characters) {
 		cursor_position += ts->columns;
-//		uint32_t address;
-//
-//		switch (terminal_check_output(no, true, &address)) {
-//			case E64::NOTHING:
-//				terminal_add_top_row(no);
-//				break;
-//			case E64::ASCII:
-//				terminal_add_top_row(no);
-//				//hud.memory_dump((address-8) & (RAM_SIZE_CPU_VISIBLE - 1), 1);
-//				break;
-//			case E64::MONITOR_WORD:
-//				terminal_add_top_row(no);
-//				//hud.memory_word_dump((address - 16) & 0xfffffe, 1);
-//				break;
-//		}
+		uint32_t address;
+
+		switch (check_output(true, &address)) {
+			case NOTHING:
+				break;
+			case MEMORY:
+				add_top_row();
+				app->debugger->memory_dump((address - 8) & 0xffff);
+				break;
+		}
 	}
 }
 
@@ -196,19 +191,11 @@ void terminal_t::cursor_down()
 		switch (check_output(false, &address)) {
 			case NOTHING:
 				add_bottom_row();
-				//cursor_position -= ts->columns;
 				break;
 			case MEMORY:
 				add_bottom_row();
-				//cursor_position -= ts->columns;
 				app->debugger->memory_dump((address + 8) & 0xffff);
-				//hud.memory_dump((address+8) & 0xffff));
 				break;
-//			case E64::MONITOR_WORD:
-//				terminal_add_bottom_row(no);
-//				blit[no].cursor_position -= blit[no].get_columns();
-//				//hud.memory_word_dump((address + 16) & 0xfffffe, 1);
-//				break;
 		}
 	}
 }
@@ -290,4 +277,25 @@ enum output_type terminal_t::check_output(bool top_down, uint32_t *address)
 		}
 	}
 	return output;
+}
+
+void terminal_t::add_top_row()
+{
+	uint16_t no_of_tiles_to_move = characters - ts->columns;
+	
+	uint16_t last_tile = characters - 1;
+
+	for (int i=0; i < no_of_tiles_to_move; i++) {
+		blitter->vram[(ts->base + last_tile + (0 * characters) - i) & VRAM_SIZE_MASK] =
+			blitter->vram[(ts->base + last_tile + (0 * characters) - ts->columns - i) & VRAM_SIZE_MASK];
+		blitter->vram[(ts->base + last_tile + (1 * characters) - i) & VRAM_SIZE_MASK] =
+			blitter->vram[(ts->base + last_tile + (1 * characters) - ts->columns - i) & VRAM_SIZE_MASK];
+		blitter->vram[(ts->base + last_tile + (2 * characters) - i) & VRAM_SIZE_MASK] =
+			blitter->vram[(ts->base + last_tile + (2 * characters) - ts->columns - i) & VRAM_SIZE_MASK];
+	}
+	for (int i=0; i < ts->columns; i++) {
+		blitter->vram[(ts->base + (0 * characters) + i) & VRAM_SIZE_MASK] = ' ';
+		blitter->vram[(ts->base + (1 * characters) + i) & VRAM_SIZE_MASK] = fg_color;
+		blitter->vram[(ts->base + (2 * characters) + i) & VRAM_SIZE_MASK] = bg_color;
+	}
 }

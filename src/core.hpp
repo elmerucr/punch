@@ -9,12 +9,10 @@
 #include "sound.hpp"
 #include "timer.hpp"
 
-// core page
-// inspect vram page
-// sound pages 4- 7 ?
-#define	BLITTER_PAGE	0x04
-#define	TIMER_PAGE	0x05
-#define SOUND_PAGE	0x08
+// core / cia / vram inspect
+#define	BLITTER_PAGE	0x08
+#define	TIMER_PAGE	0x09
+#define SOUND_PAGE	0x0c
 
 class core_t {
 public:

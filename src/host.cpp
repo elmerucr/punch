@@ -318,6 +318,11 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
 	
+	if (scanlines_texture) {
+		SDL_DestroyTexture(scanlines_texture);
+		scanlines_texture = nullptr;
+	}
+	
 	scanlines_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444,
 				    SDL_TEXTUREACCESS_STATIC,
 				    MAX_PIXELS_PER_SCANLINE, 4 * MAX_SCANLINES);
@@ -535,6 +540,7 @@ void host_t::video_toggle_linear_filtering()
 	video_linear_filtering = !video_linear_filtering;
 	create_core_texture(video_linear_filtering);
 	create_debugger_texture(video_linear_filtering);
+	//create_scanlines_texture(video_linear_filtering);
 }
 
 void host_t::video_increase_window_size()
