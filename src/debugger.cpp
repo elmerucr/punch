@@ -57,7 +57,7 @@ debugger_t::debugger_t(app_t *a)
 	character_screen.x = 0;
 	character_screen.y = 0;
 	
-	terminal = new terminal_t(&character_screen, blitter);
+	terminal = new terminal_t(app, &character_screen, blitter);
 	terminal->bg_color = 0b00000000;
 	terminal->clear();
 	print_version();
@@ -119,6 +119,10 @@ void debugger_t::run()
 				status();
 				prompt();
 				break;
+			case ASCII_F2:
+				status();
+				prompt();
+				break;
 			case ASCII_CURSOR_LEFT:
 				terminal->cursor_left();
 				break;
@@ -161,13 +165,16 @@ void debugger_t::process_command(char *c)
 		cnt++;
 	}
 	
-	bool have_prompt = true;
+	have_prompt = true;
 	
 	char *token0, *token1;
 	token0 = strtok(c, " ");
 	
 	if (token0 == NULL) {
 		//have_prompt = false;
+	} else if (token0[0] == ':') {
+		have_prompt = false;
+		enter_memory_line(c);
 	} else if (strcmp(token0, "clear") == 0) {
 		terminal->clear();
 	} else if (strcmp(token0, "exit") == 0) {
@@ -294,5 +301,92 @@ void debugger_t::memory_dump(uint16_t address)
        
 	for (int i=0; i<32; i++) {
 		terminal->cursor_left();
+	}
+}
+
+void debugger_t::enter_memory_line(char *buffer)
+{
+	have_prompt = true;
+	
+	uint32_t address;
+	uint32_t arg0, arg1, arg2, arg3;
+	uint32_t arg4, arg5, arg6, arg7;
+
+	buffer[5]  = '\0';
+	buffer[8]  = '\0';
+	buffer[11] = '\0';
+	buffer[14] = '\0';
+	buffer[17] = '\0';
+	buffer[20] = '\0';
+	buffer[23] = '\0';
+	buffer[26] = '\0';
+	buffer[29] = '\0';
+
+	if (!hex_string_to_int(&buffer[1], &address)) {
+		terminal->putchar('\r');
+		terminal->cursor_right();
+		terminal->cursor_right();
+		terminal->puts("????");
+	} else if (!hex_string_to_int(&buffer[6], &arg0)) {
+		terminal->putchar('\r');
+		for (int i=0; i<7; i++) terminal->cursor_right();
+		terminal->puts("??");
+	} else if (!hex_string_to_int(&buffer[9], &arg1)) {
+		terminal->putchar('\r');
+		for (int i=0; i<10; i++) terminal->cursor_right();
+		terminal->puts("??");
+	} else if (!hex_string_to_int(&buffer[12], &arg2)) {
+		terminal->putchar('\r');
+		for (int i=0; i<13; i++) terminal->cursor_right();
+		terminal->puts("??");
+	} else if (!hex_string_to_int(&buffer[15], &arg3)) {
+		terminal->putchar('\r');
+		for (int i=0; i<16; i++) terminal->cursor_right();
+		terminal->puts("??");
+	} else if (!hex_string_to_int(&buffer[18], &arg4)) {
+		terminal->putchar('\r');
+		for (int i=0; i<19; i++) terminal->cursor_right();
+		terminal->puts("??");
+	} else if (!hex_string_to_int(&buffer[21], &arg5)) {
+		terminal->putchar('\r');
+		for (int i=0; i<22; i++) terminal->cursor_right();
+		terminal->puts("??");
+	} else if (!hex_string_to_int(&buffer[24], &arg6)) {
+		terminal->putchar('\r');
+		for (int i=0; i<25; i++) terminal->cursor_right();
+		terminal->puts("??");
+	} else if (!hex_string_to_int(&buffer[27], &arg7)) {
+		terminal->putchar('\r');
+		for (int i=0; i<28; i++) terminal->cursor_right();
+		terminal->puts("??");
+	} else {
+		uint16_t original_address = address;
+
+		arg0 &= 0xff;
+		arg1 &= 0xff;
+		arg2 &= 0xff;
+		arg3 &= 0xff;
+		arg4 &= 0xff;
+		arg5 &= 0xff;
+		arg6 &= 0xff;
+		arg7 &= 0xff;
+
+		app->core->write8(address, (uint8_t)arg0); address +=1; address &= 0xffff;
+		app->core->write8(address, (uint8_t)arg1); address +=1; address &= 0xffff;
+		app->core->write8(address, (uint8_t)arg2); address +=1; address &= 0xffff;
+		app->core->write8(address, (uint8_t)arg3); address +=1; address &= 0xffff;
+		app->core->write8(address, (uint8_t)arg4); address +=1; address &= 0xffff;
+		app->core->write8(address, (uint8_t)arg5); address +=1; address &= 0xffff;
+		app->core->write8(address, (uint8_t)arg6); address +=1; address &= 0xffff;
+		app->core->write8(address, (uint8_t)arg7); address +=1; address &= 0xffff;
+
+		terminal->putchar('\r');
+
+		memory_dump(original_address);
+
+		original_address += 8;
+		original_address &= 0xffff;
+		terminal->printf("\n.:%04x ", original_address);
+		have_prompt = false;
 	}
 }

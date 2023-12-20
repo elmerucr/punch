@@ -1,11 +1,17 @@
 #ifndef TERMINAL_HPP
 #define TERMINAL_HPP
 
+#include "app.hpp"
 #include "blitter.hpp"
+
+enum output_type {
+	NOTHING,
+	MEMORY
+};
 
 class terminal_t {
 public:
-	terminal_t(tile_surface *t, blitter_ic *b);
+	terminal_t(app_t *a, tile_surface *t, blitter_ic *b);
 	
 	void clear();
 	void putsymbol_at_cursor(char symbol);
@@ -35,6 +41,7 @@ public:
 	uint8_t fg_color{0b00110100};
 	uint8_t bg_color{0b00000000};
 private:
+	app_t *app;
 	tile_surface *ts;
 	blitter_ic *blitter;
 	uint16_t characters;
@@ -46,6 +53,7 @@ private:
 	uint16_t cursor_original_background_color;
 	bool     cursor_blinking{false};
 	
+	enum output_type check_output(bool top_down, uint32_t *address);
 	//char	command_buffer[256];
 	//char	*command;
 };

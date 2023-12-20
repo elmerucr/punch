@@ -13,7 +13,7 @@
 
 #include "sid.h" // resid header
 #include "analog.hpp"
-#include "host.hpp"
+#include "app.hpp"
 
 /*
  * TODO: Write description of how dealing with shadow registers: they're always written to!
@@ -60,18 +60,20 @@ private:
 	float sample_buffer_stereo[131072];
 	
 	uint16_t sound_starting;
+	
+	app_t *app;
 public:
-	sound_ic();
+	sound_ic(app_t *a);
 	~sound_ic();
 	
 	SID sid[4];
 	
 	// read and write functions to data registers of sid array and mixer
-	uint8_t read_byte(uint16_t address);
-	void write_byte(uint16_t address, uint8_t byte);
+	uint8_t io_read_byte(uint16_t address);
+	void io_write_byte(uint16_t address, uint8_t byte);
 	// run the no of cycles that need to be processed by the sid chips on the sound device
 	// and process all the accumulated cycles (flush into soundbuffer)
-	void run(uint32_t number_of_cycles, host_t *h);
+	void run(uint32_t number_of_cycles);
 	void reset();
 };
 

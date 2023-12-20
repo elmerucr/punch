@@ -1,11 +1,13 @@
 #include "common.hpp"
 #include "terminal.hpp"
+#include "debugger.hpp"
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
 
-terminal_t::terminal_t(tile_surface *t, blitter_ic *b)
+terminal_t::terminal_t(app_t *a, tile_surface *t, blitter_ic *b)
 {
+	app = a;
 	ts = t;
 	blitter = b;
 	characters = ts->columns * ts->rows;
@@ -186,26 +188,28 @@ void terminal_t::cursor_down()
 
 	// cursor out of current screen?
 	if (cursor_position >= characters) {
-		add_bottom_row();
+		//add_bottom_row();
 		cursor_position -= ts->columns;
-//		uint32_t address;
-//
-//		switch (terminal_check_output(no, false, &address)) {
-//			case E64::NOTHING:
-//				terminal_add_bottom_row(no);
-//				blit[no].cursor_position -= blit[no].get_columns();
-//				break;
-//			case E64::ASCII:
-//				terminal_add_bottom_row(no);
-//				blit[no].cursor_position -= blit[no].get_columns();
-//				//hud.memory_dump((address+8) & (RAM_SIZE_CPU_VISIBLE - 1), 1);
-//				break;
+		
+		uint32_t address = 0;
+
+		switch (check_output(false, &address)) {
+			case NOTHING:
+				add_bottom_row();
+				//cursor_position -= ts->columns;
+				break;
+			case MEMORY:
+				add_bottom_row();
+				//cursor_position -= ts->columns;
+				app->debugger->memory_dump((address + 8) & 0xffff);
+				//hud.memory_dump((address+8) & 0xffff));
+				break;
 //			case E64::MONITOR_WORD:
 //				terminal_add_bottom_row(no);
 //				blit[no].cursor_position -= blit[no].get_columns();
 //				//hud.memory_word_dump((address + 16) & 0xfffffe, 1);
 //				break;
-//		}
+		}
 	}
 }
 
@@ -267,4 +271,23 @@ void terminal_t::get_command(char *c, int l)
 	//command = trim_space(command);
 	
 //	while (*command == '.') command++;
+}
+
+enum output_type terminal_t::check_output(bool top_down, uint32_t *address)
+{
+	enum output_type output = NOTHING;
+
+	for (int i = 0; i < characters; i += ts->columns) {
+		if (blitter->vram[(ts->base + i + 1)] == ':') {
+			output = MEMORY;
+			char potential_address[5];
+			for (int j=0; j<4; j++) {
+				potential_address[j] = blitter->vram[(ts->base + i + 2 + j)];
+			}
+			potential_address[4] = 0;
+			app->debugger->hex_string_to_int(potential_address, address);
+			if (top_down) break;
+		}
+	}
+	return output;
 }

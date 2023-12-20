@@ -28,6 +28,9 @@ public:
 	void status();
 	
 	void memory_dump(uint16_t address);
+	void enter_memory_line(char *buffer);
+	
+	bool hex_string_to_int(const char *temp_string, uint32_t *return_value);
 private:
 	tile_surface character_screen;
 	
@@ -38,7 +41,7 @@ private:
 	
 	char text_buffer[2048];
 	
-	bool hex_string_to_int(const char *temp_string, uint32_t *return_value);
+	bool have_prompt{true};
 };
 
 #endif

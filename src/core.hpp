@@ -14,6 +14,7 @@
 // sound pages 4- 7 ?
 #define	BLITTER_PAGE	0x04
 #define	TIMER_PAGE	0x05
+#define SOUND_PAGE	0x08
 
 class core_t {
 public:

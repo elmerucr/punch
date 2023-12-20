@@ -100,6 +100,7 @@ void app_t::run()
 				core->run(cycles);
 				break;
 			case DEBUG_MODE:
+				core->sound->run(cycles);
 				debugger->run();
 				debugger->redraw();
 				host->update_debugger_texture(&debugger->blitter->vram[(debugger->blitter->framebuffer_bank & 0x0f) << 16]);

@@ -7,9 +7,11 @@
 
 #include "sound.hpp"
 #include "common.hpp"
+#include "host.hpp"
 
-sound_ic::sound_ic() : analog0(0), analog1(1), analog2(2), analog3(3)
+sound_ic::sound_ic(app_t *a) : analog0(0), analog1(1), analog2(2), analog3(3)
 {
+	app = a;
 	/*
 	 * Remapping SID registers, rewiring necessary to have big endian
 	 * support and even addresses for word access.
@@ -111,7 +113,7 @@ sound_ic::~sound_ic()
 	 */
 }
 
-uint8_t sound_ic::read_byte(uint16_t address)
+uint8_t sound_ic::io_read_byte(uint16_t address)
 {
 	switch (address & 0x300) {
 		case 0x000:
@@ -175,7 +177,7 @@ uint8_t sound_ic::read_byte(uint16_t address)
 	}
 }
 
-void sound_ic::write_byte(uint16_t address, uint8_t byte)
+void sound_ic::io_write_byte(uint16_t address, uint8_t byte)
 {
 	switch (address & 0x300) {
 		case 0x000:
@@ -228,7 +230,7 @@ void sound_ic::write_byte(uint16_t address, uint8_t byte)
 	}
 }
 
-void sound_ic::run(uint32_t number_of_cycles, host_t *h)
+void sound_ic::run(uint32_t number_of_cycles)
 {
 	delta_t_sid0 += number_of_cycles;
 	delta_t_sid1 = delta_t_sid0;
@@ -300,7 +302,7 @@ void sound_ic::run(uint32_t number_of_cycles, host_t *h)
 		//settings->audio_record_push_sample(sample_buffer_stereo[(2 * i) + 1]);
 	}
 
-	h->queue_audio((void *)sample_buffer_stereo, 2 * n * h->get_bytes_per_sample());
+	app->host->queue_audio((void *)sample_buffer_stereo, 2 * n * app->host->get_bytes_per_sample());
 }
 
 void sound_ic::reset()

@@ -15,7 +15,7 @@ core_t::core_t(app_t *a)
 	
 	timer = new timer_ic(exceptions);
 	
-	sound = new sound_ic();
+	sound = new sound_ic(app);
 	
 	blitter->vram[0xfffe] = 0x02;
 	blitter->vram[0xffff] = 0x00;
@@ -58,6 +58,11 @@ uint8_t core_t::read8(uint16_t address)
 			return blitter->io_read8(address & 0xff);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
+		case SOUND_PAGE:
+		case SOUND_PAGE+1:
+		case SOUND_PAGE+2:
+		case SOUND_PAGE+3:
+			return sound->io_read_byte(address & 0x3ff);
 		default:
 			return blitter->vram[address];
 	}
@@ -72,6 +77,12 @@ void core_t::write8(uint16_t address, uint8_t value) {
 			break;
 		case TIMER_PAGE:
 			timer->io_write_byte(address &0xff, value);
+			break;
+		case SOUND_PAGE:
+		case SOUND_PAGE+1:
+		case SOUND_PAGE+2:
+		case SOUND_PAGE+3:
+			sound->io_write_byte(address & 0x3ff, value);
 			break;
 		default:
 			blitter->vram[address] = value;
@@ -88,11 +99,12 @@ void core_t::reset()
 
 void core_t::run(int32_t cycles)
 {
-	 do {
+	do {
 		uint8_t cycles_done = cpu->execute();
 		timer->run(cycles_done);
+		sound->run(cycles_done);
 		cycles -= cycles_done;
-	 } while (cycles > 0);
+	} while (cycles > 0);
 }
 
 void core_t::run_blitter()
