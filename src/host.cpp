@@ -205,7 +205,7 @@ void host_t::video_init()
 	scanlines_texture = nullptr;
 	create_scanlines_texture(true);
 	
-	SDL_RenderSetLogicalSize(video_renderer, MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);	// keeps right aspect ratio
+	SDL_RenderSetLogicalSize(video_renderer, 4*MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);	// keeps right aspect ratio
 
 	/*
 	 * Make sure mouse cursor isn't visible
@@ -247,14 +247,32 @@ void host_t::update_debugger_texture(uint8_t *debugger)
 
 void host_t::update_screen()
 {
+	SDL_Rect left;
+	left.w = 4*MAX_PIXELS_PER_SCANLINE;
+	left.h = 4*MAX_SCANLINES;
+	left.x = -video_hor_blur;
+	left.y = 0;
+	
+	
+	SDL_Rect right;
+	right.w = 4*MAX_PIXELS_PER_SCANLINE;
+	right.h = 4*MAX_SCANLINES;
+	right.x = video_hor_blur;
+	right.y = 0;
+	
 	SDL_RenderClear(video_renderer);
 	
 	switch (app->current_mode) {
 		case DEBUG_MODE:
-			SDL_RenderCopy(video_renderer, debugger_texture, NULL, NULL);
+			SDL_SetTextureAlphaMod(debugger_texture, 128);
+			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &left);
+			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &right);
 			break;
 		case RUN_MODE:
-			SDL_RenderCopy(video_renderer, core_texture, NULL, NULL);
+			SDL_SetTextureAlphaMod(core_texture, 128);
+			SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_ADD);
+			SDL_RenderCopy(video_renderer, core_texture, NULL, &left);
+			SDL_RenderCopy(video_renderer, core_texture, NULL, &right);
 			break;
 	}
 	
@@ -262,7 +280,9 @@ void host_t::update_screen()
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
 	if (app->current_mode == DEBUG_MODE) {
-		const SDL_Rect viewer = { 256, 0, 64, 36 };
+		const SDL_Rect viewer = { (4*4*MAX_PIXELS_PER_SCANLINE)/5, 0, (4*MAX_PIXELS_PER_SCANLINE)/5, (9*4*MAX_PIXELS_PER_SCANLINE)/(5*16) };
+		//SDL_SetTextureAlphaMod(core_texture, 255);
+		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
 		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
 	}
 
@@ -287,7 +307,7 @@ void host_t::create_core_texture(bool linear_filtering)
 	core_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_RGB332,
 				    SDL_TEXTUREACCESS_STREAMING,
 				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
-	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
+	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_ADD);
 }
 
 void host_t::create_debugger_texture(bool linear_filtering)
@@ -303,7 +323,7 @@ void host_t::create_debugger_texture(bool linear_filtering)
 	debugger_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_RGB332,
 				    SDL_TEXTUREACCESS_STREAMING,
 				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
-	SDL_SetTextureBlendMode(debugger_texture, SDL_BLENDMODE_NONE);
+	SDL_SetTextureBlendMode(debugger_texture, SDL_BLENDMODE_ADD);
 }
 
 void host_t::create_scanlines_texture(bool linear_filtering)
@@ -370,6 +390,8 @@ enum events_output_state host_t::events_process_events()
 					video_change_scanlines_intensity();
 				} else if ((event.key.keysym.sym == SDLK_b) && alt_pressed) {
 					video_toggle_linear_filtering();
+				} else if ((event.key.keysym.sym == SDLK_d) && alt_pressed) {
+					video_change_hor_blur();
 //				} else if ((event.key.keysym.sym == SDLK_r) && alt_pressed) {
 //					events_wait_until_key_released(SDLK_r);
 //					hud->show_notification("\nResetting system");
@@ -522,12 +544,20 @@ void host_t::video_toggle_fullscreen()
 
 void host_t::video_change_scanlines_intensity()
 {
-	if (video_scanlines_alpha < 64) {
+	if (video_scanlines_alpha < 32) {
+		video_scanlines_alpha = 32;
+	} else if (video_scanlines_alpha < 64) {
 		video_scanlines_alpha = 64;
+	} else if (video_scanlines_alpha < 96) {
+		video_scanlines_alpha = 96;
 	} else if (video_scanlines_alpha < 128) {
 		video_scanlines_alpha = 128;
+	} else if (video_scanlines_alpha < 160) {
+		video_scanlines_alpha = 160;
 	} else if (video_scanlines_alpha < 192) {
 		video_scanlines_alpha = 192;
+	} else if (video_scanlines_alpha < 224) {
+		video_scanlines_alpha = 224;
 	} else if (video_scanlines_alpha < 255) {
 		video_scanlines_alpha = 255;
 	} else {
@@ -561,4 +591,11 @@ void host_t::video_decrease_window_size()
 		SDL_GetWindowSize(video_window, &window_width, &window_height);
 		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	}
+}
+
+
+void host_t::video_change_hor_blur()
+{
+	video_hor_blur++;
+	if (video_hor_blur == 4) video_hor_blur = 0;
 }

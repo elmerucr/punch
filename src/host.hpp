@@ -105,7 +105,8 @@ private:
 	 */
 	uint8_t video_scaling_max;
 	uint8_t video_scaling;
-	uint8_t video_scanlines_alpha{128};
+	uint8_t video_scanlines_alpha{96};
+	uint8_t video_hor_blur{1};
 
 	bool video_fullscreen{false};
 	bool video_linear_filtering{false};
@@ -156,6 +157,7 @@ public:
 	void video_decrease_window_size();
 	void video_toggle_fullscreen();
 	void video_change_scanlines_intensity();
+	void video_change_hor_blur();
 	void video_toggle_linear_filtering();
 //    
 //	// getters setters
