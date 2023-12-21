@@ -351,7 +351,7 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 	
 	for (int i=0; i < 4*MAX_SCANLINES; i++) {
 		for (int j=0; j < MAX_PIXELS_PER_SCANLINE; j++) {
-			uint16_t color = 0x0000;
+			uint16_t color = 0x4444;
 			if ((i % 4) == 0 || (i % 4) == 3) {
 				color = 0xf000;
 			}

@@ -48,7 +48,7 @@ app_t::~app_t()
 void app_t::switch_mode()
 {
 	if (current_mode == RUN_MODE) {
-		debugger->terminal->printf("\nswitched to debug mode, break at $%04x", core->cpu->get_pc());
+		debugger->terminal->printf("\nbreak at $%04x switching to debug mode", core->cpu->get_pc());
 		switch_to_debug_mode();
 	} else {
 		switch_to_run_mode();

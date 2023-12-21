@@ -57,7 +57,7 @@ blitter_ic::blitter_ic()
 	turn_text.y = 65;
 	tile_blit(&text_buffer, &font, &turn_text);
 	
-	for (int i=0; i<184; i++) {
+	for (int i=0; i<(21*8); i++) {
 		vram[0x300+i] = bruce_data[i];
 	}
 	bruce.index = 0;
@@ -66,9 +66,9 @@ blitter_ic::blitter_ic()
 	bruce.flags_0 = 0b00000001;
 	bruce.flags_1 = 0b00000001;
 	bruce.w = 8;
-	bruce.h = 23;
+	bruce.h = 21;
 	bruce.x = 170;
-	bruce.y = 42;
+	bruce.y = 44;
 	
 	for (int i=0; i < (14*18); i++) {
 		vram[0x400+i] = punch_data[i];
