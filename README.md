@@ -12,10 +12,10 @@ Screenshot with scanlines.
 
 ### Addressable by Blitter & MC6809
 
-* ```$00000-$000ff``` direct page (register = $00)
-* ```$00100-$007ff``` available ram + sp (768 bytes)
+* ```$00000-$000ff``` direct page (after reset)
+* ```$00100-$007ff``` available ram and stack pointer (768 bytes)
 * ```$00800-$00fff``` io
-* ```$01000-$0ffef``` 60kb - 16b ram
+* ```$01000-$0ffef``` 60kb ram (minus 16 bytes)
 
 ### Addressable by Blitter only
 

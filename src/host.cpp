@@ -205,7 +205,7 @@ void host_t::video_init()
 	scanlines_texture = nullptr;
 	create_scanlines_texture(true);
 	
-	SDL_RenderSetLogicalSize(video_renderer, 4*MAX_PIXELS_PER_SCANLINE, 4*MAX_SCANLINES);	// keeps right aspect ratio
+	SDL_RenderSetLogicalSize(video_renderer, 8*MAX_PIXELS_PER_SCANLINE, 8*MAX_SCANLINES);	// keeps right aspect ratio
 
 	/*
 	 * Make sure mouse cursor isn't visible
@@ -247,32 +247,31 @@ void host_t::update_debugger_texture(uint8_t *debugger)
 
 void host_t::update_screen()
 {
-	SDL_Rect left;
-	left.w = 4*MAX_PIXELS_PER_SCANLINE;
-	left.h = 4*MAX_SCANLINES;
-	left.x = -video_hor_blur;
-	left.y = 0;
-	
-	
-	SDL_Rect right;
-	right.w = 4*MAX_PIXELS_PER_SCANLINE;
-	right.h = 4*MAX_SCANLINES;
-	right.x = video_hor_blur;
-	right.y = 0;
+	SDL_Rect placement;
+	placement.w = 8*MAX_PIXELS_PER_SCANLINE;
+	placement.h = 8*MAX_SCANLINES;
+	placement.x = -video_hor_blur;
+	placement.y = 0;
 	
 	SDL_RenderClear(video_renderer);
 	
 	switch (app->current_mode) {
 		case DEBUG_MODE:
-			SDL_SetTextureAlphaMod(debugger_texture, 128);
-			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &left);
-			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &right);
+			SDL_SetTextureAlphaMod(debugger_texture, 85);
+			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &placement);
+			placement.x = 0;
+			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &placement);
+			placement.x = video_hor_blur;
+			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &placement);
 			break;
 		case RUN_MODE:
-			SDL_SetTextureAlphaMod(core_texture, 128);
+			SDL_SetTextureAlphaMod(core_texture, 85);
 			SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_ADD);
-			SDL_RenderCopy(video_renderer, core_texture, NULL, &left);
-			SDL_RenderCopy(video_renderer, core_texture, NULL, &right);
+			SDL_RenderCopy(video_renderer, core_texture, NULL, &placement);
+			placement.x = 0;
+			SDL_RenderCopy(video_renderer, core_texture, NULL, &placement);
+			placement.x = video_hor_blur;
+			SDL_RenderCopy(video_renderer, core_texture, NULL, &placement);
 			break;
 	}
 	
@@ -280,7 +279,7 @@ void host_t::update_screen()
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
 	if (app->current_mode == DEBUG_MODE) {
-		const SDL_Rect viewer = { (4*4*MAX_PIXELS_PER_SCANLINE)/5, 0, (4*MAX_PIXELS_PER_SCANLINE)/5, (9*4*MAX_PIXELS_PER_SCANLINE)/(5*16) };
+		const SDL_Rect viewer = { (4*8*MAX_PIXELS_PER_SCANLINE)/5, 0, (8*MAX_PIXELS_PER_SCANLINE)/5, (9*8*MAX_PIXELS_PER_SCANLINE)/(5*16) };
 		//SDL_SetTextureAlphaMod(core_texture, 255);
 		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
 		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
@@ -351,7 +350,7 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 	
 	for (int i=0; i < 4*MAX_SCANLINES; i++) {
 		for (int j=0; j < MAX_PIXELS_PER_SCANLINE; j++) {
-			uint16_t color = 0x4444;
+			uint16_t color = 0x0000;
 			if ((i % 4) == 0 || (i % 4) == 3) {
 				color = 0xf000;
 			}
@@ -597,5 +596,5 @@ void host_t::video_decrease_window_size()
 void host_t::video_change_hor_blur()
 {
 	video_hor_blur++;
-	if (video_hor_blur == 4) video_hor_blur = 0;
+	if (video_hor_blur == 8) video_hor_blur = 0;
 }

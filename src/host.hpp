@@ -106,7 +106,7 @@ private:
 	uint8_t video_scaling_max;
 	uint8_t video_scaling;
 	uint8_t video_scanlines_alpha{96};
-	uint8_t video_hor_blur{1};
+	uint8_t video_hor_blur{2};
 
 	bool video_fullscreen{false};
 	bool video_linear_filtering{false};
