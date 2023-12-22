@@ -101,14 +101,17 @@ void core_t::reset()
 	cpu->reset();
 }
 
-void core_t::run(int32_t cycles)
+uint32_t core_t::run(int32_t cycles)
 {
+	uint32_t cycles_original = cycles;
 	do {
-		uint8_t cycles_done = cpu->execute();
-		timer->run(cycles_done);
-		sound->run(cycles_done);
-		cycles -= cycles_done;
-	} while (cycles > 0);
+		uint8_t c = cpu->execute();
+		timer->run(c);
+		sound->run(c);
+		cycles -= c;
+	} while ((cycles > 0) && !(cpu->breakpoint()));
+	
+	return cycles_original - cycles;
 }
 
 void core_t::run_blitter()

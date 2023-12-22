@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    4
-#define PUNCH_BUILD            20231222
+#define PUNCH_BUILD            20231223
 #define PUNCH_YEAR             2023
 
 /*
@@ -55,7 +55,7 @@
 #define C64_LIGHTGREY		0b11011011
 
 /*
- * C64 colors (VirtualC64)
+ * C64 colors (VirtualC64) argb4444 format
  */
 //#define C64_BLACK       0xf000
 //#define C64_WHITE       0xffff

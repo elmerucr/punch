@@ -22,7 +22,7 @@ public:
 	app_t *app;
 	
 	void reset();
-	void run(int32_t cycles);
+	uint32_t run(int32_t cycles);
 	void run_blitter();
 	
 	uint8_t read8(uint16_t address);

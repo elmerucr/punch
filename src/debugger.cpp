@@ -175,6 +175,32 @@ void debugger_t::process_command(char *c)
 	} else if (token0[0] == ':') {
 		have_prompt = false;
 		enter_memory_line(c);
+	} else if (strcmp(token0, "b") == 0) {
+		bool breakpoints_present = false;
+		token1 = strtok(NULL, " ");
+		if (token1 == NULL) {
+			terminal->printf("\nbreakpoints:");
+			for (int i=0; i<65536; i++) {
+				if (app->core->cpu->breakpoint_array[i]) {
+					breakpoints_present = true;
+					terminal->printf("\n$%04x", i);
+				}
+			}
+			if (!breakpoints_present) terminal->printf("\nnone");
+		} else {
+			uint32_t address;
+			if (!hex_string_to_int(token1, &address)) {
+				terminal->printf("\nerror: '%s' is not a hex number", token1);
+			} else {
+				address &= 0xffff;
+				app->core->cpu->toggle_breakpoint(address);
+				if (app->core->cpu->breakpoint_array[address]) {
+					terminal->printf("\nbreakpoint set at $%04x", address);
+				} else {
+					terminal->printf("\nbreakpoint removed at $%04x", address);
+				}
+			}
+		}
 	} else if (strcmp(token0, "clear") == 0) {
 		terminal->clear();
 	} else if (strcmp(token0, "exit") == 0) {
@@ -219,7 +245,6 @@ void debugger_t::process_command(char *c)
 				}
 			}
 		}
-		
 	} else if (strcmp(token0, "n") == 0) {
 		app->core->run(0);
 		status();
@@ -263,8 +288,12 @@ void debugger_t::status()
 	terminal->printf("%s\n", text_buffer);
 	uint16_t pc = app->core->cpu->get_pc();
 	for (int i=0; i<8; i++) {
+		if (app->core->cpu->breakpoint_array[pc]) {
+			terminal->fg_color = 0xec;
+		}
 		pc += app->core->cpu->disassemble_instruction(text_buffer, pc);
 		terminal->printf("\n%s", text_buffer);
+		terminal->fg_color = 0b00110100;
 	}
 	app->core->cpu->stacks(text_buffer, 2048, 8);
 	terminal->printf("\n\n%s", text_buffer);
