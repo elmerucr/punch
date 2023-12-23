@@ -36,6 +36,7 @@
 		4647EADA2B2E46A500D0884E /* wave.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4647EACA2B2E46A500D0884E /* wave.cc */; };
 		4647EADF2B2E471400D0884E /* analog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4647EADD2B2E471400D0884E /* analog.cpp */; };
 		4647EAE02B2E471400D0884E /* sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4647EADE2B2E471400D0884E /* sound.cpp */; };
+		4654C9852B3772E300AF2582 /* rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4654C9842B3772E300AF2582 /* rom.cpp */; };
 		466AC00A2AFC218200ACA0CE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC0092AFC218200ACA0CE /* Assets.xcassets */; };
 		466AC00D2AFC218200ACA0CE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */; };
 		466AC0162AFC220900ACA0CE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0152AFC220900ACA0CE /* main.cpp */; };
@@ -109,6 +110,7 @@
 		4647EADC2B2E471400D0884E /* sound.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sound.hpp; path = ../../src/sound.hpp; sourceTree = "<group>"; };
 		4647EADD2B2E471400D0884E /* analog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = analog.cpp; path = ../../src/analog.cpp; sourceTree = "<group>"; };
 		4647EADE2B2E471400D0884E /* sound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sound.cpp; path = ../../src/sound.cpp; sourceTree = "<group>"; };
+		4654C9842B3772E300AF2582 /* rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rom.cpp; path = ../../src/rom.cpp; sourceTree = "<group>"; };
 		466AC0022AFC218100ACA0CE /* punch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = punch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		466AC0092AFC218200ACA0CE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -229,6 +231,7 @@
 				4647EAA92B2E441300D0884E /* keyboard.cpp */,
 				4647EAA82B2E441300D0884E /* keyboard.hpp */,
 				466AC0152AFC220900ACA0CE /* main.cpp */,
+				4654C9842B3772E300AF2582 /* rom.cpp */,
 				4647EADE2B2E471400D0884E /* sound.cpp */,
 				4647EADC2B2E471400D0884E /* sound.hpp */,
 				4647EAAB2B2E445A00D0884E /* terminal.cpp */,
@@ -334,6 +337,7 @@
 				46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */,
 				46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */,
 				4614F9F52B2E2A70005C9BE3 /* blitter.cpp in Sources */,
+				4654C9852B3772E300AF2582 /* rom.cpp in Sources */,
 				4647EAE02B2E471400D0884E /* sound.cpp in Sources */,
 				469AE7A12B2E1E5D00EB3B08 /* cpu.cpp in Sources */,
 				4647EACF2B2E46A500D0884E /* pot.cc in Sources */,

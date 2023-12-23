@@ -13,6 +13,7 @@
 #define	BLITTER_PAGE	0x08
 #define	TIMER_PAGE	0x09
 #define SOUND_PAGE	0x0c
+#define	ROM_PAGE	0xfe
 
 class core_t {
 public:

@@ -8,6 +8,7 @@ add_library(app STATIC
 	exceptions.cpp
 	host.cpp
 	keyboard.cpp
+	rom.cpp
 	sound.cpp
 	terminal.cpp
 	timer.cpp
