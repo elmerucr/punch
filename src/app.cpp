@@ -103,12 +103,12 @@ void app_t::run()
 				core->sound->run(cycles);
 				debugger->run();
 				debugger->redraw();
-				host->update_debugger_texture(&debugger->blitter->vram[(debugger->blitter->framebuffer_bank & 0x0f) << 16]);
+				host->update_debugger_texture(&debugger->blitter->vram[FRAMEBUFFER]);
 				break;
 		}
 
 		core->run_blitter(); // run always?
-		host->update_core_texture(&core->blitter->vram[(core->blitter->framebuffer_bank & 0x0f) << 16]);
+		host->update_core_texture(&core->blitter->vram[FRAMEBUFFER]);
 		
 		/*
 		 * If vsync is enabled, the update screen function takes more

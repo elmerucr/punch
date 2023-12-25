@@ -44,8 +44,12 @@ debugger_t::debugger_t(app_t *a)
 	//keyboard = k;
 	
 	blitter = new blitter_ic();
-	blitter->framebuffer_bank = 0x0e;
-	blitter->framebuffer.bg_col = 0b00000000;
+	
+	/* framebuffer */
+	framebuffer.base = FRAMEBUFFER;
+	framebuffer.w = MAX_PIXELS_PER_SCANLINE;
+	framebuffer.h = MAX_SCANLINES;
+	framebuffer.bg_col = 0b00000000;
 	
 	blitter->font.flags_0 = 0b01000111;
 	blitter->font.flags_1 = 0b00000000;
@@ -62,12 +66,18 @@ debugger_t::debugger_t(app_t *a)
 	terminal->clear();
 	print_version();
 	
-//	core->cpu->status(text_buffer, 2048);
-//	terminal->printf("\n\n%s", text_buffer);
-//	core->cpu->disassemble_instruction(text_buffer, core->cpu->get_pc());
-//	terminal->printf("\n%s", text_buffer);
-	//prompt();
-	//terminal->activate_cursor();
+	for (int i=0; i<(21*8); i++) {
+		blitter->vram[0x300+i] = bruce_data[i];
+	}
+	bruce.index = 0;
+	bruce.base = 0x300;
+	bruce.keycolor = 0x01;
+	bruce.flags_0 = 0b00000001;
+	bruce.flags_1 = 0b00000001;
+	bruce.w = 8;
+	bruce.h = 21;
+	bruce.x = 130;
+	bruce.y = 159;
 }
 
 void debugger_t::print_version()
@@ -100,8 +110,10 @@ debugger_t::~debugger_t()
 
 void debugger_t::redraw()
 {
-	blitter->clear_surface(&blitter->framebuffer);
-	blitter->tile_blit(&character_screen, &blitter->font, &blitter->framebuffer);
+	blitter->clear_surface(&framebuffer);
+	blitter->tile_blit(&character_screen, &blitter->font, &framebuffer);
+	
+	blitter->blit(&bruce, &framebuffer);
 }
 
 void debugger_t::run()
@@ -206,7 +218,7 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "exit") == 0) {
 		terminal->printf("\nexit punch (y/n)");
 		redraw();
-		app->host->update_debugger_texture(&blitter->vram[(blitter->framebuffer_bank & 0x0f) << 16]);
+		app->host->update_debugger_texture(&blitter->vram[FRAMEBUFFER]);
 		app->host->update_screen();
 		if (app->host->events_yes_no()) {
 			app->running = false;
@@ -251,7 +263,7 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
 		redraw();
-		app->host->update_debugger_texture(&blitter->vram[(blitter->framebuffer_bank & 0x0f) << 16]);
+		app->host->update_debugger_texture(&blitter->vram[FRAMEBUFFER]);
 		app->host->update_screen();
 		if (app->host->events_yes_no()) {
 			app->core->reset();

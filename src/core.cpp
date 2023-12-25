@@ -9,6 +9,14 @@ core_t::core_t(app_t *a)
 	
 	blitter = new blitter_ic();
 
+	/* set up framebuffer surface */
+	blitter->surface[7].base = FRAMEBUFFER;
+	blitter->surface[7].x = 0;
+	blitter->surface[7].y = 0;
+	blitter->surface[7].w = MAX_PIXELS_PER_SCANLINE;
+	blitter->surface[7].h = MAX_SCANLINES;
+	blitter->surface[7].bg_col = 0b00000101;
+
 	cpu = new cpu_t(app);
 	
 	exceptions = new exceptions_ic();
@@ -35,7 +43,8 @@ uint8_t core_t::read8(uint16_t address)
 	
 	switch (page) {
 		case BLITTER_PAGE:
-			return blitter->io_read8(address & 0xff);
+		case BLITTER_PAGE+1:
+			return blitter->io_read8(address & 0x1ff);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
 		case SOUND_PAGE:
@@ -56,7 +65,8 @@ void core_t::write8(uint16_t address, uint8_t value) {
 
 	switch (page) {
 		case BLITTER_PAGE:
-			blitter->io_write8(address & 0xff, value);
+		case BLITTER_PAGE+1:
+			blitter->io_write8(address & 0x1ff, value);
 			break;
 		case TIMER_PAGE:
 			timer->io_write_byte(address &0xff, value);
@@ -95,8 +105,6 @@ uint32_t core_t::run(int32_t cycles)
 
 void core_t::run_blitter()
 {
-	blitter->clear_surface(&blitter->framebuffer);
-	blitter->blit(&blitter->turn_text, &blitter->framebuffer);
-	blitter->blit(&blitter->bruce, &blitter->framebuffer);
-	blitter->blit(&blitter->punch, &blitter->framebuffer);
+	blitter->clear_surface(7);
+	blitter->blit(&blitter->turn_text, &blitter->surface[7]);
 }

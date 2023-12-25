@@ -5,7 +5,7 @@
 #include <cstdarg>
 #include <cstring>
 
-terminal_t::terminal_t(app_t *a, tile_surface *t, blitter_ic *b)
+terminal_t::terminal_t(app_t *a, tile_surface_t *t, blitter_ic *b)
 {
 	app = a;
 	ts = t;

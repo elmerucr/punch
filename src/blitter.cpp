@@ -13,14 +13,6 @@ blitter_ic::blitter_ic()
 	for (int i = 0; i < 8192; i++) font_4x6[i] = 0;
 	init_font_4x6();
 	
-	/* framebuffer is a surface as well */
-	framebuffer.base = framebuffer_bank << 16;
-	framebuffer.x = 0;
-	framebuffer.y = 0;
-	framebuffer.w = MAX_PIXELS_PER_SCANLINE;
-	framebuffer.h = MAX_SCANLINES;
-	framebuffer.bg_col = 0b00000101;
-	
 	/*
 	 * available font
 	 */
@@ -31,7 +23,7 @@ blitter_ic::blitter_ic()
 	font.w = 4;
 	font.h = 6;
 	
-	tile_surface text_buffer;
+	tile_surface_t text_buffer;
 	text_buffer.columns = 80;
 	text_buffer.rows = 4;
 	text_buffer.x = 0;
@@ -56,31 +48,6 @@ blitter_ic::blitter_ic()
 	turn_text.x = 50;
 	turn_text.y = 65;
 	tile_blit(&text_buffer, &font, &turn_text);
-	
-	for (int i=0; i<(21*8); i++) {
-		vram[0x300+i] = bruce_data[i];
-	}
-	bruce.index = 0;
-	bruce.base = 0x300;
-	bruce.keycolor = 0x01;
-	bruce.flags_0 = 0b00000001;
-	bruce.flags_1 = 0b00000001;
-	bruce.w = 8;
-	bruce.h = 21;
-	bruce.x = 170;
-	bruce.y = 44;
-	
-	for (int i=0; i < (14*18); i++) {
-		vram[0x400+i] = punch_data[i];
-	}
-	punch.base = 0x400;
-	punch.keycolor = 0x01;
-	punch.flags_0 = 0b00000001;
-	punch.flags_1 = 0b00000000;
-	punch.w = 14;
-	punch.h = 18;
-	punch.x = 190;
-	punch.y = 47;
 }
 
 blitter_ic::~blitter_ic()
@@ -92,7 +59,7 @@ blitter_ic::~blitter_ic()
 /*
  * - Check with keycolor
  */
-uint32_t blitter_ic::blit(const surface *src, surface *dest)
+uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 {
 	uint32_t pixelcount = 0;
 	
@@ -141,6 +108,9 @@ uint32_t blitter_ic::blit(const surface *src, surface *dest)
 		for (int x = startx; x < endx; x++) {
 			uint8_t px{0};
 			
+			/*
+			 * Pixel selector from vram or font
+			 */
 			switch ((src->flags_0 & 0b11000000) >> 6) {
 				case 0b00:
 					px = vram[src->base + (offset + (x >> dw) + (src->w * (y >> dh))) & VRAM_SIZE_MASK];
@@ -157,6 +127,7 @@ uint32_t blitter_ic::blit(const surface *src, surface *dest)
 			if (src->flags_1 & FLAGS1_XY_FLIP) swap(dest_x, dest_y);
 			
 			/*
+			 * Color selection
 			 * TODO: Can this be sped up?
 			 */
 			switch (src->flags_0 & 0b111) {
@@ -199,11 +170,16 @@ uint32_t blitter_ic::blit(const surface *src, surface *dest)
 	return pixelcount;
 }
 
-uint32_t blitter_ic::tile_blit(const tile_surface *ts, const surface *src, surface *dst)
+uint32_t blitter_ic::blit(const uint8_t s, const uint8_t d)
+{
+	return blit(&surface[s], &surface[d]);
+}
+
+uint32_t blitter_ic::tile_blit(const tile_surface_t *ts, const surface_t *src, surface_t *dst)
 {
 	uint32_t pixelcount = 0;
 	
-	surface source = *src;
+	surface_t source = *src;
 	
 	uint8_t dw = (src->flags_1 & FLAGS1_DBLWIDTH) ? 1 : 0;
 	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) ? 1 : 0;
@@ -229,13 +205,18 @@ uint32_t blitter_ic::tile_blit(const tile_surface *ts, const surface *src, surfa
 	return pixelcount;
 }
 
-uint32_t blitter_ic::clear_surface(const surface *s)
+uint32_t blitter_ic::clear_surface(const surface_t *s)
 {
 	uint32_t pixels = s->w * s->h;
 	for (uint32_t i=0; i < pixels; i++) {
 		vram[(s->base + i) & VRAM_SIZE_MASK] = s->bg_col;
 	}
 	return pixels;
+}
+
+uint32_t blitter_ic::clear_surface(const uint8_t s)
+{
+	return clear_surface(&surface[s & 0x07]);
 }
 
 /*
@@ -526,23 +507,31 @@ void blitter_ic::init_font_4x6()
 	}
 }
 
-uint8_t blitter_ic::io_read8(uint8_t address)
+uint8_t blitter_ic::io_read8(uint16_t address)
 {
-	switch (address & 0x0f) {
-		case 0x00:
-			return framebuffer.bg_col;
-		default:
-			return 0x00;
+	if (address & 0x100) {
+		switch (address & 0b00011111) {
+			case 0b00000:
+				return surface[(address & 0b11100000) >> 5].bg_col;
+			default:
+				return 0x00;
+		}
+	} else {
+		return 0x00;
 	}
 }
 
-void blitter_ic::io_write8(uint8_t address, uint8_t value)
+void blitter_ic::io_write8(uint16_t address, uint8_t value)
 {
-	switch (address & 0x0f) {
-		case 0x00:
-			framebuffer.bg_col = value;
-			break;
-		default:
-			break;
+	if (address & 0x100) {
+		switch (address & 0b00011111) {
+			case 0b00000:
+				surface[(address & 0b11100000) >> 5].bg_col = value;
+				break;
+			default:
+				break;
+		}
+	} else {
+		
 	}
 }

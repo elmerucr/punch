@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    4
-#define PUNCH_BUILD            20231223
+#define PUNCH_BUILD            20231225
 #define PUNCH_YEAR             2023
 
 /*
@@ -23,6 +23,7 @@
 #define MAX_PIXELS_PER_SCANLINE	320
 #define MAX_SCANLINES		180
 #define PIXELS			(MAX_PIXELS_PER_SCANLINE*MAX_SCANLINES)
+#define FRAMEBUFFER		0xe0000
 
 #define VRAM_SIZE		0x100000
 #define VRAM_SIZE_MASK		(VRAM_SIZE-1)
