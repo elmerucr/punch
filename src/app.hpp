@@ -20,6 +20,7 @@ class host_t;
 class core_t;
 class keyboard_t;
 class debugger_t;
+class stats_t;
 
 class app_t {
 private:
@@ -33,6 +34,7 @@ public:
 	core_t *core;
 	keyboard_t *keyboard;
 	debugger_t *debugger;
+	stats_t *stats;
 	
 	enum mode current_mode;
 	void switch_mode();

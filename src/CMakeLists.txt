@@ -10,6 +10,7 @@ add_library(app STATIC
 	keyboard.cpp
 	rom.cpp
 	sound.cpp
+	stats.cpp
 	terminal.cpp
 	timer.cpp
 )

@@ -10,6 +10,7 @@
 #include "core.hpp"
 #include "keyboard.hpp"
 #include "debugger.hpp"
+#include "stats.hpp"
 
 app_t::app_t()
 {
@@ -31,12 +32,15 @@ app_t::app_t()
 	
 	debugger = new debugger_t(this);
 	
+	stats = new stats_t(this);
+	
 //	switch_to_run_mode();
 	switch_to_debug_mode();
 }
 
 app_t::~app_t()
 {
+	delete stats;
 	delete debugger;
 	delete keyboard;
 	delete core;
@@ -73,6 +77,8 @@ void app_t::run()
 {
 	running = true;
 	
+	stats->reset();
+	
 	end_of_frame_time = std::chrono::steady_clock::now();
 	
 	while (running) {
@@ -80,8 +86,7 @@ void app_t::run()
 		 * Audio: Measure audio_buffer and determine cycles to run
 		 */
 		uint32_t audio_buffer = host->get_queued_audio_size_bytes();
-		
-//		stats->set_queued_audio_bytes(audio_buffer);
+		stats->set_queued_audio_bytes(audio_buffer);
 		
 		/*
 		 * Use int32_t, not uint32_t! Adjust to needed buffer size + change to cycles.
@@ -91,6 +96,8 @@ void app_t::run()
 		 * Add number of cycles needed for one frame
 		 */
 		cycles += SID_CLOCK_SPEED / FPS;
+		
+		//stats->start_core_time();
 		
 		if (host->events_process_events() == QUIT_EVENT) running = false;
 		
@@ -117,6 +124,11 @@ void app_t::run()
 		core->run_blitter(); // run always?
 		host->update_core_texture(&core->blitter->vram[FRAMEBUFFER]);
 		
+		printf("%s", stats->summary());
+		
+		// Time measurement
+		stats->start_idle_time();
+		
 		/*
 		 * If vsync is enabled, the update screen function takes more
 		 * time, i.e. it will return after a few milliseconds, exactly
@@ -141,5 +153,9 @@ void app_t::run()
 		}
 		
 		host->update_screen();
+
+		stats->start_core_time();
+		
+		stats->process_parameters();
 	}
 }

@@ -37,7 +37,7 @@
 /*
  * Cpu
  */
-#define CPU_CLOCK_MULTIPLY	4
+#define CPU_CLOCK_MULTIPLY	2
 
 /*
  * C64 colors "sort of"
