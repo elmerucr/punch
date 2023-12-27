@@ -9,7 +9,10 @@ core_t::core_t(app_t *a)
 	
 	blitter = new blitter_ic();
 
-	/* set up framebuffer surface */
+	/*
+	 * Set up framebuffer surface.
+	 * TODO: Could be done from rom as well...
+	 */
 	blitter->surface[7].base = FRAMEBUFFER;
 	blitter->surface[7].x = 0;
 	blitter->surface[7].y = 0;
@@ -26,10 +29,13 @@ core_t::core_t(app_t *a)
 	timer = new timer_ic(exceptions);
 	
 	sound = new sound_ic(app);
+	
+	cpu2sid = new clocks(CPU_CLOCK_MULTIPLY, 1);
 }
 
 core_t::~core_t()
 {
+	delete cpu2sid;
 	delete sound;
 	delete timer;
 	delete exceptions;
@@ -92,15 +98,20 @@ void core_t::reset()
 
 uint32_t core_t::run(int32_t cycles)
 {
-	uint32_t cycles_original = cycles;
-	do {
-		uint8_t c = cpu->execute();
-		timer->run(c);
-		sound->run(c);
-		cycles -= c;
-	} while ((cycles > 0) && !(cpu->breakpoint()));
+	int32_t cycles_done{0};
 	
-	return cycles_original - cycles;
+	do {
+		uint8_t cpu_cycles = cpu->execute();
+		
+		uint8_t sid_cycles = cpu2sid->clock(cpu_cycles);
+		
+		timer->run(sid_cycles);
+		sound->run(sid_cycles);
+		cycles_done += sid_cycles;
+		
+	} while (((cycles - cycles_done) > 0) && !(cpu->breakpoint()));
+	
+	return cycles_done;
 }
 
 void core_t::run_blitter()

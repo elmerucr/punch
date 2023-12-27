@@ -8,6 +8,7 @@
 #include "exceptions.hpp"
 #include "sound.hpp"
 #include "timer.hpp"
+#include "clocks.hpp"
 
 // core / cia / vram inspect
 #define	BLITTER_PAGE	0x08
@@ -34,6 +35,8 @@ public:
 	timer_ic *timer;
 	sound_ic *sound;
 	cpu_t *cpu;
+private:
+	clocks *cpu2sid;
 };
 
 #endif

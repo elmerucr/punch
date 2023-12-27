@@ -48,7 +48,8 @@ app_t::~app_t()
 void app_t::switch_mode()
 {
 	if (current_mode == RUN_MODE) {
-		debugger->terminal->printf("\nbreak at $%04x: switching to debug mode", core->cpu->get_pc());
+		debugger->status();
+		debugger->terminal->printf("\n\nbreak at $%04x: switching to debug mode", core->cpu->get_pc());
 		switch_to_debug_mode();
 	} else {
 		switch_to_run_mode();
@@ -95,9 +96,15 @@ void app_t::run()
 		
 		keyboard->process();
 		
+		uint32_t cycles_done{0};
+		
 		switch (current_mode) {
 			case RUN_MODE:
-				core->run(cycles);
+				cycles_done = core->run(cycles);
+//				if (cycles > 0) {
+//					core->sound->run(cycles);
+//				}
+				if (core->cpu->breakpoint()) switch_mode();
 				break;
 			case DEBUG_MODE:
 				core->sound->run(cycles);

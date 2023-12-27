@@ -512,6 +512,8 @@ uint8_t blitter_ic::io_read8(uint16_t address)
 	if (address & 0x100) {
 		switch (address & 0b00011111) {
 			case 0b00000:
+				return surface[(address & 0b11100000) >> 5].fg_col;
+			case 0b00001:
 				return surface[(address & 0b11100000) >> 5].bg_col;
 			default:
 				return 0x00;
@@ -526,6 +528,9 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 	if (address & 0x100) {
 		switch (address & 0b00011111) {
 			case 0b00000:
+				surface[(address & 0b11100000) >> 5].fg_col = value;
+				break;
+			case 0b00001:
 				surface[(address & 0b11100000) >> 5].bg_col = value;
 				break;
 			default:

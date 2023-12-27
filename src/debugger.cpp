@@ -62,14 +62,15 @@ debugger_t::debugger_t(app_t *a)
 	character_screen.y = 0;
 	
 	terminal = new terminal_t(app, &character_screen, blitter);
-	terminal->bg_color = 0b00000000;
+	terminal->fg_color = fg;
+	terminal->bg_color = bg;
 	terminal->clear();
 	print_version();
 	
-	for (int i=0; i<(21*8); i++) {
+	for (int i=0; i<(3*21*8); i++) {
 		blitter->vram[0x300+i] = bruce_data[i];
 	}
-	bruce.index = 0;
+	bruce.index = 2;
 	bruce.base = 0x300;
 	bruce.keycolor = 0x01;
 	bruce.flags_0 = 0b00000001;
@@ -113,6 +114,27 @@ void debugger_t::redraw()
 	blitter->clear_surface(&framebuffer);
 	blitter->tile_blit(&character_screen, &blitter->font, &framebuffer);
 	
+	static int state = 0;
+	static int wait = 100;
+	
+	//bruce.index = state & 0b100 ? 1 : 2;
+	
+	if (wait < 200) {
+		bruce.index = 0;
+		state = 0;
+	} else {
+		if (state > 4) {
+			bruce.index = 1;
+			bruce.x += 2; if (bruce.x > 340) bruce.x = -20;
+		} else {
+			bruce.index = 2;
+			bruce.x += 2; if (bruce.x > 340) bruce.x = -20;
+		}
+		
+		state++; if (state == 8) state = 0;
+	}
+	wait++; if (wait >300) wait = 0;
+	
 	blitter->blit(&bruce, &framebuffer);
 }
 
@@ -134,6 +156,12 @@ void debugger_t::run()
 			case ASCII_F2:
 				status();
 				prompt();
+				break;
+			case ASCII_F3:
+				terminal->deactivate_cursor();
+				terminal->printf("run");
+				app->switch_to_run_mode();
+				app->host->events_wait_until_key_released(SDLK_F3);
 				break;
 			case ASCII_CURSOR_LEFT:
 				terminal->cursor_left();
@@ -301,11 +329,11 @@ void debugger_t::status()
 	uint16_t pc = app->core->cpu->get_pc();
 	for (int i=0; i<8; i++) {
 		if (app->core->cpu->breakpoint_array[pc]) {
-			terminal->fg_color = 0xec;
+			terminal->fg_color = fg_acc;
 		}
 		pc += app->core->cpu->disassemble_instruction(text_buffer, pc);
 		terminal->printf("\n%s", text_buffer);
-		terminal->fg_color = 0b00110100;
+		terminal->fg_color = fg;
 	}
 	app->core->cpu->stacks(text_buffer, 2048, 8);
 	terminal->printf("\n\n%s", text_buffer);
@@ -326,7 +354,7 @@ void debugger_t::memory_dump(uint16_t address)
 	}
 	temp_address = address;
 
-	terminal->bg_color = 0b00000100;
+	terminal->bg_color = bg_acc;
 
 	for (int i=0; i<8; i++) {
 		uint8_t temp_byte = app->core->read8(temp_address);
@@ -335,7 +363,7 @@ void debugger_t::memory_dump(uint16_t address)
 		temp_address &= 0xffff;
 	}
 
-	terminal->bg_color = 0b00000000;
+	terminal->bg_color = bg;
 
 	address += 8;
 	address &= 0xffff;

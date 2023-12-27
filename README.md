@@ -13,14 +13,12 @@ Screenshot with scanlines.
 ### Addressable by Blitter & MC6809
 
 * ```$00000-$000ff``` direct page (after reset)
-* ```$00100-$007ff``` available ram and stack pointer (768 bytes)
+* ```$00100-$007ff``` available ram and system stack pointer (768 bytes)
 * ```$00800-$00fff``` io
-* ```$01000-$0ffef``` 60kb ram (minus 16 bytes)
+* ```$01000-$0fdff``` 60kb ram (minus 512 bytes)
+* ```$0fe00-$0ffff``` 512 bytes kernel + vectors
 
 ### Addressable by Blitter only
 
-* ```$10000-$11fff``` pixel font 4x6 (8kb)
-* ```$11800-$11fff``` available ram (2kb)
-* ```$12000-$15fff``` cbm font 8x8 (16kb)
-* ```$16000-$dffff``` any video data (808kb)
-* ```$e0000-$fffff``` framebuffer (128kb)
+* ```$10000-$dffff``` available vram (832kb)
+* ```$e0000-$fffff``` framebuffer vram (128kb)

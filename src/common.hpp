@@ -13,30 +13,34 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    4
-#define PUNCH_BUILD            20231225
+#define PUNCH_BUILD            20231227
 #define PUNCH_YEAR             2023
 
 /*
- * video
+ * Video
  */
+#define VRAM_SIZE		0x100000
+#define VRAM_SIZE_MASK		(VRAM_SIZE-1)
 #define FPS			60
 #define MAX_PIXELS_PER_SCANLINE	320
 #define MAX_SCANLINES		180
 #define PIXELS			(MAX_PIXELS_PER_SCANLINE*MAX_SCANLINES)
-#define FRAMEBUFFER		0xe0000
-
-#define VRAM_SIZE		0x100000
-#define VRAM_SIZE_MASK		(VRAM_SIZE-1)
+#define FRAMEBUFFER		0x0e0000
 
 /*
- * audio
+ * Audio
  */
 #define SAMPLE_RATE		48000
 #define AUDIO_BUFFER_SIZE	6000.0
 #define SID_CLOCK_SPEED		985248
 
 /*
- * "sort of" C64 colors
+ * Cpu
+ */
+#define CPU_CLOCK_MULTIPLY	4
+
+/*
+ * C64 colors "sort of"
  */
 #define C64_BLACK		0b00000000
 #define C64_WHITE		0b11111111

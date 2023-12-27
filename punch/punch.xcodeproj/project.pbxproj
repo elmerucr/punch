@@ -119,6 +119,7 @@
 		466AC0232AFC29B100ACA0CE /* common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = common.hpp; path = ../../src/common.hpp; sourceTree = "<group>"; };
 		469AE79F2B2E1E5D00EB3B08 /* cpu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cpu.cpp; path = ../../src/cpu.cpp; sourceTree = "<group>"; };
 		469AE7A02B2E1E5D00EB3B08 /* cpu.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cpu.hpp; path = ../../src/cpu.hpp; sourceTree = "<group>"; };
+		46BA60D02B3B76780020C879 /* clocks.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = clocks.hpp; path = ../../src/clocks.hpp; sourceTree = "<group>"; };
 		46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_disassembler.cpp; path = ../../src/MC6809/mc6809_disassembler.cpp; sourceTree = "<group>"; };
 		46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_instructions.cpp; path = ../../src/MC6809/mc6809_instructions.cpp; sourceTree = "<group>"; };
 		46F181562B00E79800E7FDC8 /* mc6809.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mc6809.hpp; path = ../../src/MC6809/mc6809.hpp; sourceTree = "<group>"; };
@@ -217,6 +218,7 @@
 				4614F9F12B2E29F3005C9BE3 /* app.hpp */,
 				4614F9F42B2E2A70005C9BE3 /* blitter.cpp */,
 				4614F9F32B2E2A70005C9BE3 /* blitter.hpp */,
+				46BA60D02B3B76780020C879 /* clocks.hpp */,
 				466AC0232AFC29B100ACA0CE /* common.hpp */,
 				4614F9F62B2E2B76005C9BE3 /* core.cpp */,
 				4614F9F72B2E2B76005C9BE3 /* core.hpp */,
