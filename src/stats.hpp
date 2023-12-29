@@ -31,9 +31,9 @@ private:
 	uint8_t status_bar_framecounter_interval;
 	
 	double cpu_mhz;
-	uint32_t new_cpu_ticks;
+	uint32_t cpu_ticks;
 	uint32_t old_cpu_ticks;
-	uint32_t delta_cpu_ticks;
+	//uint32_t delta_cpu_ticks;
 	double smoothed_cpu_mhz;
     
 	double alpha;                       // exponential smoothing constant
@@ -42,8 +42,8 @@ private:
 	double framerate;
 	double smoothed_framerate;
 
-	double audio_queue_size_bytes;
-	double smoothed_audio_queue_size_bytes;
+	double audio_queue_size_ms;
+	double smoothed_audio_queue_size_ms;
 
 	double core_per_frame;
 	double smoothed_core_per_frame;
@@ -73,22 +73,18 @@ public:
 		start_core_old = start_core;
 	}
 	
-//	inline void start_core_time()
-//	{
-//		start_core = std::chrono::steady_clock::now();
-//		total_sound_time += std::chrono::duration_cast<std::chrono::microseconds>(start_core - start_sound).count();
-//	}
-	
 	inline void start_idle_time()
 	{
 		start_idle = std::chrono::steady_clock::now();
 		total_core_time += std::chrono::duration_cast<std::chrono::microseconds>(start_idle - start_core).count();
 	}
 	
-	inline void set_queued_audio_bytes(double b)
+	inline void set_queued_audio_ms(double b)
 	{
-		audio_queue_size_bytes = b;
+		audio_queue_size_ms = b;
 	}
+	
+	inline double get_smoothed_audio_queue_size_ms() { return smoothed_audio_queue_size_ms; }
 
 	// process calculations on parameters (fps/mhz/buffersize)
 	void process_parameters();

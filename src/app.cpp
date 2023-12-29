@@ -85,19 +85,20 @@ void app_t::run()
 		/*
 		 * Audio: Measure audio_buffer and determine cycles to run
 		 */
-		uint32_t audio_buffer = host->get_queued_audio_size_bytes();
-		stats->set_queued_audio_bytes(audio_buffer);
+		uint32_t audio_buffer_bytes = host->get_queued_audio_size_bytes();
+		stats->set_queued_audio_ms(audio_buffer_bytes / host->get_bytes_per_ms());
 		
-		/*
-		 * Use int32_t, not uint32_t! Adjust to needed buffer size + change to cycles.
-		 */
-		int32_t cycles = SID_CLOCK_SPEED * (AUDIO_BUFFER_SIZE - audio_buffer) / (host->get_bytes_per_ms() * 1000);
-		/*
-		 * Add number of cycles needed for one frame
-		 */
-		cycles += SID_CLOCK_SPEED / FPS;
+//		/*
+//		 * Use int32_t, not uint32_t! Adjust to needed buffer size + change to cycles.
+//		 */
+//		int32_t cycles = SID_CLOCK_SPEED * (AUDIO_BUFFER_SIZE - audio_buffer_bytes) / (host->get_bytes_per_ms() * 1000);
+		int32_t cycles = (SID_CLOCK_SPEED / FPS);
 		
-		//stats->start_core_time();
+		if (audio_buffer_bytes > (AUDIO_BUFFER_SIZE * 1.2)) {
+			cycles -= (SID_CLOCK_SPEED / FPS) / 100;
+		} else if (audio_buffer_bytes < (AUDIO_BUFFER_SIZE * 0.8)) {
+			cycles += (SID_CLOCK_SPEED / FPS) / 100;
+		}
 		
 		if (host->events_process_events() == QUIT_EVENT) running = false;
 		
@@ -120,7 +121,6 @@ void app_t::run()
 				host->update_debugger_texture(&debugger->blitter->vram[FRAMEBUFFER]);
 				break;
 		}
-
 		core->run_blitter(); // run always?
 		host->update_core_texture(&core->blitter->vram[FRAMEBUFFER]);
 		

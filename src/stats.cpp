@@ -28,8 +28,8 @@ void stats_t::reset()
 	status_bar_framecounter = 0;
 	status_bar_framecounter_interval = FPS / 2;
 
-	audio_queue_size_bytes = 0;
-	smoothed_audio_queue_size_bytes = 0;
+	audio_queue_size_ms = 0;
+	smoothed_audio_queue_size_ms = 0;
 	
 	smoothed_framerate = FPS;
 	
@@ -65,14 +65,13 @@ void stats_t::process_parameters()
 		/*
 		 * cpu speed
 		 */
-		new_cpu_ticks = app->core->cpu->clock_ticks();
-		delta_cpu_ticks = new_cpu_ticks - old_cpu_ticks;
-		old_cpu_ticks = new_cpu_ticks;
-		cpu_mhz = (double)delta_cpu_ticks / total_time;
+		cpu_ticks = app->core->cpu->clock_ticks();
+		cpu_mhz = (double)(cpu_ticks - old_cpu_ticks) / total_time;
 		smoothed_cpu_mhz =
 			(alpha_cpu * smoothed_cpu_mhz) +
 			((1.0 - alpha_cpu) * cpu_mhz);
-        
+		old_cpu_ticks = cpu_ticks;
+
 		core_per_frame = total_core_time / framecounter_interval;
 		idle_per_frame = total_idle_time / framecounter_interval;
 		
@@ -84,9 +83,9 @@ void stats_t::process_parameters()
 			(alpha * smoothed_idle_per_frame) +
 			((1.0 - alpha) * idle_per_frame);
 		
-		smoothed_audio_queue_size_bytes =
-			(alpha * smoothed_audio_queue_size_bytes) +
-			((1.0 - alpha) * audio_queue_size_bytes);
+		smoothed_audio_queue_size_ms =
+			(alpha * smoothed_audio_queue_size_ms) +
+			((1.0 - alpha) * audio_queue_size_ms);
 		
 		cpu_percentage = 100 * smoothed_core_per_frame / (smoothed_core_per_frame + smoothed_idle_per_frame);
         
@@ -100,10 +99,10 @@ void stats_t::process_parameters()
 
 		snprintf(statistics_string, 256,
 			"\n  frametime: %5.2f ms     cpu load:%6.2f %%\n"
-			"       core: %5.2f ms  audiobuffer: %5.2f kb\n"
+			"       core: %5.2f ms  audiobuffer: %5.2f ms\n"
 			"        cpu: %5.2f mHz   framerate:%6.2f fps\n",
 			(smoothed_core_per_frame+smoothed_idle_per_frame)/1000, cpu_percentage,
-			smoothed_core_per_frame/1000, smoothed_audio_queue_size_bytes/1024,
+			smoothed_core_per_frame/1000, smoothed_audio_queue_size_ms,
 			smoothed_cpu_mhz, smoothed_framerate);
 	}
 }

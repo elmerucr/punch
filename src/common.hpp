@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    4
-#define PUNCH_BUILD            20231227
+#define PUNCH_BUILD            20231229
 #define PUNCH_YEAR             2023
 
 /*
@@ -30,8 +30,8 @@
 /*
  * Audio
  */
-#define SAMPLE_RATE		48000
-#define AUDIO_BUFFER_SIZE	6000.0
+#define SAMPLE_RATE		44100
+#define AUDIO_BUFFER_SIZE	4000.0
 #define SID_CLOCK_SPEED		985248
 
 /*
