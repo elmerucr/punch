@@ -16,6 +16,11 @@
 #define SOUND_PAGE	0x0c
 #define	ROM_PAGE	0xfe
 
+enum output_states {
+	NORMAL,
+	BREAKPOINT,
+};
+
 class core_t {
 public:
 	core_t(app_t *a);
@@ -24,7 +29,8 @@ public:
 	app_t *app;
 	
 	void reset();
-	uint32_t run(int32_t cycles);
+	
+	enum output_states run(int32_t cycles, int32_t *cycles_done);
 	void run_blitter();
 	
 	uint8_t read8(uint16_t address);
@@ -35,6 +41,8 @@ public:
 	timer_ic *timer;
 	sound_ic *sound;
 	cpu_t *cpu;
+	
+	bool frame_done;
 private:
 	clocks *cpu2sid;
 };

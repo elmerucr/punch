@@ -138,18 +138,21 @@ void debugger_t::redraw()
 	blitter->blit(&bruce, &framebuffer);
 }
 
-void debugger_t::run()
+void debugger_t::run(int32_t *cd)
 {
 	uint8_t symbol = 0;
 	
 	terminal->process_cursor_state();
+	
+	int32_t cycles_done{0};
 	
 	while (app->keyboard->events_waiting()) {
 		terminal->deactivate_cursor();
 		symbol = app->keyboard->pop_event();
 		switch (symbol) {
 			case ASCII_F1:
-				app->core->run(0);
+				app->core->run(0, &cycles_done);
+				*cd += cycles_done;
 				status();
 				prompt();
 				break;
@@ -183,7 +186,7 @@ void debugger_t::run()
 				char command_buffer[256];
 				terminal->get_command(command_buffer, 256);
 				
-				process_command(command_buffer);
+				*cd += process_command(command_buffer);
 				
 //				if (*command_buffer == 'r') {
 //					terminal->printf("\nrrrrr");
@@ -197,8 +200,10 @@ void debugger_t::run()
 	}
 }
 
-void debugger_t::process_command(char *c)
+int32_t debugger_t::process_command(char *c)
 {
+	int32_t cycles_done{0};
+	
 	int cnt = 0;
 	while ((*c == ' ') || (*c == '.')) {
 		c++;
@@ -286,7 +291,9 @@ void debugger_t::process_command(char *c)
 			}
 		}
 	} else if (strcmp(token0, "n") == 0) {
-		app->core->run(0);
+		int32_t cycles{0};
+		app->core->run(0, &cycles);
+		cycles_done += cycles;
 		status();
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
@@ -314,6 +321,8 @@ void debugger_t::process_command(char *c)
 	}
 	
 	if (have_prompt) prompt();
+	
+	return cycles_done;
 }
 
 void debugger_t::prompt()

@@ -16,13 +16,13 @@ public:
 	
 	void redraw();
 	
-	void run();
+	void run(int32_t *cd); // cd = cycles done
 	
 	blitter_ic *blitter;
 	
 	terminal_t *terminal;
 	
-	void process_command(char *c);
+	int32_t process_command(char *c);
 	void prompt();
 	void print_version();
 	void status();

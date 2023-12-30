@@ -96,22 +96,25 @@ void core_t::reset()
 	cpu->reset();
 }
 
-uint32_t core_t::run(int32_t cycles)
+enum output_states core_t::run(int32_t cycles, int32_t *cycles_done)
 {
-	int32_t cycles_done{0};
+	enum output_states output_state = NORMAL;
+	
+	*cycles_done = 0;
 	
 	do {
 		uint8_t cpu_cycles = cpu->execute();
-		
 		uint8_t sid_cycles = cpu2sid->clock(cpu_cycles);
 		
 		timer->run(sid_cycles);
 		sound->run(sid_cycles);
-		cycles_done += sid_cycles;
+		*cycles_done += sid_cycles;
 		
-	} while (((cycles - cycles_done) > 0) && !(cpu->breakpoint()));
+	} while (((cycles - *cycles_done) > 0) && !(cpu->breakpoint()));
 	
-	return cycles_done;
+	if (cpu->breakpoint()) output_state = BREAKPOINT;
+	
+	return output_state;
 }
 
 void core_t::run_blitter()

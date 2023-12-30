@@ -81,6 +81,10 @@ void app_t::run()
 	
 	end_of_frame_time = std::chrono::steady_clock::now();
 	
+	bool start_of_new_frame{true};
+	int32_t frame_cycles{0};
+	int32_t frame_cycles_remaining{0};
+	
 	while (running) {
 		/*
 		 * Audio: Measure audio_buffer and determine cycles to run
@@ -88,35 +92,55 @@ void app_t::run()
 		uint32_t audio_buffer_bytes = host->get_queued_audio_size_bytes();
 		stats->set_queued_audio_ms(audio_buffer_bytes / host->get_bytes_per_ms());
 		
-//		/*
-//		 * Use int32_t, not uint32_t! Adjust to needed buffer size + change to cycles.
-//		 */
-//		int32_t cycles = SID_CLOCK_SPEED * (AUDIO_BUFFER_SIZE - audio_buffer_bytes) / (host->get_bytes_per_ms() * 1000);
-		int32_t cycles = (SID_CLOCK_SPEED / FPS);
+		int32_t audio_cycles = (SID_CLOCK_SPEED / FPS);
 		
 		if (audio_buffer_bytes > (AUDIO_BUFFER_SIZE * 1.2)) {
-			cycles -= (SID_CLOCK_SPEED / FPS) / 100;
+			audio_cycles -= (SID_CLOCK_SPEED / FPS) / 100;
 		} else if (audio_buffer_bytes < (AUDIO_BUFFER_SIZE * 0.8)) {
-			cycles += (SID_CLOCK_SPEED / FPS) / 100;
+			audio_cycles += (SID_CLOCK_SPEED / FPS) / 100;
 		}
+		
+		if (start_of_new_frame) {
+			frame_cycles = frame_cycles_remaining = audio_cycles;
+			start_of_new_frame = false;
+			// raise interrupt here?
+		}
+		
+		/*
+		 * This situation is unlikely but may happen when
+		 * there is a breakpoint just after the start of a frame.
+		 * If this next frame is slightly shorter then adjust
+		 * frame_cycles_left
+		 */
+		if (frame_cycles_remaining > audio_cycles) frame_cycles = frame_cycles_remaining = audio_cycles;
 		
 		if (host->events_process_events() == QUIT_EVENT) running = false;
 		
 		keyboard->process();
 		
-		uint32_t cycles_done{0};
+		int32_t frame_cycles_done{0};
 		
 		switch (current_mode) {
 			case RUN_MODE:
-				cycles_done = core->run(cycles);
-//				if (cycles > 0) {
-//					core->sound->run(cycles);
-//				}
-				if (core->cpu->breakpoint()) switch_mode();
+				switch (core->run(frame_cycles_remaining, &frame_cycles_done)) {
+					case NORMAL:
+						// frame is finished
+						// --> Have interrupt next round!
+						frame_cycles_remaining -= frame_cycles_done;
+						start_of_new_frame = true;
+						break;
+					case BREAKPOINT:
+						// frame is not finished!
+						switch_mode();
+						core->sound->run(audio_cycles - frame_cycles_done);
+						frame_cycles_remaining -= frame_cycles_done;
+						printf("%i cycles left of %i\n", frame_cycles_remaining, frame_cycles);
+						break;
+				}
 				break;
 			case DEBUG_MODE:
-				core->sound->run(cycles);
-				debugger->run();
+				debugger->run(&frame_cycles_done);
+				core->sound->run(audio_cycles - frame_cycles_done);
 				debugger->redraw();
 				host->update_debugger_texture(&debugger->blitter->vram[FRAMEBUFFER]);
 				break;
@@ -124,7 +148,7 @@ void app_t::run()
 		core->run_blitter(); // run always?
 		host->update_core_texture(&core->blitter->vram[FRAMEBUFFER]);
 		
-		printf("%s", stats->summary());
+		//printf("%s", stats->summary());
 		
 		// Time measurement
 		stats->start_idle_time();
