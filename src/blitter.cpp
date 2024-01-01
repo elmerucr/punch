@@ -1,3 +1,10 @@
+/*
+ * blitter.cpp
+ * punch
+ *
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
+ */
+
 #include "blitter.hpp"
 #include "common.hpp"
 #include <cstdio>
@@ -130,33 +137,33 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 			 * Color selection
 			 * TODO: Can this be sped up?
 			 */
-			switch (src->flags_0 & 0b111) {
-				case 0b000:
-				case 0b100:
+			switch (src->flags_0 & 0b1101) {
+				case 0b0000:
+				case 0b1000:
 					vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 					break;
-				case 0b010:
-				case 0b110:
+				case 0b0100:
+				case 0b1100:
 					vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
 					break;
-				case 0b001:
+				case 0b0001:
 					if (px != src->keycolor) {
 						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 					}
 					break;
-				case 0b011:
+				case 0b0101:
 					if (px != src->keycolor) {
 						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
 					}
 					break;
-				case 0b101:
+				case 0b1001:
 					if (px != src->keycolor) {
 						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 					} else {
 						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
 					}
 					break;
-				case 0b111:
+				case 0b1101:
 					if (px != src->keycolor) {
 						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
 					} else {

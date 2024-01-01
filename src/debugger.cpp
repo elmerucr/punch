@@ -1,3 +1,10 @@
+/*
+ * debugger.cpp
+ * punch
+ *
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
+ */
+
 #include "debugger.hpp"
 #include "common.hpp"
 #include <cstdio>
@@ -51,7 +58,7 @@ debugger_t::debugger_t(app_t *a)
 	framebuffer.h = MAX_SCANLINES;
 	framebuffer.bg_col = 0b00000000;
 	
-	blitter->font.flags_0 = 0b01000111;
+	blitter->font.flags_0 = 0b01001101;
 	blitter->font.flags_1 = 0b00000000;
 	blitter->font.keycolor = C64_BLUE;
 

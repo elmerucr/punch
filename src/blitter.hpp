@@ -1,3 +1,10 @@
+/*
+ * blitter.hpp
+ * punch
+ *
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
+ */
+
 #ifndef BLITTER_HPP
 #define BLITTER_HPP
 
@@ -17,10 +24,10 @@ struct surface_t {
 	 * Color related
 	 *
 	 * 7 6 5 4 3 2 1 0
-	 * | |       | | |
-	 * | |       | | +-- Keycolor (0 = off, 1 = on)
-	 * | |       | +---- Use foreground color (0 = off, 1 = on)
-	 * | |       +------ Use background color (0 = off, 1 = on)
+	 * | |     | |   |
+	 * | |     | |   +-- Keycolor (0 = off, 1 = on)
+	 * | |     | +------ Use foreground color (0 = off, 1 = on)
+	 * | |     +-------- Use background color (0 = off, 1 = on)
 	 * | |
 	 * +-+-------------- Rom font selection (00 = off, 01 = tiny_font, 10... 11...)
 	 *

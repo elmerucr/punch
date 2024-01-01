@@ -1,3 +1,10 @@
+/*
+ * debugger.hpp
+ * punch
+ *
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
+ */
+
 #ifndef DEBUGGER_HPP
 #define DEBUGGER_HPP
 
