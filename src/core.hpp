@@ -1,3 +1,10 @@
+/*
+ * core.hpp
+ * punch
+ *
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
+ */
+
 #ifndef CORE_HPP
 #define CORE_HPP
 
@@ -11,7 +18,7 @@
 #include "clocks.hpp"
 
 // core / cia / vram inspect
-#define	BLITTER_PAGE	0x08
+#define	BLITTER_PAGE	0x04
 #define	TIMER_PAGE	0x0a
 #define SOUND_PAGE	0x0c
 #define	ROM_PAGE	0xfe

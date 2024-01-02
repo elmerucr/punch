@@ -2,7 +2,7 @@
  * app.hpp
  * punch
  *
- * Copyright © 2023 elmerucr. All rights reserved.
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
  */
 
 #ifndef APP_HPP

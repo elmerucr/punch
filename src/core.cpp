@@ -1,3 +1,10 @@
+/*
+ * core.cpp
+ * punch
+ *
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
+ */
+
 #include "common.hpp"
 #include "core.hpp"
 
@@ -51,6 +58,9 @@ uint8_t core_t::read8(uint16_t address)
 		case BLITTER_PAGE:
 		case BLITTER_PAGE+1:
 			return blitter->io_read8(address & 0x1ff);
+		case BLITTER_PAGE+2:
+		case BLITTER_PAGE+3:
+			return blitter->io_palette_read8(address);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
 		case SOUND_PAGE:
@@ -73,6 +83,10 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case BLITTER_PAGE:
 		case BLITTER_PAGE+1:
 			blitter->io_write8(address & 0x1ff, value);
+			break;
+		case BLITTER_PAGE+2:
+		case BLITTER_PAGE+3:
+			blitter->io_palette_write8(address, value);
 			break;
 		case TIMER_PAGE:
 			timer->io_write_byte(address &0xff, value);

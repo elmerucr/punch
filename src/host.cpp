@@ -1,3 +1,9 @@
+/*
+ * host.cpp
+ * punch
+ *
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
+ */
 
 #include "host.hpp"
 #include "core.hpp"
@@ -235,14 +241,14 @@ void host_t::video_stop()
 ////	}
 //}
 
-void host_t::update_core_texture(uint8_t *core)
+void host_t::update_core_texture(uint16_t *core)
 {
-	SDL_UpdateTexture(core_texture, NULL, core, MAX_PIXELS_PER_SCANLINE * sizeof(uint8_t));
+	SDL_UpdateTexture(core_texture, NULL, core, MAX_PIXELS_PER_SCANLINE * sizeof(uint16_t));
 }
 
-void host_t::update_debugger_texture(uint8_t *debugger)
+void host_t::update_debugger_texture(uint16_t *debugger)
 {
-	SDL_UpdateTexture(debugger_texture, NULL, debugger, MAX_PIXELS_PER_SCANLINE * sizeof(uint8_t));
+	SDL_UpdateTexture(debugger_texture, NULL, debugger, MAX_PIXELS_PER_SCANLINE * sizeof(uint16_t));
 }
 
 void host_t::update_screen()
@@ -303,7 +309,7 @@ void host_t::create_core_texture(bool linear_filtering)
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
 	
-	core_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_RGB332,
+	core_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444,
 				    SDL_TEXTUREACCESS_STREAMING,
 				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_ADD);
@@ -319,7 +325,7 @@ void host_t::create_debugger_texture(bool linear_filtering)
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
 
-	debugger_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_RGB332,
+	debugger_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444,
 				    SDL_TEXTUREACCESS_STREAMING,
 				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetTextureBlendMode(debugger_texture, SDL_BLENDMODE_ADD);

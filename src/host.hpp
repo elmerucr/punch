@@ -1,3 +1,10 @@
+/*
+ * host.hpp
+ * punch
+ *
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
+ */
+
 #ifndef HOST_HPP
 #define HOST_HPP
 
@@ -149,8 +156,8 @@ public:
 	/*
 	 * Video related
 	 */
-	void update_core_texture(uint8_t *core);
-	void update_debugger_texture(uint8_t *debugger);
+	void update_core_texture(uint16_t *core);
+	void update_debugger_texture(uint16_t *debugger);
 	void update_screen();
 //	void update_title();
 	void video_increase_window_size();

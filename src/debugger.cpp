@@ -258,7 +258,8 @@ int32_t debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "exit") == 0) {
 		terminal->printf("\nexit punch (y/n)");
 		redraw();
-		app->host->update_debugger_texture(&blitter->vram[FRAMEBUFFER]);
+		blitter->update_framebuffer();
+		app->host->update_debugger_texture(blitter->framebuffer);
 		app->host->update_screen();
 		if (app->host->events_yes_no()) {
 			app->running = false;
@@ -305,7 +306,8 @@ int32_t debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
 		redraw();
-		app->host->update_debugger_texture(&blitter->vram[FRAMEBUFFER]);
+		blitter->update_framebuffer();
+		app->host->update_debugger_texture(blitter->framebuffer);
 		app->host->update_screen();
 		if (app->host->events_yes_no()) {
 			app->core->reset();

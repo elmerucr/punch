@@ -2,7 +2,7 @@
  * app.cpp
  * punch
  *
- * Copyright © 2023 elmerucr. All rights reserved.
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
  */
 
 #include "app.hpp"
@@ -142,11 +142,15 @@ void app_t::run()
 				debugger->run(&frame_cycles_done);
 				core->sound->run(audio_cycles - frame_cycles_done);
 				debugger->redraw();
-				host->update_debugger_texture(&debugger->blitter->vram[FRAMEBUFFER]);
+				debugger->blitter->update_framebuffer();
+				host->update_debugger_texture(debugger->blitter->framebuffer);
 				break;
 		}
 		core->run_blitter(); // run always?
-		host->update_core_texture(&core->blitter->vram[FRAMEBUFFER]);
+		
+		core->blitter->update_framebuffer();
+		
+		host->update_core_texture(core->blitter->framebuffer);
 		
 		//printf("%s", stats->summary());
 		

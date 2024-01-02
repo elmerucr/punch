@@ -85,6 +85,22 @@ public:
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
 	
+	uint8_t io_palette_read8(uint16_t address) {
+		if (address & 0b1) {
+			return palette[(address & 0x1ff) >> 1] & 0xff;
+		} else {
+			return (palette[(address & 0x1ff) >> 1] & 0xff00) >> 8;
+		}
+	}
+	
+	void io_palette_write8(uint16_t address, uint8_t value) {
+		if (address & 0b1) {
+			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0xff00) | value;
+		} else {
+			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0x00ff) | (value << 8);
+		}
+	}
+	
 	/*
 	 * all return number of pixels changed
 	 */
@@ -94,11 +110,15 @@ public:
 	uint32_t clear_surface(const surface_t *s);
 	uint32_t clear_surface(const uint8_t s);
 	
+	void update_framebuffer();
+	
 //	uint32_t rectangle();
 //	uint32_t line();
 //	uint32_t circle();
 	
 	uint8_t *vram;
+	uint16_t *framebuffer;
+	uint16_t *palette;
 private:
 	uint8_t *font_4x6;
 	void init_font_4x6();
