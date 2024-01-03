@@ -5,9 +5,9 @@
 #include <cstdarg>
 #include <cstring>
 
-terminal_t::terminal_t(app_t *a, tile_surface_t *t, blitter_ic *b)
+terminal_t::terminal_t(system_t *s, tile_surface_t *t, blitter_ic *b)
 {
-	app = a;
+	system = s;
 	ts = t;
 	blitter = b;
 	characters = ts->columns * ts->rows;
@@ -171,7 +171,7 @@ void terminal_t::cursor_up()
 				break;
 			case MEMORY:
 				add_top_row();
-				app->debugger->memory_dump((address - 8) & 0xffff);
+				system->debugger->memory_dump((address - 8) & 0xffff);
 				break;
 		}
 	}
@@ -194,7 +194,7 @@ void terminal_t::cursor_down()
 				break;
 			case MEMORY:
 				add_bottom_row();
-				app->debugger->memory_dump((address + 8) & 0xffff);
+				system->debugger->memory_dump((address + 8) & 0xffff);
 				break;
 		}
 	}
@@ -272,7 +272,7 @@ enum output_type terminal_t::check_output(bool top_down, uint32_t *address)
 				potential_address[j] = blitter->vram[(ts->base + i + 2 + j)];
 			}
 			potential_address[4] = 0;
-			app->debugger->hex_string_to_int(potential_address, address);
+			system->debugger->hex_string_to_int(potential_address, address);
 			if (top_down) break;
 		}
 	}

@@ -10,9 +10,9 @@
 
 extern uint8_t rom[];
 
-core_t::core_t(app_t *a)
+core_t::core_t(system_t *s)
 {
-	app = a;
+	system = s;
 	
 	blitter = new blitter_ic();
 
@@ -27,7 +27,7 @@ core_t::core_t(app_t *a)
 	blitter->surface[7].h = MAX_SCANLINES;
 	blitter->surface[7].bg_col = 0b00000101;
 
-	cpu = new cpu_t(app);
+	cpu = new cpu_t(system);
 	
 	exceptions = new exceptions_ic();
 	cpu->assign_nmi_line(&exceptions->nmi_output_pin);
@@ -35,7 +35,7 @@ core_t::core_t(app_t *a)
 	
 	timer = new timer_ic(exceptions);
 	
-	sound = new sound_ic(app);
+	sound = new sound_ic(system);
 	
 	cpu2sid = new clocks(CPU_CLOCK_MULTIPLY, 1);
 }
@@ -61,6 +61,8 @@ uint8_t core_t::read8(uint16_t address)
 		case BLITTER_PAGE+2:
 		case BLITTER_PAGE+3:
 			return blitter->io_palette_read8(address);
+		case SYSTEM_PAGE:
+			return system->io_read8(address);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
 		case SOUND_PAGE:
@@ -87,6 +89,9 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case BLITTER_PAGE+2:
 		case BLITTER_PAGE+3:
 			blitter->io_palette_write8(address, value);
+			break;
+		case SYSTEM_PAGE:
+			system->io_write8(address, value);
 			break;
 		case TIMER_PAGE:
 			timer->io_write_byte(address &0xff, value);

@@ -1,20 +1,20 @@
 /*
- * app.cpp
+ * system.cpp
  * punch
  *
  * Copyright © 2023-2024 elmerucr. All rights reserved.
  */
 
-#include "app.hpp"
+#include "system.hpp"
 #include "host.hpp"
 #include "core.hpp"
 #include "keyboard.hpp"
 #include "debugger.hpp"
 #include "stats.hpp"
 
-app_t::app_t()
+system_t::system_t()
 {
-	app_start_time = std::chrono::steady_clock::now();
+	system_start_time = std::chrono::steady_clock::now();
 	
 	printf("punch v%i.%i.%i (C)%i elmerucr\n",
 	       PUNCH_MAJOR_VERSION,
@@ -38,7 +38,7 @@ app_t::app_t()
 	switch_to_debug_mode();
 }
 
-app_t::~app_t()
+system_t::~system_t()
 {
 	delete stats;
 	delete debugger;
@@ -46,10 +46,10 @@ app_t::~app_t()
 	delete core;
 	delete host;
 	
-	printf("[punch] %.2f seconds running time\n", (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - app_start_time).count() / 1000);
+	printf("[punch] %.2f seconds running time\n", (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - system_start_time).count() / 1000);
 }
 
-void app_t::switch_mode()
+void system_t::switch_mode()
 {
 	if (current_mode == RUN_MODE) {
 		debugger->status();
@@ -60,20 +60,20 @@ void app_t::switch_mode()
 	}
 }
 
-void app_t::switch_to_debug_mode()
+void system_t::switch_to_debug_mode()
 {
 	debugger->prompt();
 	debugger->terminal->activate_cursor();
 	current_mode = DEBUG_MODE;
 }
 
-void app_t::switch_to_run_mode()
+void system_t::switch_to_run_mode()
 {
 	debugger->terminal->deactivate_cursor();
 	current_mode = RUN_MODE;
 }
 
-void app_t::run()
+void system_t::run()
 {
 	running = true;
 	
@@ -186,4 +186,20 @@ void app_t::run()
 		
 		stats->process_parameters();
 	}
+}
+
+uint8_t system_t::io_read8(uint16_t address)
+{
+	switch (address & 0xf) {
+		case 0x0:
+			// status register
+			return irq_line ? 0 : 1;
+		default:
+			return 0xba;
+	}
+}
+
+void system_t::io_write8(uint16_t address, uint8_t value)
+{
+	//
 }

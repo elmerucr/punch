@@ -2,8 +2,8 @@
  * rom.cpp
  * rom image for punch
  *
- * Copyright (c)2023 elmerucr. All rights reserved.
- * Tue Jan  2 16:52:12 2024
+ * Copyright (C)2023-2024 elmerucr. All rights reserved.
+ * Wed Jan  3 14:10:52 2024
  */
 
 #include <cstdint>

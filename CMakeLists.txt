@@ -17,4 +17,4 @@ add_subdirectory(src/)
 
 add_executable(punch src/main.cpp)
 
-target_link_libraries(punch app ${SDL2_LIBRARIES})
+target_link_libraries(punch system ${SDL2_LIBRARIES})

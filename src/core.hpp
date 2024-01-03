@@ -9,7 +9,7 @@
 #define CORE_HPP
 
 #include <cstdint>
-#include "app.hpp"
+#include "system.hpp"
 #include "blitter.hpp"
 #include "cpu.hpp"
 #include "exceptions.hpp"
@@ -19,6 +19,7 @@
 
 // core / cia / vram inspect
 #define	BLITTER_PAGE	0x04
+#define SYSTEM_PAGE	0x08
 #define	TIMER_PAGE	0x0a
 #define SOUND_PAGE	0x0c
 #define	ROM_PAGE	0xfe
@@ -30,10 +31,10 @@ enum output_states {
 
 class core_t {
 public:
-	core_t(app_t *a);
+	core_t(system_t *s);
 	~core_t();
 	
-	app_t *app;
+	system_t *system;
 	
 	void reset();
 	

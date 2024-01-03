@@ -379,8 +379,6 @@ void analog_ic::pitch_bend_reset()
 	pitch_samples = pitch_samples_remaining =
 		((SAMPLE_RATE * pitch_bend_duration) / 10000);
 	pitch_bend_phase = pitch_bend_phase_delta = 0;
-	
-	//printf("E64::analog_ic::pitch_bend_reset(); %u samples\n", pitch_samples);
 }
 
 double analog_ic::pitch_bend()

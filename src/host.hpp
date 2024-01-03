@@ -10,7 +10,7 @@
 
 #include <SDL2/SDL.h>
 #include "common.hpp"
-#include "app.hpp"
+#include "system.hpp"
 
 enum events_output_state {
 	QUIT_EVENT = -1,
@@ -140,10 +140,10 @@ private:
 	const uint8_t *sdl_keyboard_state;
 	
 public:
-	host_t(app_t *a);
+	host_t(system_t *s);
 	~host_t();
 	
-	app_t *app;
+	system_t *system;
 	
 	char *sdl_preference_path;
 	

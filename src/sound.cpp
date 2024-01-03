@@ -1,17 +1,17 @@
 /*
  * sound.cpp
- * E64
+ * punch
  *
- * Copyright © 2019-2023 elmerucr. All rights reserved.
+ * Copyright © 2019-2024 elmerucr. All rights reserved.
  */
 
 #include "sound.hpp"
 #include "common.hpp"
 #include "host.hpp"
 
-sound_ic::sound_ic(app_t *a) : analog0(0), analog1(1), analog2(2), analog3(3)
+sound_ic::sound_ic(system_t *s) : analog0(0), analog1(1), analog2(2), analog3(3)
 {
-	app = a;
+	system = s;
 	/*
 	 * Remapping SID registers, rewiring necessary to have big endian
 	 * support and even addresses for word access.
@@ -302,7 +302,7 @@ void sound_ic::run(uint32_t number_of_cycles)
 		//settings->audio_record_push_sample(sample_buffer_stereo[(2 * i) + 1]);
 	}
 
-	app->host->queue_audio((void *)sample_buffer_stereo, 2 * n * app->host->get_bytes_per_sample());
+	system->host->queue_audio((void *)sample_buffer_stereo, 2 * n * system->host->get_bytes_per_sample());
 }
 
 void sound_ic::reset()

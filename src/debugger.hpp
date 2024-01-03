@@ -8,7 +8,7 @@
 #ifndef DEBUGGER_HPP
 #define DEBUGGER_HPP
 
-#include "app.hpp"
+#include "system.hpp"
 #include "blitter.hpp"
 #include "core.hpp"
 #include "keyboard.hpp"
@@ -16,10 +16,10 @@
 
 class debugger_t {
 public:
-	debugger_t(app_t *a);
+	debugger_t(system_t *s);
 	~debugger_t();
 	
-	app_t *app;
+	system_t *system;
 	
 	void redraw();
 	

@@ -1,12 +1,12 @@
 /*
- * app.hpp
+ * system.hpp
  * punch
  *
  * Copyright © 2023-2024 elmerucr. All rights reserved.
  */
 
-#ifndef APP_HPP
-#define APP_HPP
+#ifndef SYSTEM_HPP
+#define SYSTEM_HPP
 
 #include <chrono>
 #include <thread>
@@ -22,13 +22,15 @@ class keyboard_t;
 class debugger_t;
 class stats_t;
 
-class app_t {
+class system_t {
 private:
-	std::chrono::time_point<std::chrono::steady_clock> app_start_time;
+	std::chrono::time_point<std::chrono::steady_clock> system_start_time;
 	std::chrono::time_point<std::chrono::steady_clock> end_of_frame_time;
+	
+	bool irq_line{true};
 public:
-	app_t();
-	~app_t();
+	system_t();
+	~system_t();
 	
 	host_t *host;
 	core_t *core;
@@ -44,6 +46,9 @@ public:
 	void run();
 	
 	bool running;
+	
+	uint8_t io_read8(uint16_t address);
+	void io_write8(uint16_t address, uint8_t value);
 };
 
 #endif

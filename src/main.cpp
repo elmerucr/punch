@@ -2,15 +2,15 @@
  * main.cpp
  * punch
  *
- * Copyright © 2023 elmerucr. All rights reserved.
+ * Copyright © 2023-2024 elmerucr. All rights reserved.
  */
 
-#include "app.hpp"
+#include "system.hpp"
 
 int main(int argc, char **argv)
 {
-	app_t *app = new app_t();
-	app->run();
-	delete app;
+	system_t *system = new system_t();
+	system->run();
+	delete system;
 	return 0;
 }

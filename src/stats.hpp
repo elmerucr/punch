@@ -7,7 +7,7 @@
  
 #include <cstdint>
 #include <chrono>
-#include "app.hpp"
+#include "system.hpp"
 
 #ifndef STATS_HPP
 #define STATS_HPP
@@ -54,11 +54,11 @@ private:
     
 	char statistics_string[256];
 	
-	app_t *app;
+	system_t *system;
     
 public:
-	stats_t(app_t *a) {
-		app = a;
+	stats_t(system_t *s) {
+		system = s;
 	}
 	
 	void reset();

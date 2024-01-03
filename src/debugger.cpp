@@ -41,11 +41,11 @@ bool debugger_t::hex_string_to_int(const char *temp_string, uint32_t *return_val
 	return true;
 }
 
-debugger_t::debugger_t(app_t *a)
+debugger_t::debugger_t(system_t *s)
 {
-	app = a;
+	system = s;
 	
-	irq_no = app->core->exceptions->connect_device("debugger");
+	irq_no = system->core->exceptions->connect_device("debugger");
 	
 	//core = c;
 	//keyboard = k;
@@ -68,7 +68,7 @@ debugger_t::debugger_t(app_t *a)
 	character_screen.x = 0;
 	character_screen.y = 0;
 	
-	terminal = new terminal_t(app, &character_screen, blitter);
+	terminal = new terminal_t(system, &character_screen, blitter);
 	terminal->fg_color = fg;
 	terminal->bg_color = bg;
 	terminal->clear();
@@ -104,7 +104,7 @@ void debugger_t::print_version()
 			terminal->putsymbol(symbol[i]);
 		}
 	}
-	terminal->printf("\npunch v%i.%i.%i (C)%i elmerucr",
+	terminal->printf("\npunch v%i.%i.%i (C)2023-%i elmerucr",
 	       PUNCH_MAJOR_VERSION,
 	       PUNCH_MINOR_VERSION,
 	       PUNCH_BUILD, PUNCH_YEAR);
@@ -153,12 +153,12 @@ void debugger_t::run(int32_t *cd)
 	
 	int32_t cycles_done{0};
 	
-	while (app->keyboard->events_waiting()) {
+	while (system->keyboard->events_waiting()) {
 		terminal->deactivate_cursor();
-		symbol = app->keyboard->pop_event();
+		symbol = system->keyboard->pop_event();
 		switch (symbol) {
 			case ASCII_F1:
-				app->core->run(0, &cycles_done);
+				system->core->run(0, &cycles_done);
 				*cd += cycles_done;
 				status();
 				prompt();
@@ -170,8 +170,8 @@ void debugger_t::run(int32_t *cd)
 			case ASCII_F3:
 				terminal->deactivate_cursor();
 				terminal->printf("run");
-				app->switch_to_run_mode();
-				app->host->events_wait_until_key_released(SDLK_F3);
+				system->switch_to_run_mode();
+				system->host->events_wait_until_key_released(SDLK_F3);
 				break;
 			case ASCII_CURSOR_LEFT:
 				terminal->cursor_left();
@@ -233,7 +233,7 @@ int32_t debugger_t::process_command(char *c)
 		if (token1 == NULL) {
 			terminal->printf("\nbreakpoints:");
 			for (int i=0; i<65536; i++) {
-				if (app->core->cpu->breakpoint_array[i]) {
+				if (system->core->cpu->breakpoint_array[i]) {
 					breakpoints_present = true;
 					terminal->printf("\n$%04x", i);
 				}
@@ -245,8 +245,8 @@ int32_t debugger_t::process_command(char *c)
 				terminal->printf("\nerror: '%s' is not a hex number", token1);
 			} else {
 				address &= 0xffff;
-				app->core->cpu->toggle_breakpoint(address);
-				if (app->core->cpu->breakpoint_array[address]) {
+				system->core->cpu->toggle_breakpoint(address);
+				if (system->core->cpu->breakpoint_array[address]) {
 					terminal->printf("\nbreakpoint set at $%04x", address);
 				} else {
 					terminal->printf("\nbreakpoint removed at $%04x", address);
@@ -259,17 +259,17 @@ int32_t debugger_t::process_command(char *c)
 		terminal->printf("\nexit punch (y/n)");
 		redraw();
 		blitter->update_framebuffer();
-		app->host->update_debugger_texture(blitter->framebuffer);
-		app->host->update_screen();
-		if (app->host->events_yes_no()) {
-			app->running = false;
-			app->host->events_wait_until_key_released(SDLK_y);
+		system->host->update_debugger_texture(blitter->framebuffer);
+		system->host->update_screen();
+		if (system->host->events_yes_no()) {
+			system->running = false;
+			system->host->events_wait_until_key_released(SDLK_y);
 			have_prompt = false;
 		} else {
-			app->host->events_wait_until_key_released(SDLK_n);
+			system->host->events_wait_until_key_released(SDLK_n);
 		}
 	} else if (strcmp(token0, "irq") == 0) {
-		app->core->exceptions->toggle(irq_no);
+		system->core->exceptions->toggle(irq_no);
 		status();
 	} else if (strcmp(token0, "m") == 0) {
 		have_prompt = false;
@@ -278,7 +278,7 @@ int32_t debugger_t::process_command(char *c)
 		uint8_t lines_remaining = terminal->lines_remaining();
 		if (lines_remaining == 0) lines_remaining = 1;
 		
-		uint32_t temp_pc = app->core->cpu->get_pc();
+		uint32_t temp_pc = system->core->cpu->get_pc();
 		
 		if (token1 == NULL) {
 			for (int i=0; i<lines_remaining; i++) {
@@ -300,25 +300,25 @@ int32_t debugger_t::process_command(char *c)
 		}
 	} else if (strcmp(token0, "n") == 0) {
 		int32_t cycles{0};
-		app->core->run(0, &cycles);
+		system->core->run(0, &cycles);
 		cycles_done += cycles;
 		status();
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
 		redraw();
 		blitter->update_framebuffer();
-		app->host->update_debugger_texture(blitter->framebuffer);
-		app->host->update_screen();
-		if (app->host->events_yes_no()) {
-			app->core->reset();
-			app->host->events_wait_until_key_released(SDLK_y);
+		system->host->update_debugger_texture(blitter->framebuffer);
+		system->host->update_screen();
+		if (system->host->events_yes_no()) {
+			system->core->reset();
+			system->host->events_wait_until_key_released(SDLK_y);
 		} else {
-			app->host->events_wait_until_key_released(SDLK_n);
+			system->host->events_wait_until_key_released(SDLK_n);
 		}
 	} else if (strcmp(token0, "run") == 0) {
 		have_prompt = false;
-		app->switch_to_run_mode();
-		app->host->events_wait_until_key_released(SDLK_RETURN);
+		system->switch_to_run_mode();
+		system->host->events_wait_until_key_released(SDLK_RETURN);
 	} else if (strcmp(token0, "s") == 0) {
 		status();
 	} else if (strcmp(token0, "ver") == 0) {
@@ -342,20 +342,20 @@ void debugger_t::prompt()
 void debugger_t::status()
 {
 	terminal->clear();
-	app->core->cpu->status(text_buffer, 2048);
+	system->core->cpu->status(text_buffer, 2048);
 	terminal->printf("%s\n", text_buffer);
-	uint16_t pc = app->core->cpu->get_pc();
+	uint16_t pc = system->core->cpu->get_pc();
 	for (int i=0; i<8; i++) {
-		if (app->core->cpu->breakpoint_array[pc]) {
+		if (system->core->cpu->breakpoint_array[pc]) {
 			terminal->fg_color = fg_acc;
 		}
-		pc += app->core->cpu->disassemble_instruction(text_buffer, pc);
+		pc += system->core->cpu->disassemble_instruction(text_buffer, pc);
 		terminal->printf("\n%s", text_buffer);
 		terminal->fg_color = fg;
 	}
-	app->core->cpu->stacks(text_buffer, 2048, 8);
+	system->core->cpu->stacks(text_buffer, 2048, 8);
 	terminal->printf("\n\n%s", text_buffer);
-	app->core->exceptions->status(text_buffer, 2048);
+	system->core->exceptions->status(text_buffer, 2048);
 	terminal->printf("\n\n%s", text_buffer);
 }
 
@@ -366,7 +366,7 @@ void debugger_t::memory_dump(uint16_t address)
 	uint32_t temp_address = address;
 	terminal->printf("\r.:%04x ", temp_address);
 	for (int i=0; i<8; i++) {
-		terminal->printf("%02x ", app->core->read8(temp_address));
+		terminal->printf("%02x ", system->core->read8(temp_address));
 		temp_address++;
 		temp_address &= 0xffff;
 	}
@@ -375,7 +375,7 @@ void debugger_t::memory_dump(uint16_t address)
 	terminal->bg_color = bg_acc;
 
 	for (int i=0; i<8; i++) {
-		uint8_t temp_byte = app->core->read8(temp_address);
+		uint8_t temp_byte = system->core->read8(temp_address);
 		terminal->putsymbol(temp_byte);
 		temp_address++;
 		temp_address &= 0xffff;
@@ -458,14 +458,14 @@ void debugger_t::enter_memory_line(char *buffer)
 		arg6 &= 0xff;
 		arg7 &= 0xff;
 
-		app->core->write8(address, (uint8_t)arg0); address +=1; address &= 0xffff;
-		app->core->write8(address, (uint8_t)arg1); address +=1; address &= 0xffff;
-		app->core->write8(address, (uint8_t)arg2); address +=1; address &= 0xffff;
-		app->core->write8(address, (uint8_t)arg3); address +=1; address &= 0xffff;
-		app->core->write8(address, (uint8_t)arg4); address +=1; address &= 0xffff;
-		app->core->write8(address, (uint8_t)arg5); address +=1; address &= 0xffff;
-		app->core->write8(address, (uint8_t)arg6); address +=1; address &= 0xffff;
-		app->core->write8(address, (uint8_t)arg7); address +=1; address &= 0xffff;
+		system->core->write8(address, (uint8_t)arg0); address +=1; address &= 0xffff;
+		system->core->write8(address, (uint8_t)arg1); address +=1; address &= 0xffff;
+		system->core->write8(address, (uint8_t)arg2); address +=1; address &= 0xffff;
+		system->core->write8(address, (uint8_t)arg3); address +=1; address &= 0xffff;
+		system->core->write8(address, (uint8_t)arg4); address +=1; address &= 0xffff;
+		system->core->write8(address, (uint8_t)arg5); address +=1; address &= 0xffff;
+		system->core->write8(address, (uint8_t)arg6); address +=1; address &= 0xffff;
+		system->core->write8(address, (uint8_t)arg7); address +=1; address &= 0xffff;
 
 		terminal->putchar('\r');
 

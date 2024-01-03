@@ -34,7 +34,7 @@ void stats_t::reset()
 	smoothed_framerate = FPS;
 	
 	smoothed_cpu_mhz = CPU_CLOCK_MULTIPLY*SID_CLOCK_SPEED/(1000*1000);
-	old_cpu_ticks = app->core->cpu->clock_ticks();
+	old_cpu_ticks = system->core->cpu->clock_ticks();
 	
 	smoothed_core_per_frame = 1000000 / (FPS * 4);
 	smoothed_idle_per_frame = 1000000 / (FPS * 4);
@@ -65,7 +65,7 @@ void stats_t::process_parameters()
 		/*
 		 * cpu speed
 		 */
-		cpu_ticks = app->core->cpu->clock_ticks();
+		cpu_ticks = system->core->cpu->clock_ticks();
 		cpu_mhz = (double)(cpu_ticks - old_cpu_ticks) / total_time;
 		smoothed_cpu_mhz =
 			(alpha_cpu * smoothed_cpu_mhz) +

@@ -1,7 +1,7 @@
 #ifndef TERMINAL_HPP
 #define TERMINAL_HPP
 
-#include "app.hpp"
+#include "system.hpp"
 #include "blitter.hpp"
 
 enum output_type {
@@ -11,7 +11,7 @@ enum output_type {
 
 class terminal_t {
 public:
-	terminal_t(app_t *a, tile_surface_t *t, blitter_ic *b);
+	terminal_t(system_t *s, tile_surface_t *t, blitter_ic *b);
 	
 	void clear();
 	void putsymbol_at_cursor(char symbol);
@@ -42,7 +42,7 @@ public:
 	uint8_t fg_color{0b00110100};
 	uint8_t bg_color{0b00000000};
 private:
-	app_t *app;
+	system_t *system;
 	tile_surface_t *ts;
 	blitter_ic *blitter;
 	uint16_t characters;

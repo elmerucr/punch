@@ -11,9 +11,9 @@
 #include <thread>
 #include <chrono>
 
-host_t::host_t(app_t *a)
+host_t::host_t(system_t *s)
 {
-	app = a;
+	system = s;
 	
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
@@ -177,10 +177,10 @@ void host_t::video_init()
 	 */
 	printf("[SDL] Display refresh rate of current display is %iHz\n", dm.refresh_rate);
 	if (dm.refresh_rate == FPS) {
-		printf("[SDL] Display: this is equal to the FPS of E64, trying for vsync\n");
+		printf("[SDL] Display: this is equal to the FPS of punch, trying for vsync\n");
 		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	} else {
-		printf("[SDL] Display: this differs from the FPS of E64, going for software FPS\n");
+		printf("[SDL] Display: this differs from the FPS of punch, going for software FPS\n");
 		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	}
 
@@ -228,19 +228,6 @@ void host_t::video_stop()
 	SDL_DestroyWindow(video_window);
 }
 
-//void host_t::update_title()
-//{
-////	if (machine.mode == E64::PAUSED) {
-////		SDL_SetWindowTitle(window, "E64 Debug Mode");
-////		// TODO: ?
-////		//SDL_SetWindowIcon(SDL_Window *window, SDL_Surface *icon);
-////	} else {
-//		SDL_SetWindowTitle(video_window, "E64");
-////		// TODO: ?
-////		//SDL_SetWindowIcon(SDL_Window *window, SDL_Surface *icon);
-////	}
-//}
-
 void host_t::update_core_texture(uint16_t *core)
 {
 	SDL_UpdateTexture(core_texture, NULL, core, MAX_PIXELS_PER_SCANLINE * sizeof(uint16_t));
@@ -261,7 +248,7 @@ void host_t::update_screen()
 	
 	SDL_RenderClear(video_renderer);
 	
-	switch (app->current_mode) {
+	switch (system->current_mode) {
 		case DEBUG_MODE:
 			SDL_SetTextureAlphaMod(debugger_texture, 85);
 			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &placement);
@@ -284,7 +271,7 @@ void host_t::update_screen()
 	SDL_SetTextureAlphaMod(scanlines_texture, video_scanlines_alpha);
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
-	if (app->current_mode == DEBUG_MODE) {
+	if (system->current_mode == DEBUG_MODE) {
 		const SDL_Rect viewer = { (4*8*MAX_PIXELS_PER_SCANLINE)/5, 0, (8*MAX_PIXELS_PER_SCANLINE)/5, (9*8*MAX_PIXELS_PER_SCANLINE)/(5*16) };
 		//SDL_SetTextureAlphaMod(core_texture, 255);
 		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
@@ -375,9 +362,9 @@ enum events_output_state host_t::events_process_events()
 	
 	SDL_Event event;
 	
-	//bool shift_pressed = E64_sdl2_keyboard_state[SDL_SCANCODE_LSHIFT] | E64_sdl2_keyboard_state[SDL_SCANCODE_RSHIFT];
+	//bool shift_pressed = sdl2_keyboard_state[SDL_SCANCODE_LSHIFT] | sdl2_keyboard_state[SDL_SCANCODE_RSHIFT];
 	bool alt_pressed = sdl_keyboard_state[SDL_SCANCODE_LALT] | sdl_keyboard_state[SDL_SCANCODE_RALT];
-	//bool gui_pressed   = E64_sdl2_keyboard_state[SDL_SCANCODE_LGUI] | E64_sdl2_keyboard_state[SDL_SCANCODE_RGUI];
+	//bool gui_pressed   = sdl2_keyboard_state[SDL_SCANCODE_LGUI] | sdl2_keyboard_state[SDL_SCANCODE_RGUI];
 	
 	while (SDL_PollEvent(&event)) {
 		switch(event.type) {
@@ -413,7 +400,7 @@ enum events_output_state host_t::events_process_events()
 					video_increase_window_size();
 				} else if(event.key.keysym.sym == SDLK_F9) {
 					events_wait_until_key_released(SDLK_F9);
-					app->switch_mode();
+					system->switch_mode();
 //				} else if(event.key.keysym.sym == SDLK_F10) {
 //					hud->toggle_stats();
 //				} else if((event.key.keysym.sym == SDLK_w) && alt_pressed) {

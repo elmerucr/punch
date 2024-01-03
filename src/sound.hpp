@@ -1,8 +1,8 @@
 /*
  * sound.hpp
- * E64
+ * punch
  *
- * Copyright © 2019-2023 elmerucr. All rights reserved.
+ * Copyright © 2019-2024 elmerucr. All rights reserved.
  */
 
 #include <cstdio>
@@ -13,7 +13,7 @@
 
 #include "sid.h" // resid header
 #include "analog.hpp"
-#include "app.hpp"
+#include "system.hpp"
 
 /*
  * TODO: Write description of how dealing with shadow registers: they're always written to!
@@ -61,9 +61,9 @@ private:
 	
 	uint16_t sound_starting;
 	
-	app_t *app;
+	system_t *system;
 public:
-	sound_ic(app_t *a);
+	sound_ic(system_t *s);
 	~sound_ic();
 	
 	SID sid[4];

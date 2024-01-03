@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		4602D30C2B0013B500D77BF3 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4602D30B2B0013B500D77BF3 /* SDL2.framework */; };
 		4602D30E2B00142D00D77BF3 /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4602D30B2B0013B500D77BF3 /* SDL2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		4614F9F22B2E29F3005C9BE3 /* app.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4614F9F02B2E29F3005C9BE3 /* app.cpp */; };
+		4614F9F22B2E29F3005C9BE3 /* system.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4614F9F02B2E29F3005C9BE3 /* system.cpp */; };
 		4614F9F52B2E2A70005C9BE3 /* blitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4614F9F42B2E2A70005C9BE3 /* blitter.cpp */; };
 		4614F9F82B2E2B76005C9BE3 /* core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4614F9F62B2E2B76005C9BE3 /* core.cpp */; };
 		461AD6602B2E2642006BAD70 /* exceptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 461AD65E2B2E2642006BAD70 /* exceptions.cpp */; };
@@ -64,8 +64,8 @@
 
 /* Begin PBXFileReference section */
 		4602D30B2B0013B500D77BF3 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
-		4614F9F02B2E29F3005C9BE3 /* app.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = app.cpp; path = ../../src/app.cpp; sourceTree = "<group>"; };
-		4614F9F12B2E29F3005C9BE3 /* app.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = app.hpp; path = ../../src/app.hpp; sourceTree = "<group>"; };
+		4614F9F02B2E29F3005C9BE3 /* system.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = system.cpp; path = ../../src/system.cpp; sourceTree = "<group>"; };
+		4614F9F12B2E29F3005C9BE3 /* system.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = system.hpp; path = ../../src/system.hpp; sourceTree = "<group>"; };
 		4614F9F32B2E2A70005C9BE3 /* blitter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blitter.hpp; path = ../../src/blitter.hpp; sourceTree = "<group>"; };
 		4614F9F42B2E2A70005C9BE3 /* blitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blitter.cpp; path = ../../src/blitter.cpp; sourceTree = "<group>"; };
 		4614F9F62B2E2B76005C9BE3 /* core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = core.cpp; path = ../../src/core.cpp; sourceTree = "<group>"; };
@@ -217,8 +217,6 @@
 				4647EAB12B2E468300D0884E /* resid-0.16 */,
 				4647EADD2B2E471400D0884E /* analog.cpp */,
 				4647EADB2B2E471400D0884E /* analog.hpp */,
-				4614F9F02B2E29F3005C9BE3 /* app.cpp */,
-				4614F9F12B2E29F3005C9BE3 /* app.hpp */,
 				4614F9F42B2E2A70005C9BE3 /* blitter.cpp */,
 				4614F9F32B2E2A70005C9BE3 /* blitter.hpp */,
 				46BA60D02B3B76780020C879 /* clocks.hpp */,
@@ -241,6 +239,8 @@
 				4647EADC2B2E471400D0884E /* sound.hpp */,
 				4644873E2B3CD6C4004B04BA /* stats.cpp */,
 				4644873F2B3CD6C4004B04BA /* stats.hpp */,
+				4614F9F02B2E29F3005C9BE3 /* system.cpp */,
+				4614F9F12B2E29F3005C9BE3 /* system.hpp */,
 				4647EAAB2B2E445A00D0884E /* terminal.cpp */,
 				4647EAAC2B2E445A00D0884E /* terminal.hpp */,
 				4647EAAE2B2E44CF00D0884E /* timer.cpp */,
@@ -356,7 +356,7 @@
 				4647EAD62B2E46A500D0884E /* voice.cc in Sources */,
 				4647EAAA2B2E441300D0884E /* keyboard.cpp in Sources */,
 				4647EADF2B2E471400D0884E /* analog.cpp in Sources */,
-				4614F9F22B2E29F3005C9BE3 /* app.cpp in Sources */,
+				4614F9F22B2E29F3005C9BE3 /* system.cpp in Sources */,
 				4647EACD2B2E46A500D0884E /* envelope.cc in Sources */,
 				4647EAD42B2E46A500D0884E /* wave6581_P_T.cc in Sources */,
 				4647EAD22B2E46A500D0884E /* filter.cc in Sources */,

@@ -159,22 +159,22 @@ bool scancode_not_modifier[] =
     true
 };
 
-keyboard_t::keyboard_t(app_t *a)
+keyboard_t::keyboard_t(system_t *s)
 {
-	app = a;
+	system = s;
 	reset();
 }
 
 void keyboard_t::process()
 {
        uint8_t modifier_keys_status =
-		((app->host->keyboard_state[SCANCODE_LSHIFT] & 0b1) ? SHIFT_PRESSED : 0) |
-		((app->host->keyboard_state[SCANCODE_RSHIFT] & 0b1) ? SHIFT_PRESSED : 0) |
-		((app->host->keyboard_state[SCANCODE_LCTRL ] & 0b1) ? CTRL_PRESSED  : 0) |
-		((app->host->keyboard_state[SCANCODE_RCTRL ] & 0b1) ? CTRL_PRESSED  : 0) ;
+		((system->host->keyboard_state[SCANCODE_LSHIFT] & 0b1) ? SHIFT_PRESSED : 0) |
+		((system->host->keyboard_state[SCANCODE_RSHIFT] & 0b1) ? SHIFT_PRESSED : 0) |
+		((system->host->keyboard_state[SCANCODE_LCTRL ] & 0b1) ? CTRL_PRESSED  : 0) |
+		((system->host->keyboard_state[SCANCODE_RCTRL ] & 0b1) ? CTRL_PRESSED  : 0) ;
 	
 	for (int i=0; i<128; i++) {
-		switch (app->host->keyboard_state[i] & 0b11) {
+		switch (system->host->keyboard_state[i] & 0b11) {
 			case 0b01:
 				// event key down
 				if (generate_events && scancode_not_modifier[i]) {

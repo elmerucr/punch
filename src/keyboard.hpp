@@ -9,7 +9,7 @@
 #define KEYBOARD_HPP
 
 #include <cstdint>
-#include "app.hpp"
+#include "system.hpp"
 #include "common.hpp"
 #include "host.hpp"
 
@@ -36,9 +36,9 @@ private:
 	uint8_t head;
 	uint8_t tail;
 public:
-	keyboard_t(app_t *a);
+	keyboard_t(system_t *s);
 	
-	app_t *app;
+	system_t *system;
 	
 	void reset();
 	void process();

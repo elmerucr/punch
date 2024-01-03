@@ -1,6 +1,5 @@
 add_library(app STATIC
 	analog.cpp
-	app.cpp
 	blitter.cpp
 	core.cpp
 	cpu.cpp
@@ -11,11 +10,12 @@ add_library(app STATIC
 	rom.cpp
 	sound.cpp
 	stats.cpp
+	system.cpp
 	terminal.cpp
 	timer.cpp
 )
 
-target_link_libraries(app MC6809 resid)
+target_link_libraries(system MC6809 resid)
 
 add_subdirectory(MC6809/)
 add_subdirectory(resid-0.16/)
