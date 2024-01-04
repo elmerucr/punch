@@ -1,4 +1,4 @@
-add_library(app STATIC
+add_library(system STATIC
 	analog.cpp
 	blitter.cpp
 	core.cpp

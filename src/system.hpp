@@ -27,7 +27,10 @@ private:
 	std::chrono::time_point<std::chrono::steady_clock> system_start_time;
 	std::chrono::time_point<std::chrono::steady_clock> end_of_frame_time;
 	
+	uint8_t irq_number;
 	bool irq_line{true};
+	
+	bool generate_interrupts{false};
 public:
 	system_t();
 	~system_t();
@@ -46,6 +49,9 @@ public:
 	void run();
 	
 	bool running;
+	
+	int32_t frame_cycles{0};
+	int32_t frame_cycles_remaining{0};
 	
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);

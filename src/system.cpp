@@ -24,6 +24,10 @@ system_t::system_t()
 	host = new host_t(this);
 	
 	core = new core_t(this);
+	
+	irq_number = core->exceptions->connect_device("system");
+	
+	// TODO: how to reset system stuff (irq line + cycles) at the same time?
 	core->reset();
 	
 	keyboard = new keyboard_t(this);
@@ -34,6 +38,9 @@ system_t::system_t()
 	
 	stats = new stats_t(this);
 	
+	/*
+	 * Default start mode
+	 */
 //	switch_to_run_mode();
 	switch_to_debug_mode();
 }
@@ -82,12 +89,10 @@ void system_t::run()
 	end_of_frame_time = std::chrono::steady_clock::now();
 	
 	bool start_of_new_frame{true};
-	int32_t frame_cycles{0};
-	int32_t frame_cycles_remaining{0};
 	
 	while (running) {
 		/*
-		 * Audio: Measure audio_buffer and determine cycles to run
+		 * Audio: Measure audio_buffer and determine audio_cycles to run
 		 */
 		uint32_t audio_buffer_bytes = host->get_queued_audio_size_bytes();
 		stats->set_queued_audio_ms(audio_buffer_bytes / host->get_bytes_per_ms());
@@ -100,10 +105,15 @@ void system_t::run()
 			audio_cycles += (SID_CLOCK_SPEED / FPS) / 100;
 		}
 		
+		int32_t cpu_cycles = CPU_CLOCK_MULTIPLY * audio_cycles;
+		
 		if (start_of_new_frame) {
 			frame_cycles = frame_cycles_remaining = audio_cycles;
 			start_of_new_frame = false;
-			// raise interrupt here?
+			if (generate_interrupts) {
+				core->exceptions->pull(irq_number);
+				irq_line = false;
+			}
 		}
 		
 		/*
@@ -131,16 +141,17 @@ void system_t::run()
 						break;
 					case BREAKPOINT:
 						// frame is not finished!
-						switch_mode();
 						core->sound->run(audio_cycles - frame_cycles_done);
 						frame_cycles_remaining -= frame_cycles_done;
+						switch_mode();
 						printf("%i cycles left of %i\n", frame_cycles_remaining, frame_cycles);
 						break;
 				}
 				break;
 			case DEBUG_MODE:
-				debugger->run(&frame_cycles_done);
+				debugger->run();
 				core->sound->run(audio_cycles - frame_cycles_done);
+				frame_cycles_remaining -= frame_cycles_done;
 				debugger->redraw();
 				debugger->blitter->update_framebuffer();
 				host->update_debugger_texture(debugger->blitter->framebuffer);
@@ -193,13 +204,28 @@ uint8_t system_t::io_read8(uint16_t address)
 	switch (address & 0xf) {
 		case 0x0:
 			// status register
-			return irq_line ? 0 : 1;
+			return irq_line ? 0b00000000 : 0b00000001;
+		case 0x1:
+			// control register
+			return generate_interrupts ? 0b00000001 : 0b00000000;
 		default:
-			return 0xba;
+			return 0x00;
 	}
 }
 
 void system_t::io_write8(uint16_t address, uint8_t value)
 {
-	//
+	switch (address & 0xf) {
+		case 0x0:
+			if ((value & 0b1) && (!irq_line)) {
+				core->exceptions->release(irq_number);
+				irq_line = true;
+			}
+			break;
+		case 0x1:
+			generate_interrupts = (value & 0b1) ? true : false;
+			break;
+		default:
+			break;
+	}
 }

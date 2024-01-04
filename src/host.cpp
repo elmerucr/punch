@@ -373,11 +373,6 @@ enum events_output_state host_t::events_process_events()
 				if ((event.key.keysym.sym == SDLK_f) && alt_pressed) {
 					events_wait_until_key_released(SDLK_f);
 					video_toggle_fullscreen();
-//				} else if (event.key.keysym.sym == SDLK_F1) {
-//					if (app->current_mode == DEBUG_MODE) {
-//						app->core->run(0);
-//						app->debugger->status();
-//					}
 				} else if ((event.key.keysym.sym == SDLK_s) && alt_pressed ) {
 					video_change_scanlines_intensity();
 				} else if ((event.key.keysym.sym == SDLK_b) && alt_pressed) {

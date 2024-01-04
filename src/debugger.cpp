@@ -145,7 +145,7 @@ void debugger_t::redraw()
 	blitter->blit(&bruce, &framebuffer);
 }
 
-void debugger_t::run(int32_t *cd)
+void debugger_t::run()
 {
 	uint8_t symbol = 0;
 	
@@ -159,7 +159,8 @@ void debugger_t::run(int32_t *cd)
 		switch (symbol) {
 			case ASCII_F1:
 				system->core->run(0, &cycles_done);
-				*cd += cycles_done;
+				system->frame_cycles_remaining -= cycles_done;
+				//*cd += cycles_done;
 				status();
 				prompt();
 				break;
@@ -193,7 +194,7 @@ void debugger_t::run(int32_t *cd)
 				char command_buffer[256];
 				terminal->get_command(command_buffer, 256);
 				
-				*cd += process_command(command_buffer);
+				process_command(command_buffer);
 				
 //				if (*command_buffer == 'r') {
 //					terminal->printf("\nrrrrr");
@@ -207,9 +208,9 @@ void debugger_t::run(int32_t *cd)
 	}
 }
 
-int32_t debugger_t::process_command(char *c)
+void debugger_t::process_command(char *c)
 {
-	int32_t cycles_done{0};
+	//int32_t cycles_done{0};
 	
 	int cnt = 0;
 	while ((*c == ' ') || (*c == '.')) {
@@ -301,7 +302,8 @@ int32_t debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "n") == 0) {
 		int32_t cycles{0};
 		system->core->run(0, &cycles);
-		cycles_done += cycles;
+		system->frame_cycles_remaining -= cycles;
+		//cycles_done += cycles;
 		status();
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
@@ -330,8 +332,6 @@ int32_t debugger_t::process_command(char *c)
 	}
 	
 	if (have_prompt) prompt();
-	
-	return cycles_done;
 }
 
 void debugger_t::prompt()
@@ -357,6 +357,7 @@ void debugger_t::status()
 	terminal->printf("\n\n%s", text_buffer);
 	system->core->exceptions->status(text_buffer, 2048);
 	terminal->printf("\n\n%s", text_buffer);
+	terminal->printf("\n%i of %i", system->frame_cycles_remaining, system->frame_cycles);
 }
 
 void debugger_t::memory_dump(uint16_t address)
