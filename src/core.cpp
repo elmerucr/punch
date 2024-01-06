@@ -38,6 +38,8 @@ core_t::core_t(system_t *s)
 	sound = new sound_ic(system);
 	
 	cpu2sid = new clocks(CPU_CLOCK_SPEED/FPS, SID_CLOCK_SPEED/FPS);
+	
+	irq_number = exceptions->connect_device("core");
 }
 
 core_t::~core_t()
@@ -61,8 +63,8 @@ uint8_t core_t::read8(uint16_t address)
 		case BLITTER_PAGE+2:
 		case BLITTER_PAGE+3:
 			return blitter->io_palette_read8(address);
-		case SYSTEM_PAGE:
-			return system->io_read8(address);
+		case CORE_PAGE:
+			return io_read8(address);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
 		case SOUND_PAGE:
@@ -90,8 +92,8 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case BLITTER_PAGE+3:
 			blitter->io_palette_write8(address, value);
 			break;
-		case SYSTEM_PAGE:
-			system->io_write8(address, value);
+		case CORE_PAGE:
+			io_write8(address, value);
 			break;
 		case TIMER_PAGE:
 			timer->io_write_byte(address &0xff, value);
@@ -110,6 +112,10 @@ void core_t::write8(uint16_t address, uint8_t value) {
 
 void core_t::reset()
 {
+	cpu_cycle_saldo = 0;
+	frame_done = false;
+	irq_line = true;
+	
 	sound->reset();
 	timer->reset();
 	cpu->reset();
@@ -132,28 +138,11 @@ enum output_states core_t::run(bool debug)
 	if (cpu_cycle_saldo >= CPU_CYCLES_PER_FRAME) {
 		frame_done = true;
 		cpu_cycle_saldo -= CPU_CYCLES_PER_FRAME;
+		if (generate_interrupts) {
+			exceptions->pull(irq_number);
+			irq_line = false;
+		}
 	}
-	
-	return output_state;
-}
-
-enum output_states core_t::run(int32_t cycles, int32_t *cycles_done)
-{
-	enum output_states output_state = NORMAL;
-	
-	*cycles_done = 0;
-	
-	do {
-		uint8_t cpu_cycles = cpu->execute();
-		uint8_t sid_cycles = cpu2sid->clock(cpu_cycles);
-		
-		timer->run(sid_cycles);
-		sound->run(sid_cycles);
-		*cycles_done += sid_cycles;
-		
-	} while (((cycles - *cycles_done) > 0) && !(cpu->breakpoint()));
-	
-	if (cpu->breakpoint()) output_state = BREAKPOINT;
 	
 	return output_state;
 }
@@ -163,4 +152,35 @@ void core_t::run_blitter()
 	// TODO: to be removed!!
 	blitter->clear_surface(7);
 	blitter->blit(&blitter->turn_text, &blitter->surface[7]);
+}
+
+uint8_t core_t::io_read8(uint16_t address)
+{
+	switch (address & 0xf) {
+		case 0x0:
+			// status register
+			return irq_line ? 0b00000000 : 0b00000001;
+		case 0x1:
+			// control register
+			return generate_interrupts ? 0b00000001 : 0b00000000;
+		default:
+			return 0x00;
+	}
+}
+
+void core_t::io_write8(uint16_t address, uint8_t value)
+{
+	switch (address & 0xf) {
+		case 0x0:
+			if ((value & 0b1) && (!irq_line)) {
+				exceptions->release(irq_number);
+				irq_line = true;
+			}
+			break;
+		case 0x1:
+			generate_interrupts = (value & 0b1) ? true : false;
+			break;
+		default:
+			break;
+	}
 }

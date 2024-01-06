@@ -151,16 +151,16 @@ void debugger_t::run()
 	
 	terminal->process_cursor_state();
 	
-	int32_t cycles_done{0};
+	//int32_t cycles_done{0};
 	
 	while (system->keyboard->events_waiting()) {
 		terminal->deactivate_cursor();
 		symbol = system->keyboard->pop_event();
 		switch (symbol) {
 			case ASCII_F1:
-				//system->core->run(true);
-				system->core->run(0, &cycles_done);
-				system->frame_cycles_remaining -= cycles_done;
+				system->core->run(true);
+//				system->core->run(0, &cycles_done);
+//				system->frame_cycles_remaining -= cycles_done;
 				status();
 				prompt();
 				break;
@@ -300,9 +300,10 @@ void debugger_t::process_command(char *c)
 			}
 		}
 	} else if (strcmp(token0, "n") == 0) {
-		int32_t cycles{0};
-		system->core->run(0, &cycles);
-		system->frame_cycles_remaining -= cycles;
+		//int32_t cycles{0};
+		system->core->run(true);
+		//system->core->run(0, &cycles);
+		//system->frame_cycles_remaining -= cycles;
 		//cycles_done += cycles;
 		status();
 	} else if (strcmp(token0, "reset") == 0) {
@@ -362,7 +363,7 @@ void debugger_t::status()
 	terminal->printf("\n\n%s", text_buffer);
 	system->core->exceptions->status(text_buffer, 2048);
 	terminal->printf("\n\n%s", text_buffer);
-	terminal->printf("\n\n%i of %i cycles remaining", system->frame_cycles_remaining, system->frame_cycles);
+	terminal->printf("\n\n%i of %i cycles done", system->core->get_cpu_cycle_saldo(), CPU_CYCLES_PER_FRAME);
 }
 
 void debugger_t::memory_dump(uint16_t address)

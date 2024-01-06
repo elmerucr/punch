@@ -25,8 +25,6 @@ system_t::system_t()
 	
 	core = new core_t(this);
 	
-	irq_number = core->exceptions->connect_device("system");
-	
 	// TODO: how to reset system stuff (irq line + cycles) at the same time?
 	// reset blitter?
 	core->reset();
@@ -91,8 +89,6 @@ void system_t::run()
 	
 	end_of_frame_time = std::chrono::steady_clock::now();
 	
-	bool start_of_new_frame{true};
-	
 	while (running) {
 		/*
 		 * Audio: Measure audio_buffer and determine audio_cycles to run
@@ -100,30 +96,15 @@ void system_t::run()
 		uint32_t audio_buffer_bytes = host->get_queued_audio_size_bytes();
 		stats->set_queued_audio_ms(audio_buffer_bytes / host->get_bytes_per_ms());
 		
-		int32_t audio_cycles = (SID_CLOCK_SPEED / FPS);
+		int32_t audio_cycles = SID_CYCLES_PER_FRAME;
 		
 		if (audio_buffer_bytes > (AUDIO_BUFFER_SIZE * 1.2)) {
-			audio_cycles -= (SID_CLOCK_SPEED / FPS) / 100;
+			audio_cycles -= SID_CYCLES_PER_FRAME / 100;
 		} else if (audio_buffer_bytes < (AUDIO_BUFFER_SIZE * 0.8)) {
-			audio_cycles += (SID_CLOCK_SPEED / FPS) / 100;
+			audio_cycles += SID_CYCLES_PER_FRAME / 100;
 		}
 		
-		if (start_of_new_frame) {
-			frame_cycles = frame_cycles_remaining = audio_cycles;
-			start_of_new_frame = false;
-			if (generate_interrupts) {
-				core->exceptions->pull(irq_number);
-				irq_line = false;
-			}
-		}
-		
-		/*
-		 * This situation is unlikely but may happen when
-		 * there is a breakpoint just after the start of a frame.
-		 * If this next frame is slightly shorter then adjust
-		 * frame_cycles_left
-		 */
-		if (frame_cycles_remaining > audio_cycles) frame_cycles = frame_cycles_remaining = audio_cycles;
+		core->cpu2sid->adjust_target_clock(audio_cycles);
 		
 		if (host->events_process_events() == QUIT_EVENT) running = false;
 		
@@ -133,28 +114,17 @@ void system_t::run()
 		
 		switch (current_mode) {
 			case RUN_MODE:
-				switch (core->run(frame_cycles_remaining, &frame_cycles_done)) {
-					case NORMAL:
-						// frame is finished
-						// --> Have interrupt next round!
-						frame_cycles_remaining -= frame_cycles_done;
-						start_of_new_frame = true;
-						break;
-					case BREAKPOINT:
-						// frame is not finished!
-						core->sound->run(audio_cycles - frame_cycles_done);
-						frame_cycles_remaining -= frame_cycles_done;
-						switch_mode();
-						break;
+				if (core->run(false) == BREAKPOINT) {
+					// frame is not finished
+					// TODO: fixme
+					//core->sound->run(audio_cycles - frame_cycles_done);
+					switch_mode();
 				}
 				break;
 			case DEBUG_MODE:
 				debugger->run();
+				// TODO: fixme
 				core->sound->run(audio_cycles - frame_cycles_done);
-				//frame_cycles_remaining -= frame_cycles_done;
-				if (frame_cycles_remaining <= 0) {
-					start_of_new_frame = true;
-				}
 				debugger->redraw();
 				debugger->blitter->update_framebuffer();
 				host->update_debugger_texture(debugger->blitter->framebuffer);
@@ -166,7 +136,7 @@ void system_t::run()
 		
 		host->update_core_texture(core->blitter->framebuffer);
 		
-		//printf("%s", stats->summary());
+		printf("%s", stats->summary());
 		
 		// Time measurement
 		stats->start_idle_time();
@@ -199,36 +169,5 @@ void system_t::run()
 		stats->start_core_time();
 		
 		stats->process_parameters();
-	}
-}
-
-uint8_t system_t::io_read8(uint16_t address)
-{
-	switch (address & 0xf) {
-		case 0x0:
-			// status register
-			return irq_line ? 0b00000000 : 0b00000001;
-		case 0x1:
-			// control register
-			return generate_interrupts ? 0b00000001 : 0b00000000;
-		default:
-			return 0x00;
-	}
-}
-
-void system_t::io_write8(uint16_t address, uint8_t value)
-{
-	switch (address & 0xf) {
-		case 0x0:
-			if ((value & 0b1) && (!irq_line)) {
-				core->exceptions->release(irq_number);
-				irq_line = true;
-			}
-			break;
-		case 0x1:
-			generate_interrupts = (value & 0b1) ? true : false;
-			break;
-		default:
-			break;
 	}
 }
