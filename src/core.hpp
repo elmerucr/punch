@@ -31,7 +31,6 @@ enum output_states {
 
 class core_t {
 private:
-	bool frame_done{false};
 	int32_t cpu_cycle_saldo{0};
 	
 	uint8_t irq_number;
@@ -45,7 +44,6 @@ public:
 	system_t *system;
 	
 	void reset();
-	bool is_frame_done() { return frame_done; }
 	
 	uint32_t get_cpu_cycle_saldo() { return cpu_cycle_saldo; }
 	

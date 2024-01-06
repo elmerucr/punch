@@ -25,8 +25,7 @@ system_t::system_t()
 	
 	core = new core_t(this);
 	
-	// TODO: how to reset system stuff (irq line + cycles) at the same time?
-	// reset blitter?
+	// TODO: reset blitter?
 	core->reset();
 	
 	keyboard = new keyboard_t(this);

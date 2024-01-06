@@ -113,7 +113,6 @@ void core_t::write8(uint16_t address, uint8_t value) {
 void core_t::reset()
 {
 	cpu_cycle_saldo = 0;
-	frame_done = false;
 	irq_line = true;
 	
 	sound->reset();
@@ -136,7 +135,6 @@ enum output_states core_t::run(bool debug)
 	if (cpu->breakpoint()) output_state = BREAKPOINT;
 	
 	if (cpu_cycle_saldo >= CPU_CYCLES_PER_FRAME) {
-		frame_done = true;
 		cpu_cycle_saldo -= CPU_CYCLES_PER_FRAME;
 		if (generate_interrupts) {
 			exceptions->pull(irq_number);
@@ -159,12 +157,12 @@ uint8_t core_t::io_read8(uint16_t address)
 	switch (address & 0xf) {
 		case 0x0:
 			// status register
-			return irq_line ? 0b00000000 : 0b00000001;
+			return irq_line ? 0 : 1;
 		case 0x1:
 			// control register
-			return generate_interrupts ? 0b00000001 : 0b00000000;
+			return generate_interrupts ? 1 : 0;
 		default:
-			return 0x00;
+			return 0;
 	}
 }
 
