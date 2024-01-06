@@ -28,6 +28,7 @@ system_t::system_t()
 	irq_number = core->exceptions->connect_device("system");
 	
 	// TODO: how to reset system stuff (irq line + cycles) at the same time?
+	// reset blitter?
 	core->reset();
 	
 	keyboard = new keyboard_t(this);
@@ -43,6 +44,8 @@ system_t::system_t()
 	 */
 //	switch_to_run_mode();
 	switch_to_debug_mode();
+	
+	core->reset();
 }
 
 system_t::~system_t()
@@ -105,8 +108,6 @@ void system_t::run()
 			audio_cycles += (SID_CLOCK_SPEED / FPS) / 100;
 		}
 		
-		int32_t cpu_cycles = CPU_CLOCK_MULTIPLY * audio_cycles;
-		
 		if (start_of_new_frame) {
 			frame_cycles = frame_cycles_remaining = audio_cycles;
 			start_of_new_frame = false;
@@ -144,14 +145,16 @@ void system_t::run()
 						core->sound->run(audio_cycles - frame_cycles_done);
 						frame_cycles_remaining -= frame_cycles_done;
 						switch_mode();
-						printf("%i cycles left of %i\n", frame_cycles_remaining, frame_cycles);
 						break;
 				}
 				break;
 			case DEBUG_MODE:
 				debugger->run();
 				core->sound->run(audio_cycles - frame_cycles_done);
-				frame_cycles_remaining -= frame_cycles_done;
+				//frame_cycles_remaining -= frame_cycles_done;
+				if (frame_cycles_remaining <= 0) {
+					start_of_new_frame = true;
+				}
 				debugger->redraw();
 				debugger->blitter->update_framebuffer();
 				host->update_debugger_texture(debugger->blitter->framebuffer);

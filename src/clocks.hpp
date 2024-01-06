@@ -2,11 +2,9 @@
  * clocks.hpp
  * punch
  *
- * Copyright © 2019-2022 elmerucr. All rights reserved.
+ * Copyright © 2019-2024 elmerucr. All rights reserved.
  *
- * Algorithm based on bresenham line algorithm. Besides very simple
- * multipliers / dividers, it is also possible to build very "complex"
- * ones.
+ * Algorithm based on bresenham line algorithm.
  */
 
 #ifndef CLOCKS_HPP
@@ -25,8 +23,7 @@ private:
 	uint64_t mod;
 	uint64_t result;
 public:
-	clocks(uint32_t base_clock_f, uint32_t target_clock_f)
-	{
+	clocks(uint32_t base_clock_f, uint32_t target_clock_f) {
 		base_clock_freq = base_clock_f;
 		target_clock_freq = target_clock_f;
 		//clock0_cycles = 0;
@@ -34,8 +31,7 @@ public:
 		mod = 0;
 	}
     
-	inline uint32_t clock(uint32_t delta_base_clock)
-	{
+	inline uint32_t clock(uint32_t delta_base_clock) {
 		mult = (delta_base_clock * target_clock_freq) + mod;
 		
 		/*
@@ -49,15 +45,12 @@ public:
 		return (uint32_t)result;
 	}
 	
-	inline void adjust_frequencies(uint32_t base_clock_f, uint32_t target_clock_f)
-	{
+	inline void adjust_base_clock(uint32_t base_clock_f) {
 		base_clock_freq = base_clock_f;
+	}
+	
+	inline void adjust_target_clock(uint32_t target_clock_f) {
 		target_clock_freq = target_clock_f;
-		
-		/*
-		 * Modulo won't be set to 0 this time, contrary to
-		 * constructor
-		 */
 	}
 };
 

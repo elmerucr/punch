@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    4
-#define PUNCH_BUILD            20240104
+#define PUNCH_BUILD            20240106
 #define PUNCH_YEAR             2024
 
 /*
@@ -33,11 +33,14 @@
 #define SAMPLE_RATE		48000
 #define AUDIO_BUFFER_SIZE	4000.0
 #define SID_CLOCK_SPEED		985248
+#define SID_CYCLES_PER_FRAME	(SID_CLOCK_SPEED/FPS)
 
 /*
  * Cpu
  */
 #define CPU_CLOCK_MULTIPLY	2
+#define CPU_CLOCK_SPEED		(CPU_CLOCK_MULTIPLY*SID_CLOCK_SPEED)
+#define CPU_CYCLES_PER_FRAME	(CPU_CLOCK_SPEED/FPS)
 
 /*
  * C64 colors "sort of"

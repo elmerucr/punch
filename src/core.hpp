@@ -30,6 +30,10 @@ enum output_states {
 };
 
 class core_t {
+private:
+	bool frame_done{false};
+	int32_t cpu_cycle_saldo{0};
+	
 public:
 	core_t(system_t *s);
 	~core_t();
@@ -37,8 +41,10 @@ public:
 	system_t *system;
 	
 	void reset();
+	bool is_frame_done() { return frame_done; }
 	
 	enum output_states run(int32_t cycles, int32_t *cycles_done);
+	enum output_states run(bool debug);
 	void run_blitter();
 	
 	uint8_t read8(uint16_t address);
@@ -49,9 +55,6 @@ public:
 	timer_ic *timer;
 	sound_ic *sound;
 	cpu_t *cpu;
-	
-	bool frame_done;
-private:
 	clocks *cpu2sid;
 };
 

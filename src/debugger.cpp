@@ -158,9 +158,9 @@ void debugger_t::run()
 		symbol = system->keyboard->pop_event();
 		switch (symbol) {
 			case ASCII_F1:
+				//system->core->run(true);
 				system->core->run(0, &cycles_done);
 				system->frame_cycles_remaining -= cycles_done;
-				//*cd += cycles_done;
 				status();
 				prompt();
 				break;
@@ -323,6 +323,11 @@ void debugger_t::process_command(char *c)
 		system->host->events_wait_until_key_released(SDLK_RETURN);
 	} else if (strcmp(token0, "s") == 0) {
 		status();
+	} else if (strcmp(token0, "timer") == 0) {
+		for (int i=0; i<8; i++) {
+			system->core->timer->status(text_buffer, i);
+			terminal->printf("%s", text_buffer);
+		}
 	} else if (strcmp(token0, "ver") == 0) {
 		print_version();
 	} else {
@@ -357,7 +362,7 @@ void debugger_t::status()
 	terminal->printf("\n\n%s", text_buffer);
 	system->core->exceptions->status(text_buffer, 2048);
 	terminal->printf("\n\n%s", text_buffer);
-	terminal->printf("\n%i of %i", system->frame_cycles_remaining, system->frame_cycles);
+	terminal->printf("\n\n%i of %i cycles remaining", system->frame_cycles_remaining, system->frame_cycles);
 }
 
 void debugger_t::memory_dump(uint16_t address)

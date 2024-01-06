@@ -515,6 +515,7 @@ bool host_t::events_yes_no()
 			return_value = false;
 			checking = false;
 		}
+		std::this_thread::sleep_for(std::chrono::microseconds(40000));
 	}
 	return return_value;
 }

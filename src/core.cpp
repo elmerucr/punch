@@ -37,7 +37,7 @@ core_t::core_t(system_t *s)
 	
 	sound = new sound_ic(system);
 	
-	cpu2sid = new clocks(CPU_CLOCK_MULTIPLY, 1);
+	cpu2sid = new clocks(CPU_CLOCK_SPEED/FPS, SID_CLOCK_SPEED/FPS);
 }
 
 core_t::~core_t()
@@ -115,6 +115,28 @@ void core_t::reset()
 	cpu->reset();
 }
 
+enum output_states core_t::run(bool debug)
+{
+	enum output_states output_state = NORMAL;
+	
+	do {
+		uint8_t cpu_cycles = cpu->execute();
+		timer->run(cpu_cycles);
+		sound->run(cpu2sid->clock(cpu_cycles));
+		cpu_cycle_saldo += cpu_cycles;
+		
+	} while ((!cpu->breakpoint()) && (cpu_cycle_saldo < CPU_CYCLES_PER_FRAME) && (!debug));
+	
+	if (cpu->breakpoint()) output_state = BREAKPOINT;
+	
+	if (cpu_cycle_saldo >= CPU_CYCLES_PER_FRAME) {
+		frame_done = true;
+		cpu_cycle_saldo -= CPU_CYCLES_PER_FRAME;
+	}
+	
+	return output_state;
+}
+
 enum output_states core_t::run(int32_t cycles, int32_t *cycles_done)
 {
 	enum output_states output_state = NORMAL;
@@ -138,6 +160,7 @@ enum output_states core_t::run(int32_t cycles, int32_t *cycles_done)
 
 void core_t::run_blitter()
 {
+	// TODO: to be removed!!
 	blitter->clear_surface(7);
 	blitter->blit(&blitter->turn_text, &blitter->surface[7]);
 }
