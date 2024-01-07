@@ -43,7 +43,8 @@ public:
 	void pull(uint8_t device);
 	void release(uint8_t device);
 	void toggle(uint8_t device);
-	void status(char *b, int n);
+	void status(char *b, int buffer_length);
+	void status(char *b, int buffer_length, uint8_t device);
 };
 
 #endif

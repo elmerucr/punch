@@ -349,7 +349,8 @@ void debugger_t::status()
 {
 	terminal->clear();
 	system->core->cpu->status(text_buffer, 2048);
-	terminal->printf("%s\n", text_buffer);
+	terminal->printf("%s", text_buffer);
+	terminal->printf("\n\n__disassembly____________________________________");
 	uint16_t pc = system->core->cpu->get_pc();
 	for (int i=0; i<8; i++) {
 		if (system->core->cpu->breakpoint_array[pc]) {
@@ -359,11 +360,33 @@ void debugger_t::status()
 		terminal->printf("\n%s", text_buffer);
 		terminal->fg_color = fg;
 	}
-	system->core->cpu->stacks(text_buffer, 2048, 8);
-	terminal->printf("\n\n%s", text_buffer);
-	system->core->exceptions->status(text_buffer, 2048);
-	terminal->printf("\n\n%s", text_buffer);
-	terminal->printf("\n\n%i of %i cycles done", system->core->get_cpu_cycle_saldo(), CPU_CYCLES_PER_FRAME);
+	
+	terminal->printf("\n\n__usp______ssp_____   _t__cr__sr___bpm______cycles_  _IRQ_State__Name______");
+	
+	for (int i=0; i<8; i++) {
+		uint16_t usp = (system->core->cpu->get_us() + i) & 0xffff;
+		uint8_t usp_b = system->core->read8(usp);
+		uint16_t ssp = (system->core->cpu->get_sp() + i) & 0xffff;
+		uint8_t ssp_b = system->core->read8(ssp);
+		
+		system->core->exceptions->status(text_buffer, 2048, i);
+		
+		terminal->printf("\n %04x %02x  %04x %02x      %u %s %s %5u  %10u     %s",
+				 usp,
+				 usp_b,
+				 ssp,
+				 ssp_b,
+				 i,
+				 system->core->timer->io_read_byte(0x1) & (1 << i) ? " on" : "off",
+				 system->core->timer->io_read_byte(0x0) & (1 << i) ? "irq" : "   ",
+				 system->core->timer->get_timer_bpm(i),
+				 system->core->timer->get_timer_clock_interval(i) - system->core->timer->get_timer_counter(i),
+				 text_buffer);
+	}
+
+//	system->core->exceptions->status(text_buffer, 2048);
+//	terminal->printf("\n\n%s", text_buffer);
+	terminal->printf("\n\n%i of %i frame cycles done", system->core->get_cpu_cycle_saldo(), CPU_CYCLES_PER_FRAME);
 }
 
 void debugger_t::memory_dump(uint16_t address)

@@ -243,10 +243,15 @@ void timer_ic::status(char *buffer, uint8_t timer_no)
 {
 	timer_no &= 0b00000111;
 	
-	snprintf(buffer, 64, "\n%2x:%s/%5u/%8x/%8x",
+	snprintf(buffer, 64, "\n%2u:%s/%5u/%10u/%10u",
 		 timer_no,
 		 control_register & (0b1 << timer_no) ? " on" : "off",
 		 timers[timer_no].bpm,
 		 timers[timer_no].counter,
 		 timers[timer_no].clock_interval);
+}
+
+uint16_t timer_ic::get_timer_bpm(uint8_t timer_number)
+{
+	return timers[timer_number & 0x7].bpm;
 }

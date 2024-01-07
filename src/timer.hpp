@@ -88,6 +88,7 @@ public:
 	// get functions
 	uint64_t get_timer_counter(uint8_t timer_number);
 	uint64_t get_timer_clock_interval(uint8_t timer_number);
+	uint16_t get_timer_bpm(uint8_t timer_number);
 
 	// run cycles on this ic
 	void run(uint32_t number_of_cycles);
