@@ -348,9 +348,10 @@ void debugger_t::prompt()
 void debugger_t::status()
 {
 	terminal->clear();
+	terminal->printf("__cpu__________________________________________________________");
 	system->core->cpu->status(text_buffer, 2048);
-	terminal->printf("%s", text_buffer);
-	terminal->printf("\n\n__disassembly____________________________________");
+	terminal->printf("\n%s", text_buffer);
+	terminal->printf("\n\n__disassembly__________________________________");
 	uint16_t pc = system->core->cpu->get_pc();
 	for (int i=0; i<8; i++) {
 		if (system->core->cpu->breakpoint_array[pc]) {

@@ -109,27 +109,27 @@ void system_t::run()
 		
 		keyboard->process();
 		
-		int32_t frame_cycles_done{0};
+		//int32_t frame_cycles_done{0};
 		
 		switch (current_mode) {
 			case RUN_MODE:
 				if (core->run(false) == BREAKPOINT) {
-					// frame is not finished
-					// TODO: fixme
-					//core->sound->run(audio_cycles - frame_cycles_done);
 					switch_mode();
 				}
 				break;
 			case DEBUG_MODE:
 				debugger->run();
-				// TODO: fixme
-				core->sound->run(audio_cycles - frame_cycles_done);
 				debugger->redraw();
 				debugger->blitter->update_framebuffer();
 				host->update_debugger_texture(debugger->blitter->framebuffer);
 				break;
 		}
-		core->run_blitter(); // run always?
+		
+		if (core->get_sound_cycle_saldo() < audio_cycles ) {
+			core->sound->run(audio_cycles - core->get_sound_cycle_saldo());
+		}
+		
+		core->run_blitter(); // FIXME: run always?
 		
 		core->blitter->update_framebuffer();
 		

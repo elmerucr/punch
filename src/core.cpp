@@ -122,13 +122,17 @@ void core_t::reset()
 
 enum output_states core_t::run(bool debug)
 {
+	sound_cycle_saldo = 0;
+	
 	enum output_states output_state = NORMAL;
 	
 	do {
 		uint8_t cpu_cycles = cpu->execute();
 		timer->run(cpu_cycles);
-		sound->run(cpu2sid->clock(cpu_cycles));
+		uint8_t sound_cycles = cpu2sid->clock(cpu_cycles);
+		sound->run(sound_cycles);
 		cpu_cycle_saldo += cpu_cycles;
+		sound_cycle_saldo += sound_cycles;
 		
 	} while ((!cpu->breakpoint()) && (cpu_cycle_saldo < CPU_CYCLES_PER_FRAME) && (!debug));
 	

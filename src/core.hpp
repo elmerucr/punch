@@ -32,6 +32,7 @@ enum output_states {
 class core_t {
 private:
 	int32_t cpu_cycle_saldo{0};
+	uint32_t sound_cycle_saldo;
 	
 	uint8_t irq_number;
 	bool irq_line{true};
@@ -45,7 +46,8 @@ public:
 	
 	void reset();
 	
-	uint32_t get_cpu_cycle_saldo() { return cpu_cycle_saldo; }
+	int32_t get_cpu_cycle_saldo() { return cpu_cycle_saldo; }
+	uint32_t get_sound_cycle_saldo() { return sound_cycle_saldo; }
 	
 	enum output_states run(bool debug);
 	void run_blitter();
