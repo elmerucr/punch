@@ -151,16 +151,12 @@ void debugger_t::run()
 	
 	terminal->process_cursor_state();
 	
-	//int32_t cycles_done{0};
-	
 	while (system->keyboard->events_waiting()) {
 		terminal->deactivate_cursor();
 		symbol = system->keyboard->pop_event();
 		switch (symbol) {
 			case ASCII_F1:
 				system->core->run(true);
-//				system->core->run(0, &cycles_done);
-//				system->frame_cycles_remaining -= cycles_done;
 				status();
 				prompt();
 				break;
@@ -193,12 +189,7 @@ void debugger_t::run()
 				// TODO: supply textbuffer here to isolate command?
 				char command_buffer[256];
 				terminal->get_command(command_buffer, 256);
-				
 				process_command(command_buffer);
-				
-//				if (*command_buffer == 'r') {
-//					terminal->printf("\nrrrrr");
-//				}
 				break;
 			default:
 				terminal->putchar(symbol);
@@ -210,8 +201,6 @@ void debugger_t::run()
 
 void debugger_t::process_command(char *c)
 {
-	//int32_t cycles_done{0};
-	
 	int cnt = 0;
 	while ((*c == ' ') || (*c == '.')) {
 		c++;
@@ -300,12 +289,27 @@ void debugger_t::process_command(char *c)
 			}
 		}
 	} else if (strcmp(token0, "n") == 0) {
-		//int32_t cycles{0};
 		system->core->run(true);
-		//system->core->run(0, &cycles);
-		//system->frame_cycles_remaining -= cycles;
-		//cycles_done += cycles;
 		status();
+	} else if (strcmp(token0, "palette") == 0) {
+		terminal->printf("\n    0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f");
+		for (int i=0; i<256; i++) {
+			if ((i % 16) == 0) {
+				terminal->fg_color = fg;
+				terminal->printf("\n ");
+				if (((i & 0xf0) >> 4) < 10) {
+					terminal->putsymbol(0x30 + ((i & 0xf0) >> 4));
+				} else {
+					terminal->putsymbol(0x57 + ((i & 0xf0) >> 4));
+				}
+				terminal->putchar(' ');
+			}
+			terminal->fg_color = i;
+			terminal->putsymbol(0xa0);
+			terminal->putsymbol(0xa0);
+			terminal->putsymbol(0xa0);
+		}
+		terminal->fg_color = fg;
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
 		redraw();
@@ -385,8 +389,6 @@ void debugger_t::status()
 				 text_buffer);
 	}
 
-//	system->core->exceptions->status(text_buffer, 2048);
-//	terminal->printf("\n\n%s", text_buffer);
 	terminal->printf("\n\n%i of %i frame cycles done", system->core->get_cpu_cycle_saldo(), CPU_CYCLES_PER_FRAME);
 }
 

@@ -21,47 +21,41 @@ blitter_ic::blitter_ic()
 	
 	palette = new uint16_t[256];
 	
-	// std RGB332 palette
+//	// std RGB332 palette
+//	for (int i = 0; i < 256; i++) {
+//		uint16_t r = (i & 0b11100000) >> 5;
+//		uint16_t g = (i & 0b00011100) >> 2;
+//		uint16_t b = (i & 0b00000011) >> 0;
+//		r = (15 * r) / 7;
+//		g = (15 * g) / 7;
+//		b = (15 * b) / 3;
+//		//printf("No:%03i r:%02i g:%02i b:%02i\n", i, r, g, b);
+//		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
+//	}
+	
+	// different palette
 	for (int i = 0; i < 256; i++) {
-		uint16_t r = (i & 0b11100000) >> 5;
-		uint16_t g = (i & 0b00011100) >> 2;
-		uint16_t b = (i & 0b00000011) >> 0;
-		r = (15 * r) / 7;
-		g = (15 * g) / 7;
-		b = (15 * b) / 3;
+		uint16_t r = (i & 0b11000000) >> 6;
+		uint16_t g = (i & 0b00110000) >> 4;
+		uint16_t b = (i & 0b00001100) >> 2;
+		uint16_t s = (i & 0b00000011) >> 0;
+		uint16_t factor = 0;
+		switch (s) {
+			case 0b00: factor = 6; break;
+			case 0b01: factor = 11; break;
+			case 0b10: factor = 14; break;
+			case 0b11: factor = 15; break;
+		}
+		r = factor * (r) / 3;
+		g = factor * (g) / 3;
+		b = factor * (b) / 3;
+//		r = (r << 2) | s;
+//		g = (g << 2) | s;
+//		b = (b << 2) | s;
 		//printf("No:%03i r:%02i g:%02i b:%02i\n", i, r, g, b);
 		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
 	}
-	
-//	palette[ 0] = C64_ARGB444_BLACK;
-//	palette[ 1] = C64_ARGB444_WHITE;
-//	palette[ 2] = C64_ARGB444_RED;
-//	palette[ 3] = C64_ARGB444_CYAN;
-//	palette[ 4] = C64_ARGB444_PURPLE;
-//	palette[ 5] = C64_ARGB444_GREEN;
-//	palette[ 6] = C64_ARGB444_BLUE;
-//	palette[ 7] = C64_ARGB444_YELLOW;
-//	palette[ 8] = C64_ARGB444_ORANGE;
-//	palette[ 9] = C64_ARGB444_BROWN;
-//	palette[10] = C64_ARGB444_LIGHTRED;
-//	palette[11] = C64_ARGB444_DARKGREY;
-//	palette[12] = C64_ARGB444_GREY;
-//	palette[13] = C64_ARGB444_LIGHTGREEN;
-//	palette[14] = C64_ARGB444_LIGHTBLUE;
-//	palette[15] = C64_ARGB444_LIGHTGREY;
-//	
-//	for (int i = 0; i < 64; i++) {
-//		uint16_t r = (i & 0b110000) >> 4;
-//		uint16_t g = (i & 0b001100) >> 2;
-//		uint16_t b = (i & 0b000011) >> 0;
-//		r = 5 * r;
-//		g = 5 * g;
-//		b = 5 * b;
-//		palette[64 + i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
-//	}
 
-	
-	
 	font_4x6 = new uint8_t[8192];
 	for (int i = 0; i < 8192; i++) font_4x6[i] = 0;
 	init_font_4x6();
