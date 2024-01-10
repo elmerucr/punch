@@ -25,8 +25,8 @@ system_t::system_t()
 	
 	core = new core_t(this);
 	
-	// TODO: reset blitter?
-	core->reset();
+//	// TODO: reset blitter?
+//	core->reset();
 	
 	keyboard = new keyboard_t(this);
 	keyboard->reset();

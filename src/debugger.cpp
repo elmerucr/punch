@@ -60,7 +60,7 @@ debugger_t::debugger_t(system_t *s)
 	
 	blitter->font.flags_0 = 0b01001101;
 	blitter->font.flags_1 = 0b00000000;
-	blitter->font.keycolor = C64_BLUE;
+	blitter->font.keycolor = PUNCH_BLUE;
 
 	character_screen.columns = MAX_PIXELS_PER_SCANLINE / 4;
 	character_screen.rows = MAX_SCANLINES / 6;
@@ -243,7 +243,7 @@ void debugger_t::process_command(char *c)
 				}
 			}
 		}
-	} else if (strcmp(token0, "clear") == 0) {
+	} else if (strcmp(token0, "cls") == 0) {
 		terminal->clear();
 	} else if (strcmp(token0, "exit") == 0) {
 		terminal->printf("\nexit punch (y/n)");
@@ -291,11 +291,11 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "n") == 0) {
 		system->core->run(true);
 		status();
-	} else if (strcmp(token0, "palette") == 0) {
+	} else if (strcmp(token0, "pal") == 0) {
 		terminal->printf("\n    0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f");
 		for (int i=0; i<256; i++) {
 			if ((i % 16) == 0) {
-				terminal->fg_color = fg;
+				terminal->bg_color = bg;
 				terminal->printf("\n ");
 				if (((i & 0xf0) >> 4) < 10) {
 					terminal->putsymbol(0x30 + ((i & 0xf0) >> 4));
@@ -304,12 +304,10 @@ void debugger_t::process_command(char *c)
 				}
 				terminal->putchar(' ');
 			}
-			terminal->fg_color = i;
-			terminal->putsymbol(0xa0);
-			terminal->putsymbol(0xa0);
-			terminal->putsymbol(0xa0);
+			terminal->bg_color = i;
+			terminal->printf("   ");
 		}
-		terminal->fg_color = fg;
+		terminal->bg_color = bg;
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
 		redraw();
@@ -355,7 +353,7 @@ void debugger_t::status()
 	terminal->printf("__cpu__________________________________________________________");
 	system->core->cpu->status(text_buffer, 2048);
 	terminal->printf("\n%s", text_buffer);
-	terminal->printf("\n\n__disassembly__________________________________");
+	terminal->printf("\n\n__disassembly________________________");
 	uint16_t pc = system->core->cpu->get_pc();
 	for (int i=0; i<8; i++) {
 		if (system->core->cpu->breakpoint_array[pc]) {
@@ -366,7 +364,7 @@ void debugger_t::status()
 		terminal->fg_color = fg;
 	}
 	
-	terminal->printf("\n\n__usp______ssp_____   _t__cr__sr___bpm______cycles_  _IRQ_State__Name______");
+	terminal->printf("\n\n__usp______ssp_____   _timer__cr__sr___bpm______cycles_  _IRQ_State__Name______");
 	
 	for (int i=0; i<8; i++) {
 		uint16_t usp = (system->core->cpu->get_us() + i) & 0xffff;
@@ -376,7 +374,7 @@ void debugger_t::status()
 		
 		system->core->exceptions->status(text_buffer, 2048, i);
 		
-		terminal->printf("\n %04x %02x  %04x %02x      %u %s %s %5u  %10u     %s",
+		terminal->printf("\n %04x %02x  %04x %02x        %u   %s %s %5u  %10u     %s",
 				 usp,
 				 usp_b,
 				 ssp,

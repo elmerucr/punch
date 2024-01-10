@@ -33,7 +33,8 @@ blitter_ic::blitter_ic()
 //		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
 //	}
 	
-	// different palette
+	// different palette rrggbbii system, ii shared for all colors
+	// ii is not linear
 	for (int i = 0; i < 256; i++) {
 		uint16_t r = (i & 0b11000000) >> 6;
 		uint16_t g = (i & 0b00110000) >> 4;
@@ -42,8 +43,8 @@ blitter_ic::blitter_ic()
 		uint16_t factor = 0;
 		switch (s) {
 			case 0b00: factor = 6; break;
-			case 0b01: factor = 11; break;
-			case 0b10: factor = 14; break;
+			case 0b01: factor = 9; break;
+			case 0b10: factor = 13; break;
 			case 0b11: factor = 15; break;
 		}
 		r = factor * (r) / 3;
@@ -66,7 +67,7 @@ blitter_ic::blitter_ic()
 	font.flags_0 = 0b01000000;
 	font.flags_1 = 0b00000000;
 	font.fg_col = 0b00111000;
-	font.keycolor = C64_BLUE;
+	font.keycolor = PUNCH_BLUE;
 	font.w = 4;
 	font.h = 6;
 	
@@ -221,7 +222,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 
 uint32_t blitter_ic::blit(const uint8_t s, const uint8_t d)
 {
-	return blit(&surface[s], &surface[d]);
+	return blit(&surface[s & 0b111], &surface[d & 0b111]);
 }
 
 uint32_t blitter_ic::tile_blit(const tile_surface_t *ts, const surface_t *src, surface_t *dst)
@@ -528,29 +529,29 @@ void blitter_ic::init_font_4x6()
 		for (int y=0; y<6; y++) {
 			for (int x=0; x<4; x++) {
 				if (get_font_4x6_pixel(i, x, y)) {
-					font_4x6[(i * 4 * 6) + (y * 4) + x] = C64_LIGHTBLUE;
-					font_4x6[((i + 128) * 4 * 6) + (y * 4) + x] = C64_BLUE;
+					font_4x6[(i * 4 * 6) + (y * 4) + x] = PUNCH_LIGHTBLUE;
+					font_4x6[((i + 128) * 4 * 6) + (y * 4) + x] = PUNCH_BLUE;
 				} else {
-					font_4x6[(i * 4 * 6) + (y * 4) + x] = C64_BLUE;
-					font_4x6[((i + 128) * 4 * 6) + (y * 4) + x] = C64_LIGHTBLUE;
+					font_4x6[(i * 4 * 6) + (y * 4) + x] = PUNCH_BLUE;
+					font_4x6[((i + 128) * 4 * 6) + (y * 4) + x] = PUNCH_LIGHTBLUE;
 				}
 			}
 		}
 	}
 	
 	// correction for j
-	font_4x6[(0x6a * 4 * 6) + 1] = C64_LIGHTBLUE;
-	font_4x6[((0x6a + 0x80) * 4 * 6) + 1] = C64_BLUE;
+	font_4x6[(0x6a * 4 * 6) + 1] = PUNCH_LIGHTBLUE;
+	font_4x6[((0x6a + 0x80) * 4 * 6) + 1] = PUNCH_BLUE;
 	
 	// 6 bytes / symbol * 18 symbols = 108
 	for (int i=0; i<(108); i++) {
 		for (int j=0; j<4; j++) {
 			if (blocks[i] & (0b1<<(3-j))) {
-				font_4x6[(i*4)+j] = C64_LIGHTBLUE;
-				font_4x6[(128*4*6)+(i*4)+j] = C64_BLUE;
+				font_4x6[(i*4)+j] = PUNCH_LIGHTBLUE;
+				font_4x6[(128*4*6)+(i*4)+j] = PUNCH_BLUE;
 			} else {
-				font_4x6[(i*4)+j] = C64_BLUE;
-				font_4x6[(128*4*6)+(i*4)+j] = C64_LIGHTBLUE;
+				font_4x6[(i*4)+j] = PUNCH_BLUE;
+				font_4x6[(128*4*6)+(i*4)+j] = PUNCH_LIGHTBLUE;
 			}
 		}
 	}
