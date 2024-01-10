@@ -509,11 +509,14 @@ bool host_t::events_yes_no()
 	bool return_value = true;
 	while (checking) {
 		SDL_PollEvent(&event);
-		if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym == SDLK_y)) {
-			checking = false;
-		} else if ((event.type == SDL_KEYDOWN) && (event.key.keysym.sym = SDLK_m)) {
-			return_value = false;
-			checking = false;
+		if (event.type == SDL_KEYDOWN) {
+			if (event.key.keysym.sym == SDLK_y) {
+				printf("YES!\n");
+				checking = false;
+			} else if (event.key.keysym.sym == SDLK_n) {
+				return_value = false;
+				checking = false;
+			}
 		}
 		std::this_thread::sleep_for(std::chrono::microseconds(40000));
 	}

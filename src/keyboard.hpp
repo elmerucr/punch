@@ -48,6 +48,7 @@ public:
 	inline bool events_waiting() { return (head == tail) ? false : true; }
 	inline void enable_events() { generate_events = true; }
 	inline void disable_events() { generate_events = false; }
+	inline void purge() { head = tail; }
 };
 
 #endif

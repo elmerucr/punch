@@ -164,12 +164,12 @@ void debugger_t::run()
 				status();
 				prompt();
 				break;
-			case ASCII_F3:
-				terminal->deactivate_cursor();
-				terminal->printf("run");
-				system->switch_to_run_mode();
-				system->host->events_wait_until_key_released(SDLK_F3);
-				break;
+//			case ASCII_F3:
+//				terminal->deactivate_cursor();
+//				terminal->printf("run");
+//				system->switch_to_run_mode();
+//				system->host->events_wait_until_key_released(SDLK_F3);
+//				break;
 			case ASCII_CURSOR_LEFT:
 				terminal->cursor_left();
 				break;
