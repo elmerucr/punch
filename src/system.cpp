@@ -11,6 +11,7 @@
 #include "keyboard.hpp"
 #include "debugger.hpp"
 #include "stats.hpp"
+#include "hud.hpp"
 
 system_t::system_t()
 {
@@ -36,6 +37,8 @@ system_t::system_t()
 	
 	stats = new stats_t(this);
 	
+	hud = new hud_t(this);
+	
 	/*
 	 * Default start mode
 	 */
@@ -47,6 +50,7 @@ system_t::system_t()
 
 system_t::~system_t()
 {
+	delete hud;
 	delete stats;
 	delete debugger;
 	delete keyboard;
@@ -110,8 +114,6 @@ void system_t::run()
 		
 		keyboard->process();
 		
-		//int32_t frame_cycles_done{0};
-		
 		switch (current_mode) {
 			case RUN_MODE:
 				if (core->run(false) == BREAKPOINT) {
@@ -126,8 +128,9 @@ void system_t::run()
 				break;
 		}
 		
-		if (core->get_sound_cycle_saldo() < audio_cycles ) {
-			core->sound->run(audio_cycles - core->get_sound_cycle_saldo());
+		uint32_t sound_cycle_saldo = core->get_sound_cycle_saldo();
+		if (sound_cycle_saldo < audio_cycles ) {
+			core->sound->run(audio_cycles - sound_cycle_saldo);
 		}
 		
 		core->run_blitter(); // FIXME: run always?
@@ -136,7 +139,7 @@ void system_t::run()
 		
 		host->update_core_texture(core->blitter->framebuffer);
 		
-		printf("%s", stats->summary());
+		//printf("%s", stats->summary());
 		
 		// Time measurement
 		stats->start_idle_time();

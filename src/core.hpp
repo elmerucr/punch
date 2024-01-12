@@ -17,9 +17,10 @@
 #include "timer.hpp"
 #include "clocks.hpp"
 
-// core / cia / vram inspect
+// core / vram inspect
 #define	BLITTER_PAGE	0x04
 #define CORE_PAGE	0x08
+#define KEYBOARD_PAGE	0x09
 #define	TIMER_PAGE	0x0a
 #define SOUND_PAGE	0x0c
 #define	ROM_PAGE	0xfe
@@ -47,7 +48,11 @@ public:
 	void reset();
 	
 	int32_t get_cpu_cycle_saldo() { return cpu_cycle_saldo; }
-	uint32_t get_sound_cycle_saldo() { return sound_cycle_saldo; }
+	uint32_t get_sound_cycle_saldo() {
+		uint32_t result = sound_cycle_saldo;
+		sound_cycle_saldo = 0;
+		return result;
+	}
 	
 	enum output_states run(bool debug);
 	void run_blitter();

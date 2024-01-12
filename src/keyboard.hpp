@@ -24,8 +24,8 @@ private:
 	int32_t microseconds_per_frame = 1000000 / FPS;
 	int32_t microseconds_remaining{0};
 	int32_t time_to_next{0};
-	int32_t repeat_delay_ms; // in milliseconds
-	int32_t repeat_speed_ms; // in milliseconds
+	int16_t repeat_delay_ms; // in milliseconds
+	int16_t repeat_speed_ms; // in milliseconds
 	
 	uint8_t last_char;
 	
@@ -49,6 +49,9 @@ public:
 	inline void enable_events() { generate_events = true; }
 	inline void disable_events() { generate_events = false; }
 	inline void purge() { head = tail; }
+	
+	uint8_t io_read8(uint16_t address);
+	void io_write8(uint16_t address, uint8_t value);
 };
 
 #endif

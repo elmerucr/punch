@@ -7,6 +7,7 @@
 
 #include "common.hpp"
 #include "core.hpp"
+#include "keyboard.hpp"
 
 extern uint8_t rom[];
 
@@ -65,6 +66,8 @@ uint8_t core_t::read8(uint16_t address)
 			return blitter->io_palette_read8(address);
 		case CORE_PAGE:
 			return io_read8(address);
+		case KEYBOARD_PAGE:
+			return system->keyboard->io_read8(address);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
 		case SOUND_PAGE:
@@ -95,6 +98,9 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case CORE_PAGE:
 			io_write8(address, value);
 			break;
+		case KEYBOARD_PAGE:
+			system->keyboard->io_write8(address, value);
+			break;
 		case TIMER_PAGE:
 			timer->io_write_byte(address &0xff, value);
 			break;
@@ -122,8 +128,6 @@ void core_t::reset()
 
 enum output_states core_t::run(bool debug)
 {
-	sound_cycle_saldo = 0;
-	
 	enum output_states output_state = NORMAL;
 	
 	do {

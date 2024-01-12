@@ -199,8 +199,6 @@ void host_t::video_init()
 	/*
 	 * Create two textures that are able to refresh very frequently
 	 */
-	core_texture = nullptr;
-	debugger_texture = nullptr;
 	
 	create_core_texture(video_linear_filtering);
 	create_debugger_texture(video_linear_filtering);
@@ -518,7 +516,7 @@ bool host_t::events_yes_no()
 				checking = false;
 			}
 		}
-		std::this_thread::sleep_for(std::chrono::microseconds(40000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 	return return_value;
 }

@@ -244,3 +244,54 @@ void keyboard_t::reset()
 	repeat_speed_ms = 50;
 	head = tail = 0;
 }
+
+uint8_t keyboard_t::io_read8(uint16_t address)
+{
+	if (address & 0x80) {
+		return system->host->keyboard_state[address & 0x7f];
+	}
+	
+	switch (address & 0xff) {
+		case 0x00:
+			// status register
+			return events_waiting() ? 0b1 : 0b0;
+		case 0x02:
+			return (repeat_delay_ms & 0xff00) >> 8;
+		case 0x03:
+			return repeat_delay_ms & 0xff;
+		case 0x04:
+			return (repeat_speed_ms & 0xff00) >> 8;
+		case 0x05:
+			return repeat_speed_ms & 0xff;
+		case 0x06:
+			return pop_event();
+		default:
+			return 0x00;
+	}
+}
+
+void keyboard_t::io_write8(uint16_t address, uint8_t value)
+{
+	switch (address & 0xff) {
+		case 0x01:
+			// control register
+			if (value & 0b100000000) head = tail;
+			break;
+		case 0x02:
+			repeat_delay_ms = (repeat_delay_ms & 0x00ff) | (value << 8);
+			break;
+		case 0x03:
+			repeat_delay_ms = (repeat_delay_ms & 0xff00) | value;
+			//if (repeat_speed_ms == 0) repeat_speed_ms = 1;
+			break;
+		case 0x04:
+			repeat_speed_ms = (repeat_speed_ms & 0x00ff) | (value << 8);
+			break;
+		case 0x05:
+			repeat_speed_ms = (repeat_speed_ms & 0xff00) | value;
+			if (repeat_speed_ms == 0) repeat_speed_ms = 1;
+			break;
+		default:
+			break;
+	}
+}
