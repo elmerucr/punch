@@ -79,9 +79,6 @@ public:
 	tile_surface_t tile_surface[8];
 	surface_t surface[8];
 	
-	surface_t font;
-	surface_t turn_text;
-	
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
 	
@@ -104,11 +101,11 @@ public:
 	/*
 	 * all return number of pixels changed
 	 */
-	uint32_t blit(const surface_t *src, surface_t *dst);
 	uint32_t blit(const uint8_t s, const uint8_t d);
+	uint32_t blit(const surface_t *src, surface_t *dst);
 	uint32_t tile_blit(const tile_surface_t *ts, const surface_t *src, surface_t *dst);
-	uint32_t clear_surface(const surface_t *s);
 	uint32_t clear_surface(const uint8_t s);
+	uint32_t clear_surface(const surface_t *s);
 	
 	void update_framebuffer();
 	

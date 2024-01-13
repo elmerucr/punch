@@ -157,7 +157,7 @@ void core_t::run_blitter()
 {
 	// TODO: to be removed!!
 	blitter->clear_surface(7);
-	blitter->blit(&blitter->turn_text, &blitter->surface[7]);
+//	blitter->blit(&blitter->turn_text, &blitter->surface[7]);
 }
 
 uint8_t core_t::io_read8(uint16_t address)

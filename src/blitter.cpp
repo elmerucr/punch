@@ -21,7 +21,9 @@ blitter_ic::blitter_ic()
 	
 	palette = new uint16_t[256];
 	
-//	// std RGB332 palette
+//	/*
+//	 * std RGB332 palette
+//	 */
 //	for (int i = 0; i < 256; i++) {
 //		uint16_t r = (i & 0b11100000) >> 5;
 //		uint16_t g = (i & 0b00011100) >> 2;
@@ -33,69 +35,40 @@ blitter_ic::blitter_ic()
 //		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
 //	}
 	
-	// different palette rrggbbii system, ii shared for all colors
-	// ii is not linear
+	/*
+	 * Palette uses RRGGBBII system. R, G and B uses two bits and have
+	 * 4 levels each (0.00, 0.33, 0.66 and 1.00 of max). On top of that,
+	 * the intensity level (II) is shared between all channels.
+	 * Final color levels are RR * II, GG * II and BB * II.
+	 * II is not linear, see below. This systems results in a nice palette
+	 * with many dark shades as well to choose from (compared to RGB332).
+	 *
+	 * Inspired by: https://www.bigmessowires.com/2008/07/04/video-palette-setup/
+	 */
 	for (int i = 0; i < 256; i++) {
 		uint16_t r = (i & 0b11000000) >> 6;
 		uint16_t g = (i & 0b00110000) >> 4;
 		uint16_t b = (i & 0b00001100) >> 2;
 		uint16_t s = (i & 0b00000011) >> 0;
 		uint16_t factor = 0;
+		
 		switch (s) {
 			case 0b00: factor = 6; break;
 			case 0b01: factor = 9; break;
 			case 0b10: factor = 13; break;
 			case 0b11: factor = 15; break;
 		}
+		
 		r = factor * (r) / 3;
 		g = factor * (g) / 3;
 		b = factor * (b) / 3;
-//		r = (r << 2) | s;
-//		g = (g << 2) | s;
-//		b = (b << 2) | s;
-		//printf("No:%03i r:%02i g:%02i b:%02i\n", i, r, g, b);
+
 		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
 	}
 
 	font_4x6 = new uint8_t[8192];
 	for (int i = 0; i < 8192; i++) font_4x6[i] = 0;
 	init_font_4x6();
-	
-	/*
-	 * available font
-	 */
-	font.flags_0 = 0b01000000;
-	font.flags_1 = 0b00000000;
-	font.fg_col = 0b00111000;
-	font.keycolor = PUNCH_BLUE;
-	font.w = 4;
-	font.h = 6;
-	
-	tile_surface_t text_buffer;
-	text_buffer.columns = 80;
-	text_buffer.rows = 4;
-	text_buffer.x = 0;
-	text_buffer.y = 0;
-	text_buffer.base = 0x10000;
-	for (int i=0; i<256; i++) {
-		vram[text_buffer.base + i] = i;
-	}
-	vram[text_buffer.base + 0x14] = 0x45;	// E
-	vram[text_buffer.base + 0x15] = 0x6c;	// l
-	vram[text_buffer.base + 0x16] = 0x6d;	// m
-	vram[text_buffer.base + 0x17] = 0x65;	// e
-	vram[text_buffer.base + 0x18] = 0x72;	// r
-	
-	//surface turn_text;
-	turn_text.index = 0;
-	turn_text.flags_0 = 0b00000000;
-	turn_text.flags_1 = 0b00010000;
-	turn_text.base= 0x30000;
-	turn_text.w = 320;
-	turn_text.h = 24;
-	turn_text.x = 50;
-	turn_text.y = 65;
-	tile_blit(&text_buffer, &font, &turn_text);
 }
 
 blitter_ic::~blitter_ic()

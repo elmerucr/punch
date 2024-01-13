@@ -39,6 +39,7 @@ public:
 
 	bool hex_string_to_int(const char *temp_string, uint32_t *return_value);
 private:
+	surface_t font;
 	surface_t framebuffer;
 	tile_surface_t character_screen;
 	surface_t bruce;

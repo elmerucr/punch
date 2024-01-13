@@ -11,7 +11,6 @@
 #include "keyboard.hpp"
 #include "debugger.hpp"
 #include "stats.hpp"
-#include "hud.hpp"
 
 system_t::system_t()
 {
@@ -37,8 +36,6 @@ system_t::system_t()
 	
 	stats = new stats_t(this);
 	
-	hud = new hud_t(this);
-	
 	/*
 	 * Default start mode
 	 */
@@ -50,7 +47,6 @@ system_t::system_t()
 
 system_t::~system_t()
 {
-	delete hud;
 	delete stats;
 	delete debugger;
 	delete keyboard;

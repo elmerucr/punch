@@ -58,9 +58,11 @@ debugger_t::debugger_t(system_t *s)
 	framebuffer.h = MAX_SCANLINES;
 	framebuffer.bg_col = 0b00000000;
 	
-	blitter->font.flags_0 = 0b01001101;
-	blitter->font.flags_1 = 0b00000000;
-	blitter->font.keycolor = PUNCH_BLUE;
+	font.w = 4;
+	font.h = 6;
+	font.flags_0 = 0b01001101;
+	font.flags_1 = 0b00000000;
+	font.keycolor = PUNCH_BLUE;
 
 	character_screen.columns = MAX_PIXELS_PER_SCANLINE / 4;
 	character_screen.rows = MAX_SCANLINES / 6;
@@ -119,7 +121,7 @@ debugger_t::~debugger_t()
 void debugger_t::redraw()
 {
 	blitter->clear_surface(&framebuffer);
-	blitter->tile_blit(&character_screen, &blitter->font, &framebuffer);
+	blitter->tile_blit(&character_screen, &font, &framebuffer);
 	
 	static int state = 0;
 	static int wait = 100;
