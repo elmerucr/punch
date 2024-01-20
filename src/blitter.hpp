@@ -99,11 +99,14 @@ public:
 	}
 	
 	/*
-	 * all return number of pixels changed
+	 * All return number of pixels changed
 	 */
 	uint32_t blit(const uint8_t s, const uint8_t d);
 	uint32_t blit(const surface_t *src, surface_t *dst);
+	
+	uint32_t tile_blit(const uint8_t ts, const uint8_t s, const uint8_t d);
 	uint32_t tile_blit(const tile_surface_t *ts, const surface_t *src, surface_t *dst);
+	
 	uint32_t clear_surface(const uint8_t s);
 	uint32_t clear_surface(const surface_t *s);
 	
@@ -117,6 +120,10 @@ public:
 	uint16_t *framebuffer;
 	uint16_t *palette;
 private:
+	uint8_t index1{0};
+	uint8_t index2{0};
+	uint8_t index3{0};
+	
 	uint8_t *font_4x6;
 	void init_font_4x6();
 };

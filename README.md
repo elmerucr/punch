@@ -4,8 +4,6 @@
 
 ## Screenshots
 
-Screenshot with scanlines.
-
 ![punch](./docs/20240108_screenshot.png)
 
 ## Memory Map

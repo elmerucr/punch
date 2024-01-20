@@ -21,7 +21,6 @@ class core_t;
 class keyboard_t;
 class debugger_t;
 class stats_t;
-class hud_t;
 
 class system_t {
 private:
@@ -36,7 +35,6 @@ public:
 	keyboard_t *keyboard;
 	debugger_t *debugger;
 	stats_t *stats;
-	hud_t *hud;
 	
 	enum mode current_mode;
 	void switch_mode();

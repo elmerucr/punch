@@ -129,7 +129,7 @@ void system_t::run()
 			core->sound->run(audio_cycles - sound_cycle_saldo);
 		}
 		
-		core->run_blitter(); // FIXME: run always?
+		//core->run_blitter(); // FIXME: run always?
 		
 		core->blitter->update_framebuffer();
 		

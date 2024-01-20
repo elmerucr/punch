@@ -55,7 +55,6 @@ public:
 	}
 	
 	enum output_states run(bool debug);
-	void run_blitter();
 	
 	uint8_t read8(uint16_t address);
 	void write8(uint16_t address, uint8_t value);

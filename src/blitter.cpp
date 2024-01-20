@@ -14,7 +14,7 @@ blitter_ic::blitter_ic()
 	vram = new uint8_t[VRAM_SIZE];
 	
 	for (int i = 0; i < VRAM_SIZE; i++) {
-		vram[i] = (i & 0x40) ? 0xff : 0x00;
+		vram[i] = (i & 0x40) ? 0xfc : 0x00;
 	}
 	
 	framebuffer = new uint16_t[PIXELS];
@@ -80,7 +80,15 @@ blitter_ic::~blitter_ic()
 }
 
 /*
- * - Check with keycolor
+ * Short indexed version. Returns no. of pixels written.
+ */
+uint32_t blitter_ic::blit(const uint8_t s, const uint8_t d)
+{
+	return blit(&surface[s & 0b111], &surface[d & 0b111]);
+}
+
+/*
+ * Returns number of pixels written.
  */
 uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 {
@@ -193,9 +201,9 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	return pixelcount;
 }
 
-uint32_t blitter_ic::blit(const uint8_t s, const uint8_t d)
+uint32_t blitter_ic::tile_blit(const uint8_t ts, const uint8_t s, const uint8_t d)
 {
-	return blit(&surface[s & 0b111], &surface[d & 0b111]);
+	return tile_blit(&tile_surface[ts & 0b111], &surface[s & 0b111], &surface[d & 0b111]);
 }
 
 uint32_t blitter_ic::tile_blit(const tile_surface_t *ts, const surface_t *src, surface_t *dst)
@@ -542,7 +550,12 @@ uint8_t blitter_ic::io_read8(uint16_t address)
 				return 0x00;
 		}
 	} else {
-		return 0x00;
+		switch (address & 0xff) {
+			case 0x02:
+				return index1;
+			default:
+				return 0x00;
+		}
 	}
 }
 
@@ -560,7 +573,19 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 				break;
 		}
 	} else {
-		
+		switch (address & 0xff) {
+			case 0x01:
+				// control register
+				if (value & 0b00000001) {
+					// clear surface
+					clear_surface(index1);
+				}
+				break;
+			case 0x02:
+				index1 = value & 0b111;
+			default:
+				break;
+		}
 	}
 }
 
