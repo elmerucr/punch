@@ -121,7 +121,7 @@ debugger_t::~debugger_t()
 void debugger_t::redraw()
 {
 	blitter->clear_surface(&framebuffer);
-	blitter->tile_blit(&character_screen, &font, &framebuffer);
+	blitter->tile_blit(&font, &framebuffer, &character_screen);
 	
 	static int state = 0;
 	static int wait = 100;

@@ -104,8 +104,8 @@ public:
 	uint32_t blit(const uint8_t s, const uint8_t d);
 	uint32_t blit(const surface_t *src, surface_t *dst);
 	
-	uint32_t tile_blit(const uint8_t ts, const uint8_t s, const uint8_t d);
-	uint32_t tile_blit(const tile_surface_t *ts, const surface_t *src, surface_t *dst);
+	uint32_t tile_blit(const uint8_t s, const uint8_t d, const uint8_t ts);
+	uint32_t tile_blit(const surface_t *src, surface_t *dst, const tile_surface_t *ts);
 	
 	uint32_t clear_surface(const uint8_t s);
 	uint32_t clear_surface(const surface_t *s);
@@ -120,6 +120,7 @@ public:
 	uint16_t *framebuffer;
 	uint16_t *palette;
 private:
+	uint8_t index0{0};
 	uint8_t index1{0};
 	uint8_t index2{0};
 	uint8_t index3{0};

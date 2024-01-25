@@ -70,6 +70,8 @@ uint8_t core_t::read8(uint16_t address)
 			return system->keyboard->io_read8(address);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
+		case VRAM_PEEK_PAGE:
+			return blitter->vram[((vram_peek << 8) | (address & 0xff)) & VRAM_SIZE_MASK];
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
 		case SOUND_PAGE+2:
@@ -103,6 +105,9 @@ void core_t::write8(uint16_t address, uint8_t value) {
 			break;
 		case TIMER_PAGE:
 			timer->io_write_byte(address &0xff, value);
+			break;
+		case VRAM_PEEK_PAGE:
+			blitter->vram[((vram_peek << 8) | (address & 0xff)) & VRAM_SIZE_MASK] = value;
 			break;
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
@@ -155,13 +160,19 @@ enum output_states core_t::run(bool debug)
 
 uint8_t core_t::io_read8(uint16_t address)
 {
-	switch (address & 0xf) {
-		case 0x0:
+	switch (address & 0x0f) {
+		case 0x00:
 			// status register
 			return irq_line ? 0 : 1;
-		case 0x1:
+		case 0x01:
 			// control register
 			return generate_interrupts ? 1 : 0;
+		case 0x02:
+			// vram peek high byte
+			return (vram_peek & 0xff00) >> 8;
+		case 0x03:
+			// vram peek low byte
+			return vram_peek & 0x00ff;
 		default:
 			return 0;
 	}
@@ -169,15 +180,23 @@ uint8_t core_t::io_read8(uint16_t address)
 
 void core_t::io_write8(uint16_t address, uint8_t value)
 {
-	switch (address & 0xf) {
-		case 0x0:
+	switch (address & 0x0f) {
+		case 0x00:
 			if ((value & 0b1) && (!irq_line)) {
 				exceptions->release(irq_number);
 				irq_line = true;
 			}
 			break;
-		case 0x1:
+		case 0x01:
 			generate_interrupts = (value & 0b1) ? true : false;
+			break;
+		case 0x02:
+			// vram peek high byte
+			vram_peek = (vram_peek & 0x00ff) | ((value & 0x0f) << 8);
+			break;
+		case 0x03:
+			// vram peek low byte
+			vram_peek = (vram_peek & 0xff00) | value;
 			break;
 		default:
 			break;

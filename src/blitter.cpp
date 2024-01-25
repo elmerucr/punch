@@ -36,7 +36,7 @@ blitter_ic::blitter_ic()
 //	}
 	
 	/*
-	 * Palette uses RRGGBBII system. R, G and B uses two bits and have
+	 * A palette using RRGGBBII system. R, G and B use two bits and have
 	 * 4 levels each (0.00, 0.33, 0.66 and 1.00 of max). On top of that,
 	 * the intensity level (II) is shared between all channels.
 	 * Final color levels are RR * II, GG * II and BB * II.
@@ -59,9 +59,9 @@ blitter_ic::blitter_ic()
 			case 0b11: factor = 15; break;
 		}
 		
-		r = factor * (r) / 3;
-		g = factor * (g) / 3;
-		b = factor * (b) / 3;
+		r = (factor * r) / 3;
+		g = (factor * g) / 3;
+		b = (factor * b) / 3;
 
 		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
 	}
@@ -201,12 +201,12 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	return pixelcount;
 }
 
-uint32_t blitter_ic::tile_blit(const uint8_t ts, const uint8_t s, const uint8_t d)
+uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t ts)
 {
-	return tile_blit(&tile_surface[ts & 0b111], &surface[s & 0b111], &surface[d & 0b111]);
+	return tile_blit(&surface[s & 0b111], &surface[d & 0b111], &tile_surface[ts & 0b111]);
 }
 
-uint32_t blitter_ic::tile_blit(const tile_surface_t *ts, const surface_t *src, surface_t *dst)
+uint32_t blitter_ic::tile_blit(const surface_t *src, surface_t *dst, const tile_surface_t *ts)
 {
 	uint32_t pixelcount = 0;
 	
@@ -552,7 +552,13 @@ uint8_t blitter_ic::io_read8(uint16_t address)
 	} else {
 		switch (address & 0xff) {
 			case 0x02:
+				return index0;
+			case 0x03:
 				return index1;
+			case 0x04:
+				return index2;
+			case 0x05:
+				return index3;
 			default:
 				return 0x00;
 		}
@@ -576,13 +582,23 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 		switch (address & 0xff) {
 			case 0x01:
 				// control register
-				if (value & 0b00000001) {
-					// clear surface
-					clear_surface(index1);
-				}
+				if	(value & 0b00000001) clear_surface(index1);
+				else if	(value & 0b00000010) blit(index0, index1);
+				else if	(value & 0b00000100) tile_blit(index0, index1, index2);
+				
 				break;
 			case 0x02:
+				index0 = value & 0b111;
+				break;
+			case 0x03:
 				index1 = value & 0b111;
+				break;
+			case 0x04:
+				index2 = value & 0b111;
+				break;
+			case 0x05:
+				index3 = value & 0b111;
+				break;
 			default:
 				break;
 		}
