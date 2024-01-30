@@ -56,7 +56,7 @@ struct surface_t {
 	uint8_t bg_col;
 	
 	uint8_t index;
-	uint32_t base;
+	uint16_t base_page;
 	int16_t x;
 	int16_t y;
 	uint16_t w;

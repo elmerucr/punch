@@ -21,7 +21,7 @@ core_t::core_t(system_t *s)
 	 * Set up framebuffer surface.
 	 * TODO: Could be done from rom as well...
 	 */
-	blitter->surface[7].base = FRAMEBUFFER;
+	blitter->surface[7].base_page = FRAMEBUFFER_PAGE;
 	blitter->surface[7].x = 0;
 	blitter->surface[7].y = 0;
 	blitter->surface[7].w = MAX_PIXELS_PER_SCANLINE;
@@ -192,7 +192,7 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 			break;
 		case 0x02:
 			// vram peek high byte
-			vram_peek = (vram_peek & 0x00ff) | ((value & 0x0f) << 8);
+			vram_peek = (vram_peek & 0x00ff) | (value << 8);
 			break;
 		case 0x03:
 			// vram peek low byte

@@ -144,7 +144,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 			 */
 			switch ((src->flags_0 & 0b11000000) >> 6) {
 				case 0b00:
-					px = vram[src->base + (offset + (x >> dw) + (src->w * (y >> dh))) & VRAM_SIZE_MASK];
+					px = vram[(src->base_page << 8) + (offset + (x >> dw) + (src->w * (y >> dh))) & VRAM_SIZE_MASK];
 					break;
 				case 0b01:
 				case 0b10:
@@ -164,34 +164,34 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 			switch (src->flags_0 & 0b1101) {
 				case 0b0000:
 				case 0b1000:
-					vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
+					vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 					break;
 				case 0b0100:
 				case 0b1100:
-					vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
+					vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
 					break;
 				case 0b0001:
 					if (px != src->keycolor) {
-						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
+						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 					}
 					break;
 				case 0b0101:
 					if (px != src->keycolor) {
-						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
+						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
 					}
 					break;
 				case 0b1001:
 					if (px != src->keycolor) {
-						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
+						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 					} else {
-						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
+						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
 					}
 					break;
 				case 0b1101:
 					if (px != src->keycolor) {
-						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
+						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
 					} else {
-						vram[(dest->base + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
+						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
 					}
 					break;
 			}
@@ -240,7 +240,7 @@ uint32_t blitter_ic::clear_surface(const surface_t *s)
 {
 	uint32_t pixels = s->w * s->h;
 	for (uint32_t i=0; i < pixels; i++) {
-		vram[(s->base + i) & VRAM_SIZE_MASK] = s->bg_col;
+		vram[((s->base_page << 8) + i) & VRAM_SIZE_MASK] = s->bg_col;
 	}
 	return pixels;
 }
@@ -608,6 +608,6 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 void blitter_ic::update_framebuffer()
 {
 	for (int i = 0; i < PIXELS; i++) {
-		framebuffer[i] = palette[vram[FRAMEBUFFER + i]];
+		framebuffer[i] = palette[vram[(FRAMEBUFFER_PAGE << 8) + i]];
 	}
 }

@@ -61,7 +61,7 @@ void system_t::switch_mode()
 	keyboard->purge();
 	if (current_mode == RUN_MODE) {
 		debugger->status();
-		debugger->terminal->printf("\n\nbreak at $%04x: switching to debug mode", core->cpu->get_pc());
+		debugger->terminal->printf(", break at $%04x", core->cpu->get_pc());
 		switch_to_debug_mode();
 	} else {
 		switch_to_run_mode();
@@ -128,8 +128,6 @@ void system_t::run()
 		if (sound_cycle_saldo < audio_cycles ) {
 			core->sound->run(audio_cycles - sound_cycle_saldo);
 		}
-		
-		//core->run_blitter(); // FIXME: run always?
 		
 		core->blitter->update_framebuffer();
 		

@@ -53,7 +53,7 @@ debugger_t::debugger_t(system_t *s)
 	blitter = new blitter_ic();
 	
 	/* framebuffer */
-	framebuffer.base = FRAMEBUFFER;
+	framebuffer.base_page = FRAMEBUFFER_PAGE;
 	framebuffer.w = MAX_PIXELS_PER_SCANLINE;
 	framebuffer.h = MAX_SCANLINES;
 	framebuffer.bg_col = 0b00000000;
@@ -75,19 +75,20 @@ debugger_t::debugger_t(system_t *s)
 	terminal->bg_color = bg;
 	terminal->clear();
 	print_version();
-	
-	for (int i=0; i<(3*21*8); i++) {
-		blitter->vram[0x300+i] = bruce_data[i];
-	}
+
 	bruce.index = 2;
-	bruce.base = 0x300;
+	bruce.base_page = 0x0003;
 	bruce.keycolor = 0x01;
 	bruce.flags_0 = 0b00000001;
 	bruce.flags_1 = 0b00000001;
 	bruce.w = 8;
 	bruce.h = 21;
-	bruce.x = 130;
-	bruce.y = 159;
+	bruce.x = 54;
+	bruce.y = 123;
+	
+	for (int i=0; i<(3*21*8); i++) {
+		blitter->vram[(bruce.base_page << 8) + i] = bruce_data[i];
+	}
 }
 
 void debugger_t::print_version()
@@ -142,7 +143,7 @@ void debugger_t::redraw()
 		
 		state++; if (state == 8) state = 0;
 	}
-	wait++; if (wait >300) wait = 0;
+	wait++; if (wait > 350) wait = 0;
 	
 	blitter->blit(&bruce, &framebuffer);
 }
@@ -352,12 +353,12 @@ void debugger_t::prompt()
 void debugger_t::status()
 {
 	terminal->clear();
-	terminal->printf("__cpu__________________________________________________________");
+	terminal->printf("_cpu___________________________________________________________");
 	system->core->cpu->status(text_buffer, 2048);
 	terminal->printf("\n%s", text_buffer);
-	terminal->printf("\n\n__disassembly________________________");
+	terminal->printf("\n\n_disassembly_________________________");
 	uint16_t pc = system->core->cpu->get_pc();
-	for (int i=0; i<8; i++) {
+	for (int i=0; i<6; i++) {
 		if (system->core->cpu->breakpoint_array[pc]) {
 			terminal->fg_color = fg_acc;
 		}
@@ -366,7 +367,7 @@ void debugger_t::status()
 		terminal->fg_color = fg;
 	}
 	
-	terminal->printf("\n\n__usp______ssp_____   _timer__cr__sr___bpm______cycles_  _IRQ_State__Name______");
+	terminal->printf("\n\n_usp___  _ssp___  t_____s___bpm______cycles  IRQ_s__Name_____");
 	
 	for (int i=0; i<8; i++) {
 		uint16_t usp = (system->core->cpu->get_us() + i) & 0xffff;
@@ -376,14 +377,14 @@ void debugger_t::status()
 		
 		system->core->exceptions->status(text_buffer, 2048, i);
 		
-		terminal->printf("\n %04x %02x  %04x %02x        %u   %s %s %5u  %10u     %s",
+		terminal->printf("\n%04x %02x  %04x %02x  %u %s %s %5u  %10u   %s",
 				 usp,
 				 usp_b,
 				 ssp,
 				 ssp_b,
 				 i,
-				 system->core->timer->io_read_byte(0x1) & (1 << i) ? " on" : "off",
-				 system->core->timer->io_read_byte(0x0) & (1 << i) ? "irq" : "   ",
+				 system->core->timer->io_read_byte(0x01) & (1 << i) ? " on" : "off",
+				 system->core->timer->io_read_byte(0x00) & (1 << i) ? "*" : "-",
 				 system->core->timer->get_timer_bpm(i),
 				 system->core->timer->get_timer_clock_interval(i) - system->core->timer->get_timer_counter(i),
 				 text_buffer);

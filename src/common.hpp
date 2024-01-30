@@ -12,20 +12,20 @@
  * Version information
  */
 #define PUNCH_MAJOR_VERSION    0
-#define PUNCH_MINOR_VERSION    5
-#define PUNCH_BUILD            20240125
+#define PUNCH_MINOR_VERSION    6
+#define PUNCH_BUILD            20240130
 #define PUNCH_YEAR             2024
 
 /*
  * Video
  */
-#define VRAM_SIZE		0x100000
+#define VRAM_SIZE		0x1000000
 #define VRAM_SIZE_MASK		(VRAM_SIZE-1)
 #define FPS			60
-#define MAX_PIXELS_PER_SCANLINE	320
-#define MAX_SCANLINES		180
+#define MAX_PIXELS_PER_SCANLINE	256
+#define MAX_SCANLINES		144
 #define PIXELS			(MAX_PIXELS_PER_SCANLINE*MAX_SCANLINES)
-#define FRAMEBUFFER		0x0e0000
+#define FRAMEBUFFER_PAGE	0x0e00
 
 /*
  * Audio
