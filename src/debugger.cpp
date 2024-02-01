@@ -83,8 +83,8 @@ debugger_t::debugger_t(system_t *s)
 	bruce.flags_1 = 0b00000001;
 	bruce.w = 8;
 	bruce.h = 21;
-	bruce.x = 54;
-	bruce.y = 123;
+	bruce.x = 30;
+	bruce.y = 159;
 	
 	for (int i=0; i<(3*21*8); i++) {
 		blitter->vram[(bruce.base_page << 8) + i] = bruce_data[i];
@@ -143,7 +143,7 @@ void debugger_t::redraw()
 		
 		state++; if (state == 8) state = 0;
 	}
-	wait++; if (wait > 350) wait = 0;
+	wait++; if (wait > 300) wait = 0;
 	
 	blitter->blit(&bruce, &framebuffer);
 }
@@ -358,7 +358,7 @@ void debugger_t::status()
 	terminal->printf("\n%s", text_buffer);
 	terminal->printf("\n\n_disassembly_________________________");
 	uint16_t pc = system->core->cpu->get_pc();
-	for (int i=0; i<6; i++) {
+	for (int i=0; i<8; i++) {
 		if (system->core->cpu->breakpoint_array[pc]) {
 			terminal->fg_color = fg_acc;
 		}

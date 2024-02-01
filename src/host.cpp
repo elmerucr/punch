@@ -270,7 +270,7 @@ void host_t::update_screen()
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
 	if (system->current_mode == DEBUG_MODE) {
-		const SDL_Rect viewer = { (4*8*MAX_PIXELS_PER_SCANLINE)/5, (8*MAX_SCANLINES)/5, (8*MAX_PIXELS_PER_SCANLINE)/5, (9*8*MAX_PIXELS_PER_SCANLINE)/(5*16) };
+		const SDL_Rect viewer = { (4*8*MAX_PIXELS_PER_SCANLINE)/5, 0, (8*MAX_PIXELS_PER_SCANLINE)/5, (9*8*MAX_PIXELS_PER_SCANLINE)/(5*16) };
 		//SDL_SetTextureAlphaMod(core_texture, 255);
 		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
 		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
@@ -509,7 +509,6 @@ bool host_t::events_yes_no()
 		SDL_PollEvent(&event);
 		if (event.type == SDL_KEYDOWN) {
 			if (event.key.keysym.sym == SDLK_y) {
-				printf("YES!\n");
 				checking = false;
 			} else if (event.key.keysym.sym == SDLK_n) {
 				return_value = false;

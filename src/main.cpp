@@ -22,4 +22,3 @@ int main(int argc, char **argv)
 // page for color index table (so default to hardware table etc)
 // then 1, 2, 4, 8 and 16 bits per pixel will become possible
 // 16mb ram done
-
