@@ -129,6 +129,8 @@ void core_t::reset()
 	sound->reset();
 	timer->reset();
 	cpu->reset();
+	
+	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 }
 
 enum output_states core_t::run(bool debug)
@@ -153,6 +155,7 @@ enum output_states core_t::run(bool debug)
 			exceptions->pull(irq_number);
 			irq_line = false;
 		}
+		blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 	}
 	
 	return output_state;

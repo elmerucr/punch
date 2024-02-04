@@ -15,8 +15,6 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-// basepage 00e0 not working?
-// next step: tile surface base becomes base page
 // then m view vram and colors
 // m view vram as text
 // page for color index table (so default to hardware table etc)

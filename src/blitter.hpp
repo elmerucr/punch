@@ -66,7 +66,7 @@ struct surface_t {
 struct tile_surface_t {
 	uint8_t columns;
 	uint8_t rows;
-	uint32_t base;
+	uint16_t base_page;
 	int16_t x;
 	int16_t y;
 };
@@ -110,6 +110,9 @@ public:
 	uint32_t clear_surface(const uint8_t s);
 	uint32_t clear_surface(const surface_t *s);
 	
+	void set_pixel_saldo(uint32_t s) { pixel_saldo = s; }
+	uint32_t get_pixel_saldo() { return pixel_saldo; }
+	
 	void update_framebuffer();
 	
 //	uint32_t rectangle();
@@ -124,6 +127,13 @@ private:
 	uint8_t index1{0};
 	uint8_t index2{0};
 	uint8_t index3{0};
+	
+	/*
+	 * To restrain max no of pixels per frame
+	 * At start of frame, set to specific level
+	 * e.g. max. 8 times total pixels in display.
+	 */
+	uint32_t pixel_saldo{0};
 	
 	uint8_t *font_4x6;
 	void init_font_4x6();

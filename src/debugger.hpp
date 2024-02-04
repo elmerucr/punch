@@ -45,9 +45,9 @@ private:
 	surface_t bruce;
 
 	const uint8_t fg = 0x23;
-	const uint8_t fg_acc = 0xc3;
+	const uint8_t fg_acc = 0x33;
 	const uint8_t bg = 0x00;
-	const uint8_t bg_acc = 0x11;
+	const uint8_t bg_acc = 0x55;
 
 	uint8_t irq_no;
 

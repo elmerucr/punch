@@ -66,7 +66,7 @@ debugger_t::debugger_t(system_t *s)
 
 	character_screen.columns = MAX_PIXELS_PER_SCANLINE / 4;
 	character_screen.rows = MAX_SCANLINES / 6;
-	character_screen.base = 0x10000;
+	character_screen.base_page = 0x0100;
 	character_screen.x = 0;
 	character_screen.y = 0;
 	
@@ -121,6 +121,7 @@ debugger_t::~debugger_t()
 
 void debugger_t::redraw()
 {
+	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 	blitter->clear_surface(&framebuffer);
 	blitter->tile_blit(&font, &framebuffer, &character_screen);
 	
@@ -361,10 +362,12 @@ void debugger_t::status()
 	for (int i=0; i<8; i++) {
 		if (system->core->cpu->breakpoint_array[pc]) {
 			terminal->fg_color = fg_acc;
+			terminal->bg_color = bg_acc;
 		}
 		pc += system->core->cpu->disassemble_instruction(text_buffer, pc);
 		terminal->printf("\n%s", text_buffer);
 		terminal->fg_color = fg;
+		terminal->bg_color = bg;
 	}
 	
 	terminal->printf("\n\n_usp___  _ssp___  t_____s___bpm______cycles  IRQ_s__Name_____");
@@ -389,8 +392,9 @@ void debugger_t::status()
 				 system->core->timer->get_timer_clock_interval(i) - system->core->timer->get_timer_counter(i),
 				 text_buffer);
 	}
-
-	terminal->printf("\n\n%i of %i frame cycles done", system->core->get_cpu_cycle_saldo(), CPU_CYCLES_PER_FRAME);
+	
+	terminal->printf("\n\n%6i of %6i frame cycles done", system->core->get_cpu_cycle_saldo(), CPU_CYCLES_PER_FRAME);
+	terminal->printf("\n%6u of %6u pixel writes left for this frame", system->core->blitter->get_pixel_saldo(), MAX_PIXELS_PER_FRAME);
 }
 
 void debugger_t::memory_dump(uint16_t address)

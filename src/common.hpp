@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    6
-#define PUNCH_BUILD            20240201
+#define PUNCH_BUILD            20240204
 #define PUNCH_YEAR             2024
 
 /*
@@ -25,6 +25,7 @@
 #define MAX_PIXELS_PER_SCANLINE	320
 #define MAX_SCANLINES		180
 #define PIXELS			(MAX_PIXELS_PER_SCANLINE*MAX_SCANLINES)
+#define MAX_PIXELS_PER_FRAME	524288	// 512k pixels = 9.1x PIXELS
 #define FRAMEBUFFER_PAGE	0x0e00
 
 /*

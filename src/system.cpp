@@ -61,7 +61,7 @@ void system_t::switch_mode()
 	keyboard->purge();
 	if (current_mode == RUN_MODE) {
 		debugger->status();
-		debugger->terminal->printf(", break at $%04x", core->cpu->get_pc());
+		debugger->terminal->printf("\n\nbreak at $%04x", core->cpu->get_pc());
 		switch_to_debug_mode();
 	} else {
 		switch_to_run_mode();
