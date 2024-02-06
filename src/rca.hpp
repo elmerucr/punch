@@ -2,7 +2,15 @@
  * rca.hpp
  * punch
  *
- * Copyright © 2024 elmerucr. All rights reserved.
+ * Copyright © 2012-2024 elmerucr. All rights reserved.
+ */
+
+/*
+ * rca: random number generation with cellular automaton
+ *
+ * 2012-01-21 c version
+ * 2013-11-11 c++ version
+ *
  */
 
 #ifndef RCA_HPP
@@ -31,7 +39,7 @@ public:
 		 */
 		stat = (1 << 16);
 	}
-	
+
 	/*
 	 * Alternative constructor,uses an uint32_t for init.
 	 */
@@ -80,7 +88,7 @@ public:
 
 		return (uint8_t)((stat<<8)>>24);
 	}
-	
+
 	/*
 	 * Returns status (e.g. to seed another generator), doesn't
 	 * apply rule 30 on internal status.

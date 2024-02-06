@@ -54,14 +54,6 @@
  */
 #define STEEPNESS	4
 
-/*
- * rca: random number generation with cellular automaton
- *
- * 2012-01-21 c version
- * 2013-11-11 c++ version
- *
- */
-
 enum waveforms {
 	SINE = 0,
 	TRIANGLE,
@@ -81,7 +73,7 @@ enum envelope_stages {
 class analog_ic {
 private:
 	uint8_t id;
-	
+
 	int16_t old_buffer;
 	/*
 	 * Basic waveforms
@@ -90,22 +82,22 @@ private:
 	double *triangle_amplitude;
 	double *sawtooth_amplitude;
 	// how to do noise?
-	
+
 	/*
 	 * Envelopes
 	 */
 	double *exponential_increase;
 	double *exponential_decrease;
-	
+
 	bool gate_open;
-	
+
 	uint32_t phase;
 	uint32_t phase_delta;
 	double   phase_remainder;
-	
+
 	double	frequency, _frequency;
 	void 	set_frequency();		// translates digital frequency to real frequency
-	
+
 	enum waveforms waveform;
 
 	uint16_t square_duty;
@@ -119,35 +111,35 @@ private:
 	uint32_t stage_samples;			// no of samples needed to finish current stage
 						// calculated at each start of a new stage
 	uint32_t stage_samples_remaining;
-	
+
 	uint32_t envelope_phase;
 	uint32_t envelope_phase_delta;
 
 	double   envelope_change;
-	
+
 	uint16_t attack;	// 0.0 -  6553.5 ms = 0.0000-6.5536s
 	uint16_t decay;		// 0   - 65535   ms
 	uint16_t sustain;	// 0   - 65535   level value
 	uint16_t release;	// 0   - 65536   ms
-	
+
 	// pitch bend envelope
 	uint16_t pitch_bend_duration;	// 0   - 65536   ms
 	bool     pitch_bend_on;
 	bool     pitch_up;
-	
+
 	uint8_t  pitch_factor;		// uses only bits 0-6 (and transposed +1
 					// so values 1-128
 	double   pitch_equal_tempered_scale[256];
-	
+
 	uint32_t pitch_samples;
 	uint32_t pitch_samples_remaining;
-	
+
 	uint32_t pitch_bend_phase;
 	uint32_t pitch_bend_phase_delta;
-	
+
 	void     pitch_bend_reset();
 	double   pitch_bend();
-	
+
 	rca	uniform_white_noise;
 
 public:
@@ -155,9 +147,9 @@ public:
 	~analog_ic();
 	uint8_t read_byte(uint8_t address);
 	void write_byte(uint8_t address, uint8_t byte);
-	
+
 	void run(uint16_t no_samples, int16_t *buffer);
-	
+
 	inline void set_digital_frequency(uint16_t f) { digital_freq = f; set_frequency(); }
 	inline uint16_t get_digital_frequency() { return digital_freq; }
 };
