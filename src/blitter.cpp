@@ -221,11 +221,11 @@ uint32_t blitter_ic::tile_blit(const surface_t *src, surface_t *dst, const tile_
 	source.x = ts->x;
 	source.y = ts->y;
 	uint32_t tile = ts->base_page << 8;
-	uint32_t fg_color = (ts->base_page << 8) + (ts->columns * ts->rows);
-	uint32_t bg_color = (ts->base_page << 8) + (2 * ts->columns * ts->rows);
+	uint32_t fg_color = (ts->base_page << 8) + (ts->w * ts->h);
+	uint32_t bg_color = (ts->base_page << 8) + (2 * ts->w * ts->h);
 	
-	for (int y = 0; y < ts->rows; y++) {
-		for (int x = 0; x < ts->columns; x++) {
+	for (int y = 0; y < ts->h; y++) {
+		for (int x = 0; x < ts->w; x++) {
 			source.index = vram[tile++ & VRAM_SIZE_MASK];
 			source.fg_col = vram[fg_color++ & VRAM_SIZE_MASK];
 			source.bg_col = vram[bg_color++ & VRAM_SIZE_MASK];

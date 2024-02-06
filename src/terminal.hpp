@@ -36,7 +36,7 @@ public:
 	void get_command(char *c, int length);
 	
 	inline int lines_remaining() {
-		return ts->rows - (cursor_position / ts->columns) - 1;
+		return ts->h - (cursor_position / ts->w) - 1;
 	}
 	
 	uint8_t fg_color{0b00110100};

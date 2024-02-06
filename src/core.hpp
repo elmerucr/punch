@@ -19,12 +19,12 @@
 
 // core / vram inspect
 #define	BLITTER_PAGE	0x04
-#define CORE_PAGE	0x08
+#define CORE_PAGE		0x08
 #define KEYBOARD_PAGE	0x09
-#define	TIMER_PAGE	0x0a
+#define	TIMER_PAGE		0x0a
 #define VRAM_PEEK_PAGE	0x0b
-#define SOUND_PAGE	0x0c
-#define	ROM_PAGE	0xfe
+#define SOUND_PAGE		0x0c
+#define	ROM_PAGE		0xfe
 
 enum output_states {
 	NORMAL,

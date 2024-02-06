@@ -36,6 +36,7 @@
 #define ANALOG_HPP
 
 #include <cstdint>
+#include "rca.hpp"
 
 /*
  * Maximum wavelength (in seconds) at full resolution. This results in
@@ -60,41 +61,6 @@
  * 2013-11-11 c++ version
  *
  */
-
-class rca {
-private:
-	/*
-	 * Will be a 29 cell prng, fits perfectly in a 32 bit register
-	 */
-	uint32_t stat;
-public:
-	/*
-	 * Default constructor, simple init, turn on 1 bit in the
-	 * "middle column", this bit serves also as the least significant
-	 * bit of the byte that's returned.
-	 */
-	rca();
-	
-	/*
-	 * Alternative constructor,uses an uint32_t for init.
-	 */
-	rca(uint32_t number);
-
-	/*
-	 * Generates a "random byte", this function currently actually
-	 * performs two tasks:
-	 *
-	 * (1) Shifts internal status according to rule 30 (Wolfram)
-	 * (2) Outputs part of internal status as 8 bit unsigned integer
-	 */
-	uint8_t byte();
-	
-	/*
-	 * Returns status (e.g. to seed another generator), doesn't
-	 * apply rule 30 on internal status.
-	 */
-	uint32_t status();
-};
 
 enum waveforms {
 	SINE = 0,

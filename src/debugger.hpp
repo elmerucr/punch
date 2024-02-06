@@ -13,6 +13,7 @@
 #include "core.hpp"
 #include "keyboard.hpp"
 #include "terminal.hpp"
+#include "rca.hpp"
 
 class debugger_t {
 public:
@@ -38,6 +39,8 @@ public:
 	void enter_memory_line(char *buffer);
 
 	bool hex_string_to_int(const char *temp_string, uint32_t *return_value);
+	
+	rca bruce_rand;
 private:
 	surface_t font;
 	surface_t framebuffer;

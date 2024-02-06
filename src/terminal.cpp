@@ -10,7 +10,7 @@ terminal_t::terminal_t(system_t *s, tile_surface_t *t, blitter_ic *b)
 	system = s;
 	ts = t;
 	blitter = b;
-	characters = ts->columns * ts->rows;
+	characters = ts->w * ts->h;
 }
 
 void terminal_t::clear()
@@ -36,21 +36,21 @@ void terminal_t::putsymbol(char symbol)
 	cursor_position++;
 	if (cursor_position >= characters) {
 		add_bottom_row();
-		cursor_position -= ts->columns;
+		cursor_position -= ts->w;
 	}
 }
 
 void terminal_t::add_bottom_row()
 {
-	uint16_t no_of_tiles_to_move = characters - ts->columns;
+	uint16_t no_of_tiles_to_move = characters - ts->w;
 
 	for (int i=0; i < no_of_tiles_to_move; i++) {
 		blitter->vram[((ts->base_page << 8) + (0 * characters) + i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + (0 * characters) + ts->columns + i) & VRAM_SIZE_MASK];
+			blitter->vram[((ts->base_page << 8) + (0 * characters) + ts->w + i) & VRAM_SIZE_MASK];
 		blitter->vram[((ts->base_page << 8) + (1 * characters) + i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + (1 * characters) + ts->columns + i) & VRAM_SIZE_MASK];
+			blitter->vram[((ts->base_page << 8) + (1 * characters) + ts->w + i) & VRAM_SIZE_MASK];
 		blitter->vram[((ts->base_page << 8) + (2 * characters) + i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + (2 * characters) + ts->columns + i) & VRAM_SIZE_MASK];
+			blitter->vram[((ts->base_page << 8) + (2 * characters) + ts->w + i) & VRAM_SIZE_MASK];
 	}
 	for (int i=no_of_tiles_to_move; i < characters; i++) {
 		blitter->vram[((ts->base_page << 8) + (0 * characters) + i) & VRAM_SIZE_MASK] = ' ';
@@ -64,18 +64,18 @@ int terminal_t::putchar(int character)
 	uint8_t result = (uint8_t)character;
 	switch (result) {
 		case '\r':
-			cursor_position -= cursor_position % ts->columns;
+			cursor_position -= cursor_position % ts->w;
 			break;
 		case '\n':
-			cursor_position -= cursor_position % ts->columns;
-			if ((cursor_position / ts->columns) == (ts->rows - 1)) {
+			cursor_position -= cursor_position % ts->w;
+			if ((cursor_position / ts->w) == (ts->h - 1)) {
 				add_bottom_row();
 			} else {
-				cursor_position += ts->columns;
+				cursor_position += ts->w;
 			}
 			break;
 		case '\t':
-			while ((cursor_position % ts->columns) & 0b11) {
+			while ((cursor_position % ts->w) & 0b11) {
 				putsymbol(' ');
 			}
 			break;
@@ -154,16 +154,16 @@ void terminal_t::cursor_right()
 	cursor_position++;
 	if (cursor_position > characters - 1) {
 		add_bottom_row();
-		cursor_position -= ts->columns;
+		cursor_position -= ts->w;
 	}
 }
 
 void terminal_t::cursor_up()
 {
-	cursor_position -= ts->columns;
+	cursor_position -= ts->w;
 
 	if (cursor_position >= characters) {
-		cursor_position += ts->columns;
+		cursor_position += ts->w;
 		uint32_t address;
 
 		switch (check_output(true, &address)) {
@@ -179,12 +179,12 @@ void terminal_t::cursor_up()
 
 void terminal_t::cursor_down()
 {
-	cursor_position += ts->columns;
+	cursor_position += ts->w;
 
 	// cursor out of current screen?
 	if (cursor_position >= characters) {
 		//add_bottom_row();
-		cursor_position -= ts->columns;
+		cursor_position -= ts->w;
 		
 		uint32_t address = 0;
 
@@ -207,7 +207,7 @@ void terminal_t::backspace()
 
 	if (pos > min_pos) {
 		cursor_position--;
-		while (pos % ts->columns) {
+		while (pos % ts->w) {
 			blitter->vram[((ts->base_page << 8) + pos - 1) & VRAM_SIZE_MASK] =
 				blitter->vram[((ts->base_page << 8) + pos) & VRAM_SIZE_MASK];
 			blitter->vram[((ts->base_page << 8) + characters + pos - 1) & VRAM_SIZE_MASK] =
@@ -244,9 +244,9 @@ void terminal_t::backspace()
 
 void terminal_t::get_command(char *c, int l)
 {
-	int length = ts->columns < (l-1) ? ts->columns : (l-1);
+	int length = ts->w < (l-1) ? ts->w : (l-1);
 	
-	uint16_t pos = cursor_position - (cursor_position % ts->columns);
+	uint16_t pos = cursor_position - (cursor_position % ts->w);
 	
 	for (int i=0; i<length; i++) {
 		c[i] = blitter->vram[(ts->base_page << 8) + pos + i];
@@ -264,7 +264,7 @@ enum output_type terminal_t::check_output(bool top_down, uint32_t *address)
 {
 	enum output_type output = NOTHING;
 
-	for (int i = 0; i < characters; i += ts->columns) {
+	for (int i = 0; i < characters; i += ts->w) {
 		if (blitter->vram[((ts->base_page << 8) + i + 1)] == ':') {
 			output = MEMORY;
 			char potential_address[5];
@@ -281,19 +281,19 @@ enum output_type terminal_t::check_output(bool top_down, uint32_t *address)
 
 void terminal_t::add_top_row()
 {
-	uint16_t no_of_tiles_to_move = characters - ts->columns;
+	uint16_t no_of_tiles_to_move = characters - ts->w;
 	
 	uint16_t last_tile = characters - 1;
 
 	for (int i=0; i < no_of_tiles_to_move; i++) {
 		blitter->vram[((ts->base_page << 8) + last_tile + (0 * characters) - i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + last_tile + (0 * characters) - ts->columns - i) & VRAM_SIZE_MASK];
+			blitter->vram[((ts->base_page << 8) + last_tile + (0 * characters) - ts->w - i) & VRAM_SIZE_MASK];
 		blitter->vram[((ts->base_page << 8) + last_tile + (1 * characters) - i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + last_tile + (1 * characters) - ts->columns - i) & VRAM_SIZE_MASK];
+			blitter->vram[((ts->base_page << 8) + last_tile + (1 * characters) - ts->w - i) & VRAM_SIZE_MASK];
 		blitter->vram[((ts->base_page << 8) + last_tile + (2 * characters) - i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + last_tile + (2 * characters) - ts->columns - i) & VRAM_SIZE_MASK];
+			blitter->vram[((ts->base_page << 8) + last_tile + (2 * characters) - ts->w - i) & VRAM_SIZE_MASK];
 	}
-	for (int i=0; i < ts->columns; i++) {
+	for (int i=0; i < ts->w; i++) {
 		blitter->vram[((ts->base_page << 8) + (0 * characters) + i) & VRAM_SIZE_MASK] = ' ';
 		blitter->vram[((ts->base_page << 8) + (1 * characters) + i) & VRAM_SIZE_MASK] = fg_color;
 		blitter->vram[((ts->base_page << 8) + (2 * characters) + i) & VRAM_SIZE_MASK] = bg_color;

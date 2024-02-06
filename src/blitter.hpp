@@ -19,6 +19,14 @@
 #define	FLAGS1_XY_FLIP		0b01000000
 
 struct surface_t {
+	int16_t x{0};
+	int16_t y{0};
+
+	uint16_t w{0};
+	uint16_t h{0};
+	
+	uint16_t base_page{0};
+	
 	/*
 	 * Properties related to flags_0 (as encoded inside machine)
 	 * Color related
@@ -33,7 +41,7 @@ struct surface_t {
 	 *
 	 * bits 3 to 5: Reserved
 	 */
-	uint8_t flags_0;
+	uint8_t flags_0{0};
 	
 	/*
 	 * Properties related to flags_1 (as encoded inside machine)
@@ -49,26 +57,24 @@ struct surface_t {
 	 *
 	 * bits 2,3 and 7: Reserved
 	 */
-	uint8_t flags_1;
+	uint8_t flags_1{0};
 	
-	uint8_t keycolor;
-	uint8_t fg_col;
-	uint8_t bg_col;
+	uint8_t fg_col{0};
+	uint8_t bg_col{0};
 	
-	uint8_t index;
-	uint16_t base_page;
-	int16_t x;
-	int16_t y;
-	uint16_t w;
-	uint16_t h;
+	uint8_t keycolor{0};
+	
+	uint8_t index{0};
 };
 
 struct tile_surface_t {
-	uint8_t columns;
-	uint8_t rows;
-	uint16_t base_page;
-	int16_t x;
-	int16_t y;
+	int16_t x{0};
+	int16_t y{0};
+
+	uint16_t w{0};
+	uint16_t h{0};
+
+	uint16_t base_page{0};
 };
 
 class blitter_ic {

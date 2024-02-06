@@ -64,8 +64,8 @@ debugger_t::debugger_t(system_t *s)
 	font.flags_1 = 0b00000000;
 	font.keycolor = PUNCH_BLUE;
 
-	character_screen.columns = MAX_PIXELS_PER_SCANLINE / 4;
-	character_screen.rows = MAX_SCANLINES / 6;
+	character_screen.w = MAX_PIXELS_PER_SCANLINE / 4;
+	character_screen.h = MAX_SCANLINES / 6;
 	character_screen.base_page = 0x0100;
 	character_screen.x = 0;
 	character_screen.y = 0;
@@ -125,26 +125,43 @@ void debugger_t::redraw()
 	blitter->clear_surface(&framebuffer);
 	blitter->tile_blit(&font, &framebuffer, &character_screen);
 	
+	// Bruce is just for fun
 	static int state = 0;
 	static int wait = 100;
+	static bool right = true;
+	static bool change_direction = true;
 	
-	//bruce.index = state & 0b100 ? 1 : 2;
+	right ? bruce.flags_1 &= 0b11101111 : bruce.flags_1 |= 0b00010000;
 	
 	if (wait < 200) {
 		bruce.index = 0;
 		state = 0;
 	} else {
+		if (change_direction) {
+			if (bruce_rand.byte() < 128) right = true; else right = false;
+			change_direction = false;
+		}
+		
 		if (state > 4) {
 			bruce.index = 1;
-			bruce.x += 2; if (bruce.x > 340) bruce.x = -20;
 		} else {
 			bruce.index = 2;
-			bruce.x += 2; if (bruce.x > 340) bruce.x = -20;
+		}
+		
+		bruce.x += 2 * (right ? 1 : -1);
+		if (bruce.x > 340) {
+			bruce.x = -20;
+		} else if (bruce.x < -20) {
+			bruce.x = 340;
 		}
 		
 		state++; if (state == 8) state = 0;
 	}
-	wait++; if (wait > 300) wait = 0;
+	wait++; if (wait > 300) {
+		wait = 0;
+		change_direction = true;
+	}
+	// end Bruce
 	
 	blitter->blit(&bruce, &framebuffer);
 }
