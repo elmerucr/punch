@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    6
-#define PUNCH_BUILD            20240206
+#define PUNCH_BUILD            20240209
 #define PUNCH_YEAR             2024
 
 /*
@@ -46,19 +46,19 @@
 /*
  * Colors similar to C64 colors
  */
-#define PUNCH_BLACK		0x00
-#define PUNCH_WHITE		0xff
-#define PUNCH_RED		0xc6
-#define PUNCH_CYAN		0x7e
+#define PUNCH_BLACK			0x00
+#define PUNCH_WHITE			0xff
+#define PUNCH_RED			0xc6
+#define PUNCH_CYAN			0x7e
 #define PUNCH_PURPLE		0xde
-#define PUNCH_GREEN		0x72
-#define PUNCH_BLUE		0x5d
+#define PUNCH_GREEN			0x72
+#define PUNCH_BLUE			0x5d
 #define PUNCH_YELLOW		0xf7
 #define PUNCH_ORANGE		0xe2
-#define PUNCH_BROWN		0x95
+#define PUNCH_BROWN			0x95
 #define PUNCH_LIGHTRED		0xea
 #define PUNCH_DARKGREY		0xfc
-#define PUNCH_GREY		0xaa
+#define PUNCH_GREY			0xaa
 #define PUNCH_LIGHTGREEN	0xba
 #define PUNCH_LIGHTBLUE		0xaf
 #define PUNCH_LIGHTGREY		0xfe

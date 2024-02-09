@@ -115,7 +115,7 @@ sound_ic::~sound_ic()
 
 uint8_t sound_ic::io_read_byte(uint16_t address)
 {
-	switch (address & 0x300) {
+	switch (address & 0x100) {
 		case 0x000:
 			// sids
 			switch (address & 0x1c) {
@@ -152,25 +152,24 @@ uint8_t sound_ic::io_read_byte(uint16_t address)
 					}
 			}
 		case 0x100:
-			// analogs
-			switch (address & 0xe0) {
+			// analogs + balance/mixing
+			switch (address & 0xf0) {
 				case 0x00:
+				case 0x10:
 					return analog0.read_byte(address & 0x1f);
 				case 0x20:
+				case 0x30:
 					return analog1.read_byte(address & 0x1f);
 				case 0x40:
+				case 0x50:
 					return analog2.read_byte(address & 0x1f);
 				case 0x60:
+				case 0x70:
 					return analog3.read_byte(address & 0x1f);
+				case 0x80:
+					return balance_registers[address & 0x0f];
 				default:
 					return 0x00;
-			}
-		case 0x200:
-			// mixer etc...
-			if ((address & 0xf0) == 0) {
-				return balance_registers[address & 0x0f];
-			} else {
-				return 0x00;
 			}
 		default:
 			return 0x00;
@@ -179,7 +178,7 @@ uint8_t sound_ic::io_read_byte(uint16_t address)
 
 void sound_ic::io_write_byte(uint16_t address, uint8_t byte)
 {
-	switch (address & 0x300) {
+	switch (address & 0x100) {
 		case 0x000:
 			// sids
 			switch (address & 0x60) {
@@ -201,28 +200,29 @@ void sound_ic::io_write_byte(uint16_t address, uint8_t byte)
 			sid_shadow[address & 0x7f] = byte;
 			break;
 		case 0x100:
-			// analogs
-			switch (address & 0xe0) {
+			// analogs + balance/mixing
+			switch (address & 0xf0) {
 				case 0x00:
+				case 0x10:
 					analog0.write_byte(address & 0x1f, byte);
 					break;
 				case 0x20:
+				case 0x30:
 					analog1.write_byte(address & 0x1f, byte);
 					break;
 				case 0x40:
+				case 0x50:
 					analog2.write_byte(address & 0x1f, byte);
 					break;
 				case 0x60:
+				case 0x70:
 					analog3.write_byte(address & 0x1f, byte);
+					break;
+				case 0x80:
+					balance_registers[address & 0x0f] = byte;
 					break;
 				default:
 					break;
-			}
-			break;
-		case 0x200:
-			// mixer etc...
-			if ((address & 0xf0) == 0) {
-				balance_registers[address & 0x0f] = byte;
 			}
 			break;
 		default:

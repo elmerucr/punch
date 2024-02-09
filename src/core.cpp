@@ -74,9 +74,7 @@ uint8_t core_t::read8(uint16_t address)
 			return blitter->vram[((vram_peek << 8) | (address & 0xff)) & VRAM_SIZE_MASK];
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
-		case SOUND_PAGE+2:
-		case SOUND_PAGE+3:
-			return sound->io_read_byte(address & 0x3ff);
+			return sound->io_read_byte(address & 0x1ff);
 		case ROM_PAGE:
 		case ROM_PAGE+1:
 			return rom[address & 0x1ff];
@@ -111,9 +109,7 @@ void core_t::write8(uint16_t address, uint8_t value) {
 			break;
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
-		case SOUND_PAGE+2:
-		case SOUND_PAGE+3:
-			sound->io_write_byte(address & 0x3ff, value);
+			sound->io_write_byte(address & 0x1ff, value);
 			break;
 		default:
 			blitter->vram[address] = value;
