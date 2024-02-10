@@ -18,6 +18,10 @@
 #define FLAGS1_VER_FLIP		0b00100000
 #define	FLAGS1_XY_FLIP		0b01000000
 
+/*
+ * for both pixels and tiles!!!
+ * need to write documentation
+ */
 struct surface_t {
 	int16_t x{0};
 	int16_t y{0};
@@ -65,16 +69,13 @@ struct surface_t {
 	uint8_t keycolor{0};
 	
 	uint8_t index{0};
-};
-
-struct tile_surface_t {
-	int16_t x{0};
-	int16_t y{0};
-
-	uint16_t w{0};
-	uint16_t h{0};
-
-	uint16_t base_page{0};
+	
+	uint8_t color_indices[16] = {
+		0x00, 0xff, 0xc6, 0x7e,
+		0xde, 0x72, 0x5d, 0xf7,
+		0xe2, 0x95, 0xea, 0xfc,
+		0xaa, 0xba, 0xaf, 0xfe
+	};
 };
 
 class blitter_ic {
@@ -82,11 +83,16 @@ public:
 	blitter_ic();
 	~blitter_ic();
 	
-	tile_surface_t tile_surface[8];
-	surface_t surface[8];
+	surface_t surface[16];
 	
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
+	
+	uint8_t io_surfaces_read8(uint16_t address);
+	void io_surfaces_write8(uint16_t address, uint8_t value);
+	
+	uint8_t io_color_indices_read8(uint16_t address);
+	void io_color_indices_write8(uint16_t address, uint8_t value);
 	
 	uint8_t io_palette_read8(uint16_t address) {
 		if (address & 0b1) {
@@ -111,7 +117,7 @@ public:
 	uint32_t blit(const surface_t *src, surface_t *dst);
 	
 	uint32_t tile_blit(const uint8_t s, const uint8_t d, const uint8_t ts);
-	uint32_t tile_blit(const surface_t *src, surface_t *dst, const tile_surface_t *ts);
+	uint32_t tile_blit(const surface_t *src, surface_t *dst, const surface_t *ts);
 	
 	uint32_t clear_surface(const uint8_t s);
 	uint32_t clear_surface(const surface_t *s);

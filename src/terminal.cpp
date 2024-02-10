@@ -5,7 +5,7 @@
 #include <cstdarg>
 #include <cstring>
 
-terminal_t::terminal_t(system_t *s, tile_surface_t *t, blitter_ic *b)
+terminal_t::terminal_t(system_t *s, surface_t *t, blitter_ic *b)
 {
 	system = s;
 	ts = t;

@@ -22,4 +22,3 @@ int main(int argc, char **argv)
 // then m view vram and colors
 // m view vram as text
 // page for color index table (so default to hardware table etc)
-// then 8index and 16 bits per pixel in surface

@@ -21,12 +21,12 @@ core_t::core_t(system_t *s)
 	 * Set up framebuffer surface.
 	 * TODO: Could be done from rom as well...
 	 */
-	blitter->surface[7].base_page = FRAMEBUFFER_PAGE;
-	blitter->surface[7].x = 0;
-	blitter->surface[7].y = 0;
-	blitter->surface[7].w = MAX_PIXELS_PER_SCANLINE;
-	blitter->surface[7].h = MAX_SCANLINES;
-	blitter->surface[7].bg_col = 0b00000101;
+	blitter->surface[15].base_page = FRAMEBUFFER_PAGE;
+	blitter->surface[15].x = -23;
+	blitter->surface[15].y = 0;
+	blitter->surface[15].w = MAX_PIXELS_PER_SCANLINE;
+	blitter->surface[15].h = MAX_SCANLINES;
+	blitter->surface[15].bg_col = 0b00000101;
 
 	cpu = new cpu_t(system);
 	
@@ -58,11 +58,12 @@ uint8_t core_t::read8(uint16_t address)
 	uint8_t page = (address & 0xff00) >> 8;
 	
 	switch (page) {
-		case BLITTER_PAGE:
-		case BLITTER_PAGE+1:
-			return blitter->io_read8(address & 0x1ff);
-		case BLITTER_PAGE+2:
-		case BLITTER_PAGE+3:
+		case BLITTER_SURFACES:
+			return blitter->io_surfaces_read8(address);
+		case BLITTER_COLOR_INDICES:
+			return blitter->io_color_indices_read8(address);
+		case BLITTER_PALETTE:
+		case BLITTER_PALETTE+1:
 			return blitter->io_palette_read8(address);
 		case CORE_PAGE:
 			return io_read8(address);
@@ -70,11 +71,13 @@ uint8_t core_t::read8(uint16_t address)
 			return system->keyboard->io_read8(address);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
-		case VRAM_PEEK_PAGE:
-			return blitter->vram[((vram_peek << 8) | (address & 0xff)) & VRAM_SIZE_MASK];
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
 			return sound->io_read_byte(address & 0x1ff);
+		case BLITTER_PAGE:
+			return blitter->io_read8(address & 0xff);
+		case VRAM_PEEK_PAGE:
+			return blitter->vram[((vram_peek << 8) | (address & 0xff)) & VRAM_SIZE_MASK];
 		case ROM_PAGE:
 		case ROM_PAGE+1:
 			return rom[address & 0x1ff];
@@ -87,12 +90,14 @@ void core_t::write8(uint16_t address, uint8_t value) {
 	uint8_t page = (address & 0xff00) >> 8;
 
 	switch (page) {
-		case BLITTER_PAGE:
-		case BLITTER_PAGE+1:
-			blitter->io_write8(address & 0x1ff, value);
+		case BLITTER_SURFACES:
+			blitter->io_surfaces_write8(address, value);
 			break;
-		case BLITTER_PAGE+2:
-		case BLITTER_PAGE+3:
+		case BLITTER_COLOR_INDICES:
+			blitter->io_color_indices_write8(address, value);
+			break;
+		case BLITTER_PALETTE:
+		case BLITTER_PALETTE+1:
 			blitter->io_palette_write8(address, value);
 			break;
 		case CORE_PAGE:
@@ -104,12 +109,15 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case TIMER_PAGE:
 			timer->io_write_byte(address &0xff, value);
 			break;
-		case VRAM_PEEK_PAGE:
-			blitter->vram[((vram_peek << 8) | (address & 0xff)) & VRAM_SIZE_MASK] = value;
-			break;
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
 			sound->io_write_byte(address & 0x1ff, value);
+			break;
+		case BLITTER_PAGE:
+			blitter->io_write8(address & 0xff, value);
+			break;
+		case VRAM_PEEK_PAGE:
+			blitter->vram[((vram_peek << 8) | (address & 0xff)) & VRAM_SIZE_MASK] = value;
 			break;
 		default:
 			blitter->vram[address] = value;

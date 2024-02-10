@@ -44,7 +44,7 @@ public:
 private:
 	surface_t font;
 	surface_t framebuffer;
-	tile_surface_t character_screen;
+	surface_t character_screen;
 	surface_t bruce;
 
 	const uint8_t fg = 0x23;
