@@ -80,10 +80,21 @@ struct surface_t {
 
 class blitter_ic {
 private:
-	uint8_t index0{0};
-	uint8_t index1{0};
-	uint8_t index2{0};
-	uint8_t index3{0};
+	
+	// blitter registers
+	uint8_t src_surface{0};
+	uint8_t dst_surface{0};
+	uint8_t tile_surface{0};
+	uint8_t draw_color{0};
+	int16_t x0{0};
+	int16_t y0{0};
+	int16_t x1{0};
+	int16_t y1{0};
+	
+//	int16_t test_x0 = 30;
+//	int16_t test_y0 = 10;
+//	int16_t test_x1 = 34;
+//	int16_t test_y1 = -100;
 	
 	/*
 	 * To restrain max no of pixels per frame
@@ -93,10 +104,9 @@ private:
 	uint32_t pixel_saldo{0};
 	
 	/*
-	 * All return number of pixels changed
+	 * Returns number of pixels changed
 	 */
 	uint32_t blit(const surface_t *src, surface_t *dst);
-	uint32_t tile_blit(const surface_t *src, surface_t *dst, const surface_t *ts);
 	
 	uint8_t *font_4x6;
 	void init_font_4x6();
@@ -136,7 +146,10 @@ public:
 	 */
 	uint32_t clear_surface(const uint8_t surf_no);
 	uint32_t blit(const uint8_t s, const uint8_t d);
-	uint32_t tile_blit(const uint8_t s, const uint8_t d, const uint8_t ts);
+	uint32_t tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t _ts);
+	uint32_t line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
+	uint32_t rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
+	uint32_t box(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	
 	void set_pixel_saldo(uint32_t s) { pixel_saldo = s; }
 	uint32_t get_pixel_saldo() { return pixel_saldo; }
