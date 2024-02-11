@@ -47,47 +47,46 @@ debugger_t::debugger_t(system_t *s)
 	
 	irq_no = system->core->exceptions->connect_device("debugger");
 	
-	//core = c;
-	//keyboard = k;
-	
 	blitter = new blitter_ic();
 	
-	/* framebuffer */
-	framebuffer.base_page = FRAMEBUFFER_PAGE;
-	framebuffer.w = MAX_PIXELS_PER_SCANLINE;
-	framebuffer.h = MAX_SCANLINES;
-	framebuffer.bg_col = 0b00000000;
+	/* font surface in slot 0xe */
+	blitter->surface[0xe].w = 4;
+	blitter->surface[0xe].h = 6;
+	blitter->surface[0xe].flags_0 = 0b01001101;
+	blitter->surface[0xe].flags_1 = 0b00000000;
+	blitter->surface[0xe].keycolor = PUNCH_BLUE;
 	
-	font.w = 4;
-	font.h = 6;
-	font.flags_0 = 0b01001101;
-	font.flags_1 = 0b00000000;
-	font.keycolor = PUNCH_BLUE;
-
-	character_screen.w = MAX_PIXELS_PER_SCANLINE / 4;
-	character_screen.h = MAX_SCANLINES / 6;
-	character_screen.base_page = 0x0100;
-	character_screen.x = 0;
-	character_screen.y = 0;
+	/* framebuffer surface in slot 0xf */
+	blitter->surface[0xf].base_page = FRAMEBUFFER_PAGE;
+	blitter->surface[0xf].w = MAX_PIXELS_PER_SCANLINE;
+	blitter->surface[0xf].h = MAX_PIXELS_PER_SCANLINE;
+	blitter->surface[0xf].bg_col = 0b00000000;
 	
-	terminal = new terminal_t(system, &character_screen, blitter);
+	/* character screen in slot 0xd */
+	blitter->surface[0xd].w = MAX_PIXELS_PER_SCANLINE / blitter->surface[0xe].w;
+	blitter->surface[0xd].h = MAX_SCANLINES / blitter->surface[0xe].h;
+	blitter->surface[0xd].base_page = 0x0100;
+	blitter->surface[0xd].x = 0;
+	blitter->surface[0xd].y = 0;
+	
+	terminal = new terminal_t(system, &blitter->surface[0xd], blitter);
 	terminal->fg_color = fg;
 	terminal->bg_color = bg;
 	terminal->clear();
 	print_version();
 
-	bruce.index = 2;
-	bruce.base_page = 0x0003;
-	bruce.keycolor = 0x01;
-	bruce.flags_0 = 0b00000001;
-	bruce.flags_1 = 0b00000001;
-	bruce.w = 8;
-	bruce.h = 21;
-	bruce.x = 30;
-	bruce.y = 159;
+	blitter->surface[0xc].index = 2;
+	blitter->surface[0xc].base_page = 0x0003;
+	blitter->surface[0xc].keycolor = 0x01;
+	blitter->surface[0xc].flags_0 = 0b00000001;
+	blitter->surface[0xc].flags_1 = 0b00000001;
+	blitter->surface[0xc].w = 8;
+	blitter->surface[0xc].h = 21;
+	blitter->surface[0xc].x = 30;
+	blitter->surface[0xc].y = 159;
 	
 	for (int i=0; i<(3*21*8); i++) {
-		blitter->vram[(bruce.base_page << 8) + i] = bruce_data[i];
+		blitter->vram[(blitter->surface[0xc].base_page << 8) + i] = bruce_data[i];
 	}
 }
 
@@ -122,8 +121,8 @@ debugger_t::~debugger_t()
 void debugger_t::redraw()
 {
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
-	blitter->clear_surface(&framebuffer);
-	blitter->tile_blit(&font, &framebuffer, &character_screen);
+	blitter->clear_surface(0xf);
+	blitter->tile_blit(0xe, 0xf, 0xd);
 	
 	// Bruce is just for fun
 	static int state = 0;
@@ -131,10 +130,10 @@ void debugger_t::redraw()
 	static bool right = true;
 	static bool change_direction = true;
 	
-	right ? bruce.flags_1 &= 0b11101111 : bruce.flags_1 |= 0b00010000;
+	right ? blitter->surface[0xc].flags_1 &= 0b11101111 : blitter->surface[0xc].flags_1 |= 0b00010000;
 	
 	if (wait < 200) {
-		bruce.index = 0;
+		blitter->surface[0xc].index = 0;
 		state = 0;
 	} else {
 		if (change_direction) {
@@ -143,16 +142,16 @@ void debugger_t::redraw()
 		}
 		
 		if (state > 4) {
-			bruce.index = 1;
+			blitter->surface[0xc].index = 1;
 		} else {
-			bruce.index = 2;
+			blitter->surface[0xc].index = 2;
 		}
 		
-		bruce.x += 2 * (right ? 1 : -1);
-		if (bruce.x > 340) {
-			bruce.x = -20;
-		} else if (bruce.x < -20) {
-			bruce.x = 340;
+		blitter->surface[0xc].x += 2 * (right ? 1 : -1);
+		if (blitter->surface[0xc].x > 340) {
+			blitter->surface[0xc].x = -20;
+		} else if (blitter->surface[0xc].x < -20) {
+			blitter->surface[0xc].x = 340;
 		}
 		
 		state++; if (state == 8) state = 0;
@@ -163,7 +162,7 @@ void debugger_t::redraw()
 	}
 	// end Bruce
 	
-	blitter->blit(&bruce, &framebuffer);
+	blitter->blit(0xc, 0xf);
 }
 
 void debugger_t::run()

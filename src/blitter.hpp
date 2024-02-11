@@ -79,6 +79,27 @@ struct surface_t {
 };
 
 class blitter_ic {
+private:
+	uint8_t index0{0};
+	uint8_t index1{0};
+	uint8_t index2{0};
+	uint8_t index3{0};
+	
+	/*
+	 * To restrain max no of pixels per frame
+	 * At start of frame, set to specific level
+	 * e.g. max. 8 times total pixels in display.
+	 */
+	uint32_t pixel_saldo{0};
+	
+	/*
+	 * All return number of pixels changed
+	 */
+	uint32_t blit(const surface_t *src, surface_t *dst);
+	uint32_t tile_blit(const surface_t *src, surface_t *dst, const surface_t *ts);
+	
+	uint8_t *font_4x6;
+	void init_font_4x6();
 public:
 	blitter_ic();
 	~blitter_ic();
@@ -113,42 +134,18 @@ public:
 	/*
 	 * All return number of pixels changed
 	 */
+	uint32_t clear_surface(const uint8_t surf_no);
 	uint32_t blit(const uint8_t s, const uint8_t d);
-	uint32_t blit(const surface_t *src, surface_t *dst);
-	
 	uint32_t tile_blit(const uint8_t s, const uint8_t d, const uint8_t ts);
-	uint32_t tile_blit(const surface_t *src, surface_t *dst, const surface_t *ts);
-	
-	uint32_t clear_surface(const uint8_t s);
-	uint32_t clear_surface(const surface_t *s);
 	
 	void set_pixel_saldo(uint32_t s) { pixel_saldo = s; }
 	uint32_t get_pixel_saldo() { return pixel_saldo; }
 	
 	void update_framebuffer();
 	
-//	uint32_t rectangle();
-//	uint32_t line();
-//	uint32_t circle();
-	
 	uint8_t *vram;
 	uint16_t *framebuffer;
 	uint16_t *palette;
-private:
-	uint8_t index0{0};
-	uint8_t index1{0};
-	uint8_t index2{0};
-	uint8_t index3{0};
-	
-	/*
-	 * To restrain max no of pixels per frame
-	 * At start of frame, set to specific level
-	 * e.g. max. 8 times total pixels in display.
-	 */
-	uint32_t pixel_saldo{0};
-	
-	uint8_t *font_4x6;
-	void init_font_4x6();
 };
 
 #endif

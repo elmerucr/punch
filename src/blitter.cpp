@@ -84,7 +84,7 @@ blitter_ic::~blitter_ic()
  */
 uint32_t blitter_ic::blit(const uint8_t s, const uint8_t d)
 {
-	return blit(&surface[s & 0b111], &surface[d & 0b111]);
+	return blit(&surface[s & 0b1111], &surface[d & 0b1111]);
 }
 
 /*
@@ -239,9 +239,11 @@ uint32_t blitter_ic::tile_blit(const surface_t *src, surface_t *dst, const surfa
 	return pixelcount;
 }
 
-uint32_t blitter_ic::clear_surface(const surface_t *s)
+uint32_t blitter_ic::clear_surface(const uint8_t surf_no)
 {
+	surface_t *s = &surface[surf_no & 0xf];
 	uint32_t pixels = s->w * s->h;
+	
 	for (uint32_t i=0; i < pixels; i++) {
 		if (pixel_saldo) {
 			vram[((s->base_page << 8) + i) & VRAM_SIZE_MASK] = s->bg_col;
@@ -251,11 +253,6 @@ uint32_t blitter_ic::clear_surface(const surface_t *s)
 		}
 	}
 	return pixels;
-}
-
-uint32_t blitter_ic::clear_surface(const uint8_t s)
-{
-	return clear_surface(&surface[s & 0xf]);
 }
 
 /*
@@ -567,9 +564,13 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 	switch (address & 0xff) {
 		case 0x01:
 			// control register
-			if      (value & 0b00000001) clear_surface(index1);
-			else if (value & 0b00000010) blit(index0, index1);
-			else if (value & 0b00000100) tile_blit(index0, index1, index2);
+			if (value == 0b00000001) {
+				clear_surface(index1);
+			} else if (value == 0b00000010) {
+				blit(index0, index1);
+			} else if (value == 0b00000100) {
+				tile_blit(index0, index1, index2);
+			}
 			break;
 		case 0x02:
 			index0 = value & 0b1111;

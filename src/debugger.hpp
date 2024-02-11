@@ -42,11 +42,9 @@ public:
 	
 	rca bruce_rand;
 private:
-	surface_t font;
-	surface_t framebuffer;
-	surface_t character_screen;
-	surface_t bruce;
-
+	/*
+	 * color theme
+	 */
 	const uint8_t fg = 0x23;
 	const uint8_t fg_acc = 0x33;
 	const uint8_t bg = 0x00;
