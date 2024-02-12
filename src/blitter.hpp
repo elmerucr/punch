@@ -150,6 +150,7 @@ public:
 	uint32_t line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t box(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
+	uint32_t circle(int16_t x0, int16_t y0, int16_t x1, uint8_t c, uint8_t d);
 	
 	void set_pixel_saldo(uint32_t s) { pixel_saldo = s; }
 	uint32_t get_pixel_saldo() { return pixel_saldo; }

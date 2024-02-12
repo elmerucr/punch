@@ -258,22 +258,15 @@ uint32_t blitter_ic::clear_surface(const uint8_t surf_no)
 uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
 {
 	surface_t *s = &surface[d & 0b1111];
-	
+
 	uint32_t pixels{0};
-	
-//	auto min = [pixels](int16_t a, int16_t b) {
-//		printf("kkl\n");
-//	};
-	
+
 	int16_t dx = abs(x1 - x0);
 	int16_t dy = abs(y1 - y0);
 	int16_t sx, sy;
 
-	if (x0 < x1) sx = 1;
-	else sx = -1;
-
-	if (y0 < y1) sy = 1;
-	else sy = -1;
+	sx = x0 < x1 ? 1 : -1;
+	sy = y0 < y1 ? 1 : -1;
 
 	int16_t err = dx - dy;
 
@@ -333,6 +326,68 @@ uint32_t blitter_ic::box(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t
 	
 	for (int16_t y=y0; y<=y1; y++) {
 		pixels += line(x0, y, x1, y, c, d);
+	}
+	
+	return pixels;
+}
+
+/*
+ * Midpoint circle algorithm, from ChatGPT and Jesko's method (wikipedia)
+ */
+uint32_t blitter_ic::circle(int16_t x0, int16_t y0, int16_t x1, uint8_t c, uint8_t d)
+{
+	surface_t *s = &surface[d & 0b1111];
+	uint32_t pixels{0};
+
+	int16_t x = x1;
+	int16_t y = 0;
+	int16_t t1 = x1 >> 4;
+	int16_t t2;
+
+	while (x >= y) {
+		// Plot the eight octants
+		if (pixel_saldo >= 8) {
+			if (((x0+x) >= 0) && ((x0+x) < s->w) && ((y0+y) >= 0) && ((y0+y) < s->h)) {
+				vram[((s->base_page << 8) + ((y0 + y) * s->w) + (x0 + x)) & VRAM_SIZE_MASK] = c;
+				pixels++; pixel_saldo--;
+			}
+			if (((x0-x) >= 0) && ((x0-x) < s->w) && ((y0+y) >= 0) && ((y0+y) < s->h)) {
+				vram[((s->base_page << 8) + ((y0 + y) * s->w) + (x0 - x)) & VRAM_SIZE_MASK] = c;
+				pixels++; pixel_saldo--;
+			}
+			if (((x0+x) >= 0) && ((x0+x) < s->w) && ((y0-y) >= 0) && ((y0-y) < s->h)) {
+				vram[((s->base_page << 8) + ((y0 - y) * s->w) + (x0 + x)) & VRAM_SIZE_MASK] = c;
+				pixels++; pixel_saldo--;
+			}
+			if (((x0-x) >= 0) && ((x0-x) < s->w) && ((y0-y) >= 0) && ((y0-y) < s->h)) {
+				vram[((s->base_page << 8) + ((y0 - y) * s->w) + (x0 - x)) & VRAM_SIZE_MASK] = c;
+				pixels++; pixel_saldo--;
+			}
+			if (((x0+y) >= 0) && ((x0+y) < s->w) && ((y0+x) >= 0) && ((y0+x) < s->h)) {
+				vram[((s->base_page << 8) + ((y0 + x) * s->w) + (x0 + y)) & VRAM_SIZE_MASK] = c;
+				pixels++; pixel_saldo--;
+			}
+			if (((x0-y) >= 0) && ((x0-y) < s->w) && ((y0+x) >= 0) && ((y0+x) < s->h)) {
+				vram[((s->base_page << 8) + ((y0 + x) * s->w) + (x0 - y)) & VRAM_SIZE_MASK] = c;
+				pixels++; pixel_saldo--;
+			}
+			if (((x0+y) >= 0) && ((x0+y) < s->w) && ((y0-x) >= 0) && ((y0-x) < s->h)) {
+				vram[((s->base_page << 8) + ((y0 - x) * s->w) + (x0 + y)) & VRAM_SIZE_MASK] = c;
+				pixels++; pixel_saldo--;
+			}
+			if (((x0-y) >= 0) && ((x0-y) < s->w) && ((y0-x) >= 0) && ((y0-x) < s->h)) {
+				vram[((s->base_page << 8) + ((y0 - x) * s->w) + (x0 - y)) & VRAM_SIZE_MASK] = c;
+				pixels++; pixel_saldo--;
+			}
+		}
+
+		y++;
+		t1 += y;
+		t2 = t1 - x;
+		if (t2 >= 0) {
+			t1 = t2;
+			x--;
+		}
 	}
 	
 	return pixels;
@@ -659,6 +714,7 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 				case 0b00001000: line(x0, y0, x1, y1, draw_color, dst_surface); break;
 				case 0b00010000: rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
 				case 0b00100000: box(x0, y0, x1, y1, draw_color, dst_surface); break;
+				case 0b01000000: circle(x0, y0, x1, draw_color, dst_surface); break;
 					// circle / ellipse / flood fill
 				default: break;
 			}
