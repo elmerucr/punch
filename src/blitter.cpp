@@ -316,7 +316,7 @@ uint32_t blitter_ic::rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u
 	return pixels;
 }
 
-uint32_t blitter_ic::box(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
+uint32_t blitter_ic::fill_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
 {
 	uint32_t pixels{0};
 	
@@ -331,66 +331,137 @@ uint32_t blitter_ic::box(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t
 	return pixels;
 }
 
-/*
- * Midpoint circle algorithm, from ChatGPT and Jesko's method (wikipedia)
- */
-uint32_t blitter_ic::circle(int16_t x0, int16_t y0, int16_t x1, uint8_t c, uint8_t d)
+//uint32_t blitter_ic::flood_fill(int16_t x0, int16_t y0, uint8_t c, uint8_t d)
+//{
+//	uint32_t pixels{0};
+//	surface_t *s = &surface[d & 0b1111];
+//	
+//	uint8_t target_color = (s->base_page << 8) | (
+//	return pixels;
+//}
+
+uint8_t blitter_ic::io_read8(uint16_t address)
 {
-	surface_t *s = &surface[d & 0b1111];
-	uint32_t pixels{0};
-
-	int16_t x = x1;
-	int16_t y = 0;
-	int16_t t1 = x1 >> 4;
-	int16_t t2;
-
-	while (x >= y) {
-		// Plot the eight octants
-		if (pixel_saldo >= 8) {
-			if (((x0+x) >= 0) && ((x0+x) < s->w) && ((y0+y) >= 0) && ((y0+y) < s->h)) {
-				vram[((s->base_page << 8) + ((y0 + y) * s->w) + (x0 + x)) & VRAM_SIZE_MASK] = c;
-				pixels++; pixel_saldo--;
-			}
-			if (((x0-x) >= 0) && ((x0-x) < s->w) && ((y0+y) >= 0) && ((y0+y) < s->h)) {
-				vram[((s->base_page << 8) + ((y0 + y) * s->w) + (x0 - x)) & VRAM_SIZE_MASK] = c;
-				pixels++; pixel_saldo--;
-			}
-			if (((x0+x) >= 0) && ((x0+x) < s->w) && ((y0-y) >= 0) && ((y0-y) < s->h)) {
-				vram[((s->base_page << 8) + ((y0 - y) * s->w) + (x0 + x)) & VRAM_SIZE_MASK] = c;
-				pixels++; pixel_saldo--;
-			}
-			if (((x0-x) >= 0) && ((x0-x) < s->w) && ((y0-y) >= 0) && ((y0-y) < s->h)) {
-				vram[((s->base_page << 8) + ((y0 - y) * s->w) + (x0 - x)) & VRAM_SIZE_MASK] = c;
-				pixels++; pixel_saldo--;
-			}
-			if (((x0+y) >= 0) && ((x0+y) < s->w) && ((y0+x) >= 0) && ((y0+x) < s->h)) {
-				vram[((s->base_page << 8) + ((y0 + x) * s->w) + (x0 + y)) & VRAM_SIZE_MASK] = c;
-				pixels++; pixel_saldo--;
-			}
-			if (((x0-y) >= 0) && ((x0-y) < s->w) && ((y0+x) >= 0) && ((y0+x) < s->h)) {
-				vram[((s->base_page << 8) + ((y0 + x) * s->w) + (x0 - y)) & VRAM_SIZE_MASK] = c;
-				pixels++; pixel_saldo--;
-			}
-			if (((x0+y) >= 0) && ((x0+y) < s->w) && ((y0-x) >= 0) && ((y0-x) < s->h)) {
-				vram[((s->base_page << 8) + ((y0 - x) * s->w) + (x0 + y)) & VRAM_SIZE_MASK] = c;
-				pixels++; pixel_saldo--;
-			}
-			if (((x0-y) >= 0) && ((x0-y) < s->w) && ((y0-x) >= 0) && ((y0-x) < s->h)) {
-				vram[((s->base_page << 8) + ((y0 - x) * s->w) + (x0 - y)) & VRAM_SIZE_MASK] = c;
-				pixels++; pixel_saldo--;
-			}
-		}
-
-		y++;
-		t1 += y;
-		t2 = t1 - x;
-		if (t2 >= 0) {
-			t1 = t2;
-			x--;
-		}
+	switch (address & 0xff) {
+		case 0x02: return src_surface;
+		case 0x03: return dst_surface;
+		case 0x04: return tile_surface;
+		case 0x05: return draw_color;
+			
+		case 0x08: return (((uint16_t)x0) & 0xff00) >> 8;
+		case 0x09: return ((uint16_t)x0) & 0xff;
+		case 0x0a: return (((uint16_t)y0) & 0xff00) >> 8;
+		case 0x0b: return ((uint16_t)y0) & 0xff;
+		case 0x0c: return (((uint16_t)x1) & 0xff00) >> 8;
+		case 0x0d: return ((uint16_t)x1) & 0xff;
+		case 0x0e: return (((uint16_t)y1) & 0xff00) >> 8;
+		case 0x0f: return ((uint16_t)y1) & 0xff;
+			
+		default: return 0x00;
 	}
+}
+
+void blitter_ic::io_write8(uint16_t address, uint8_t value)
+{
+	switch (address & 0xff) {
+		case 0x01:
+			// control register
+			switch (value) {
+				case 0b00000001: clear_surface(dst_surface); break;
+				case 0b00000010: blit(src_surface, dst_surface); break;
+				case 0b00000100: tile_blit(src_surface, dst_surface, tile_surface); break;
+				case 0b00001000: line(x0, y0, x1, y1, draw_color, dst_surface); break;
+				case 0b00010000: rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
+				case 0b00100000: fill_rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
+//				case 0b01000000: flood_fill(x0, y0, draw_color, dst_surface); break;
+				default: break;
+			}
+			break;
+		case 0x02: src_surface = value & 0b1111; break;
+		case 0x03: dst_surface = value & 0b1111; break;
+		case 0x04: tile_surface = value & 0b1111; break;
+		case 0x05: draw_color = value; break;
+			
+		case 0x08: x0 = (int16_t)((((uint16_t)x0) & 0x00ff) | (value << 8)); break;
+		case 0x09: x0 = (int16_t)((((uint16_t)x0) & 0xff00) | value);        break;
+		case 0x0a: y0 = (int16_t)((((uint16_t)y0) & 0x00ff) | (value << 8)); break;
+		case 0x0b: y0 = (int16_t)((((uint16_t)y0) & 0xff00) | value);        break;
+		case 0x0c: x1 = (int16_t)((((uint16_t)x1) & 0x00ff) | (value << 8)); break;
+		case 0x0d: x1 = (int16_t)((((uint16_t)x1) & 0xff00) | value);        break;
+		case 0x0e: y1 = (int16_t)((((uint16_t)y1) & 0x00ff) | (value << 8)); break;
+		case 0x0f: y1 = (int16_t)((((uint16_t)y1) & 0xff00) | value);        break;
+			
+		default: break;
+	}
+}
+
+uint8_t blitter_ic::io_surfaces_read8(uint16_t address)
+{
+	int8_t no = (address & 0xf0) >> 4;
 	
-	return pixels;
+	switch (address & 0xf) {
+		case 0x0: return (((uint16_t)surface[no].x) & 0xff00) >> 8;
+		case 0x1: return ((uint16_t)surface[no].x) & 0xff;
+		case 0x2: return (((uint16_t)surface[no].y) & 0xff00) >> 8;
+		case 0x3: return ((uint16_t)surface[no].y) & 0xff;
+		case 0x4: return (surface[no].w & 0xff00) >> 8;
+		case 0x5: return surface[no].w & 0xff;
+		case 0x6: return (surface[no].h & 0xff00) >> 8;
+		case 0x7: return surface[no].h & 0xff;
+		case 0x8: return (surface[no].base_page & 0xff00) >> 8;
+		case 0x9: return surface[no].base_page & 0xff;
+		case 0xa: return surface[no].flags_0;
+		case 0xb: return surface[no].flags_1;
+		case 0xc: return surface[no].fg_col;
+		case 0xd: return surface[no].bg_col;
+		case 0xe: return surface[no].keycolor;
+		case 0xf: return surface[no].index;
+		default:  return 0x00;
+	}
+}
+
+void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
+{
+	int8_t no = (address & 0xf0) >> 4;
+	
+	switch (address & 0xf) {
+		case 0x0: surface[no].x = (int16_t)((((uint16_t)surface[no].x) & 0x00ff) | (value << 8)); break;
+		case 0x1: surface[no].x = (int16_t)((((uint16_t)surface[no].x) & 0xff00) | value);        break;
+		case 0x2: surface[no].y = (int16_t)((((uint16_t)surface[no].y) & 0x00ff) | (value << 8)); break;
+		case 0x3: surface[no].y = (int16_t)((((uint16_t)surface[no].y) & 0xff00) | value);        break;
+		case 0x4: surface[no].w = (surface[no].w & 0x00ff) | (value << 8); break;
+		case 0x5: surface[no].w = (surface[no].w & 0xff00) | value;        break;
+		case 0x6: surface[no].h = (surface[no].h & 0x00ff) | (value << 8); break;
+		case 0x7: surface[no].h = (surface[no].h & 0xff00) | value;        break;
+		case 0x8: surface[no].base_page = (surface[no].base_page & 0x00ff) | (value << 8); break;
+		case 0x9: surface[no].base_page = (surface[no].base_page & 0xff00) | value;        break;
+		case 0xa: surface[no].flags_0 = value; break;
+		case 0xb: surface[no].flags_1 = value; break;
+		case 0xc: surface[no].fg_col = value; break;
+		case 0xd: surface[no].bg_col = value; break;
+		case 0xe: surface[no].keycolor = value; break;
+		case 0xf: surface[no].index = value; break;
+		default:  break;
+	}
+}
+
+uint8_t blitter_ic::io_color_indices_read8(uint16_t address)
+{
+	uint8_t no = (address & 0xf0) >> 4;
+	return surface[no].color_indices[address & 0xf];
+}
+
+void blitter_ic::io_color_indices_write8(uint16_t address, uint8_t value)
+{
+	uint8_t no = (address & 0xf0) >> 4;
+	surface[no].color_indices[address & 0xf] = value;
+}
+
+void blitter_ic::update_framebuffer()
+{
+	for (int i = 0; i < PIXELS; i++) {
+		framebuffer[i] = palette[vram[(FRAMEBUFFER_PAGE << 8) + i]];
+	}
 }
 
 /*
@@ -678,130 +749,5 @@ void blitter_ic::init_font_4x6()
 				font_4x6[(128*4*6)+(i*4)+j] = PUNCH_LIGHTBLUE;
 			}
 		}
-	}
-}
-
-uint8_t blitter_ic::io_read8(uint16_t address)
-{
-	switch (address & 0xff) {
-		case 0x02: return src_surface;
-		case 0x03: return dst_surface;
-		case 0x04: return tile_surface;
-		case 0x05: return draw_color;
-			
-		case 0x08: return (((uint16_t)x0) & 0xff00) >> 8;
-		case 0x09: return ((uint16_t)x0) & 0xff;
-		case 0x0a: return (((uint16_t)y0) & 0xff00) >> 8;
-		case 0x0b: return ((uint16_t)y0) & 0xff;
-		case 0x0c: return (((uint16_t)x1) & 0xff00) >> 8;
-		case 0x0d: return ((uint16_t)x1) & 0xff;
-		case 0x0e: return (((uint16_t)y1) & 0xff00) >> 8;
-		case 0x0f: return ((uint16_t)y1) & 0xff;
-			
-		default: return 0x00;
-	}
-}
-
-void blitter_ic::io_write8(uint16_t address, uint8_t value)
-{
-	switch (address & 0xff) {
-		case 0x01:
-			// control register
-			switch (value) {
-				case 0b00000001: clear_surface(dst_surface); break;
-				case 0b00000010: blit(src_surface, dst_surface); break;
-				case 0b00000100: tile_blit(src_surface, dst_surface, tile_surface); break;
-				case 0b00001000: line(x0, y0, x1, y1, draw_color, dst_surface); break;
-				case 0b00010000: rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
-				case 0b00100000: box(x0, y0, x1, y1, draw_color, dst_surface); break;
-				case 0b01000000: circle(x0, y0, x1, draw_color, dst_surface); break;
-					// circle / ellipse / flood fill
-				default: break;
-			}
-			break;
-		case 0x02: src_surface = value & 0b1111; break;
-		case 0x03: dst_surface = value & 0b1111; break;
-		case 0x04: tile_surface = value & 0b1111; break;
-		case 0x05: draw_color = value; break;
-			
-		case 0x08: x0 = (int16_t)((((uint16_t)x0) & 0x00ff) | (value << 8)); break;
-		case 0x09: x0 = (int16_t)((((uint16_t)x0) & 0xff00) | value);        break;
-		case 0x0a: y0 = (int16_t)((((uint16_t)y0) & 0x00ff) | (value << 8)); break;
-		case 0x0b: y0 = (int16_t)((((uint16_t)y0) & 0xff00) | value);        break;
-		case 0x0c: x1 = (int16_t)((((uint16_t)x1) & 0x00ff) | (value << 8)); break;
-		case 0x0d: x1 = (int16_t)((((uint16_t)x1) & 0xff00) | value);        break;
-		case 0x0e: y1 = (int16_t)((((uint16_t)y1) & 0x00ff) | (value << 8)); break;
-		case 0x0f: y1 = (int16_t)((((uint16_t)y1) & 0xff00) | value);        break;
-			
-		default: break;
-	}
-}
-
-uint8_t blitter_ic::io_surfaces_read8(uint16_t address)
-{
-	int8_t no = (address & 0xf0) >> 4;
-	
-	switch (address & 0xf) {
-		case 0x0: return (((uint16_t)surface[no].x) & 0xff00) >> 8;
-		case 0x1: return ((uint16_t)surface[no].x) & 0xff;
-		case 0x2: return (((uint16_t)surface[no].y) & 0xff00) >> 8;
-		case 0x3: return ((uint16_t)surface[no].y) & 0xff;
-		case 0x4: return (surface[no].w & 0xff00) >> 8;
-		case 0x5: return surface[no].w & 0xff;
-		case 0x6: return (surface[no].h & 0xff00) >> 8;
-		case 0x7: return surface[no].h & 0xff;
-		case 0x8: return (surface[no].base_page & 0xff00) >> 8;
-		case 0x9: return surface[no].base_page & 0xff;
-		case 0xa: return surface[no].flags_0;
-		case 0xb: return surface[no].flags_1;
-		case 0xc: return surface[no].fg_col;
-		case 0xd: return surface[no].bg_col;
-		case 0xe: return surface[no].keycolor;
-		case 0xf: return surface[no].index;
-		default:  return 0x00;
-	}
-}
-
-void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
-{
-	int8_t no = (address & 0xf0) >> 4;
-	
-	switch (address & 0xf) {
-		case 0x0: surface[no].x = (int16_t)((((uint16_t)surface[no].x) & 0x00ff) | (value << 8)); break;
-		case 0x1: surface[no].x = (int16_t)((((uint16_t)surface[no].x) & 0xff00) | value);        break;
-		case 0x2: surface[no].y = (int16_t)((((uint16_t)surface[no].y) & 0x00ff) | (value << 8)); break;
-		case 0x3: surface[no].y = (int16_t)((((uint16_t)surface[no].y) & 0xff00) | value);        break;
-		case 0x4: surface[no].w = (surface[no].w & 0x00ff) | (value << 8); break;
-		case 0x5: surface[no].w = (surface[no].w & 0xff00) | value;        break;
-		case 0x6: surface[no].h = (surface[no].h & 0x00ff) | (value << 8); break;
-		case 0x7: surface[no].h = (surface[no].h & 0xff00) | value;        break;
-		case 0x8: surface[no].base_page = (surface[no].base_page & 0x00ff) | (value << 8); break;
-		case 0x9: surface[no].base_page = (surface[no].base_page & 0xff00) | value;        break;
-		case 0xa: surface[no].flags_0 = value; break;
-		case 0xb: surface[no].flags_1 = value; break;
-		case 0xc: surface[no].fg_col = value; break;
-		case 0xd: surface[no].bg_col = value; break;
-		case 0xe: surface[no].keycolor = value; break;
-		case 0xf: surface[no].index = value; break;
-		default:  break;
-	}
-}
-
-uint8_t blitter_ic::io_color_indices_read8(uint16_t address)
-{
-	uint8_t no = (address & 0xf0) >> 4;
-	return surface[no].color_indices[address & 0xf];
-}
-
-void blitter_ic::io_color_indices_write8(uint16_t address, uint8_t value)
-{
-	uint8_t no = (address & 0xf0) >> 4;
-	surface[no].color_indices[address & 0xf] = value;
-}
-
-void blitter_ic::update_framebuffer()
-{
-	for (int i = 0; i < PIXELS; i++) {
-		framebuffer[i] = palette[vram[(FRAMEBUFFER_PAGE << 8) + i]];
 	}
 }

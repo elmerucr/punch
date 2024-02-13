@@ -91,11 +91,6 @@ private:
 	int16_t x1{0};
 	int16_t y1{0};
 	
-//	int16_t test_x0 = 30;
-//	int16_t test_y0 = 10;
-//	int16_t test_x1 = 34;
-//	int16_t test_y1 = -100;
-	
 	/*
 	 * To restrain max no of pixels per frame
 	 * At start of frame, set to specific level
@@ -149,8 +144,8 @@ public:
 	uint32_t tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t _ts);
 	uint32_t line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
-	uint32_t box(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
-	uint32_t circle(int16_t x0, int16_t y0, int16_t x1, uint8_t c, uint8_t d);
+	uint32_t fill_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
+//	uint32_t flood_fill(int16_t x0, int16_t y0, uint8_t c, uint8_t d);
 	
 	void set_pixel_saldo(uint32_t s) { pixel_saldo = s; }
 	uint32_t get_pixel_saldo() { return pixel_saldo; }
