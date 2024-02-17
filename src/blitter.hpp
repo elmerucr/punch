@@ -43,7 +43,7 @@ struct surface_t {
 	 * | |
 	 * +-+-------------- Rom font selection (00 = off, 01 = tiny_font, 10... 11...)
 	 *
-	 * bits 3 to 5: Reserved
+	 * bits 1, 4 and 5: Reserved
 	 */
 	uint8_t flags_0{0};
 	

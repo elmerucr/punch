@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 //	for (int i = 0; i < argc; i++) {
 //		printf("\n%s", argv[i]);
 //	}
-
+	
 	system_t *system = new system_t();
 	system->run();
 	delete system;
@@ -21,4 +21,3 @@ int main(int argc, char **argv)
 
 // then m view vram and colors
 // m view vram as text
-// page for color index table (so default to hardware table etc)
