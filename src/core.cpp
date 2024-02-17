@@ -26,7 +26,7 @@ core_t::core_t(system_t *s)
 	blitter->surface[15].y = 0;
 	blitter->surface[15].w = MAX_PIXELS_PER_SCANLINE;
 	blitter->surface[15].h = MAX_SCANLINES;
-	blitter->surface[15].bg_col = 0b00000101;
+	blitter->surface[15].color_indices[0] = 0b00000101;
 
 	cpu = new cpu_t(system);
 	

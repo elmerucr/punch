@@ -36,14 +36,14 @@ struct surface_t {
 	 * Color related
 	 *
 	 * 7 6 5 4 3 2 1 0
-	 * | |     | |   |
-	 * | |     | |   +-- Keycolor (0 = off, 1 = on)
-	 * | |     | +------ Use foreground color (0 = off, 1 = on)
-	 * | |     +-------- Use background color (0 = off, 1 = on)
+	 * | |         | |
+	 * | |         | |
+	 * | |         | +-- Use background color (0 = off, 1 = on)
+	 * | |         +---- Use foreground color (0 = off, 1 = on)
 	 * | |
 	 * +-+-------------- Rom font selection (00 = off, 01 = tiny_font, 10... 11...)
 	 *
-	 * bits 1, 4 and 5: Reserved
+	 * bits 2 to 5: Reserved
 	 */
 	uint8_t flags_0{0};
 	
@@ -62,11 +62,6 @@ struct surface_t {
 	 * bits 2,3 and 7: Reserved
 	 */
 	uint8_t flags_1{0};
-	
-	uint8_t fg_col{0};
-	uint8_t bg_col{0};
-	
-	uint8_t keycolor{0};
 	
 	uint8_t index{0};
 	

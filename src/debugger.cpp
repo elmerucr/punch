@@ -52,15 +52,15 @@ debugger_t::debugger_t(system_t *s)
 	/* font surface in slot 0xe */
 	blitter->surface[0xe].w = 4;
 	blitter->surface[0xe].h = 6;
-	blitter->surface[0xe].flags_0 = 0b01001101;
+	blitter->surface[0xe].flags_0 = 0b01000011;
 	blitter->surface[0xe].flags_1 = 0b00000000;
-	blitter->surface[0xe].keycolor = PUNCH_BLUE;
+//	blitter->surface[0xe].keycolor = PUNCH_BLUE;
 	
 	/* framebuffer surface in slot 0xf */
 	blitter->surface[0xf].base_page = FRAMEBUFFER_PAGE;
 	blitter->surface[0xf].w = MAX_PIXELS_PER_SCANLINE;
 	blitter->surface[0xf].h = MAX_PIXELS_PER_SCANLINE;
-	blitter->surface[0xf].bg_col = 0b00000000;
+	blitter->surface[0xf].color_indices[0] = 0b00000000;
 	
 	/* character screen in slot 0xd */
 	blitter->surface[0xd].w = MAX_PIXELS_PER_SCANLINE / blitter->surface[0xe].w;
@@ -77,8 +77,7 @@ debugger_t::debugger_t(system_t *s)
 
 	blitter->surface[0xc].index = 2;
 	blitter->surface[0xc].base_page = 0x0003;
-	blitter->surface[0xc].keycolor = 0x01;
-	blitter->surface[0xc].flags_0 = 0b00000001;
+	blitter->surface[0xc].flags_0 = 0b00000000;
 	blitter->surface[0xc].flags_1 = 0b00000001;
 	blitter->surface[0xc].w = 8;
 	blitter->surface[0xc].h = 21;

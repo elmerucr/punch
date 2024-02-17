@@ -169,32 +169,22 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				 * Color selection and placement if needed
 				 */
 				uint8_t px = pixel_mem[(offset + (x >> dw) + (src->w * (y >> dh))) & mask];
-				uint8_t is_keycolor = (px == src->keycolor) ? 0b0010 : 0b000;
 				
-				switch ((src->flags_0 & 0b1101) | is_keycolor) {
-					case 0b0011:
-					case 0b0111:
-						// keycolor on, it matches and bg is off: draw nothing
+				switch ((src->flags_0 & 0b011) | (px ? 0b100 : 0b000)) {
+					case 0b000: // no pix, back off, fore off, do nothing
+					case 0b010: // no pix, back off, fore on, do nothing
 						break;
-					case 0b0000:
-					case 0b0001:
-					case 0b0010:
-					case 0b1000:
-					case 0b1001:
-					case 0b1010:
+					case 0b001: // no pix, back on, fore off
+					case 0b011: // no pix, back on, fore on
+						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
+						break;
+					case 0b100: // pix, take it
+					case 0b101: // pix, back on, fore off
 						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 						break;
-					case 0b0100:
-					case 0b0110:
-					case 0b1100:
-					case 0b1110:
-					case 0b0101:
-					case 0b1101:
-						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
-						break;
-					case 0b1011:
-					case 0b1111:
-						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
+					case 0b110: // pix, back off, fore on
+					case 0b111:
+						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
 						break;
 				}
 				
@@ -228,8 +218,8 @@ uint32_t blitter_ic::tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t
 	for (int y = 0; y < ts->h; y++) {
 		for (int x = 0; x < ts->w; x++) {
 			source.index = vram[tile++ & VRAM_SIZE_MASK];
-			source.fg_col = vram[fg_color++ & VRAM_SIZE_MASK];
-			source.bg_col = vram[bg_color++ & VRAM_SIZE_MASK];
+			source.color_indices[0] = vram[bg_color++ & VRAM_SIZE_MASK];
+			source.color_indices[1] = vram[fg_color++ & VRAM_SIZE_MASK];
 			pixelcount += blit(&source, dst);
 			source.x += (source.w << dw);
 		}
@@ -248,7 +238,7 @@ uint32_t blitter_ic::clear_surface(const uint8_t surf_no)
 	
 	for (uint32_t i=0; i < pixels; i++) {
 		if (pixel_saldo) {
-			vram[((s->base_page << 8) + i) & VRAM_SIZE_MASK] = s->bg_col;
+			vram[((s->base_page << 8) + i) & VRAM_SIZE_MASK] = s->color_indices[0];
 			pixel_saldo--;
 		} else {
 			break;
@@ -413,9 +403,9 @@ uint8_t blitter_ic::io_surfaces_read8(uint16_t address)
 		case 0x9: return surface[no].base_page & 0xff;
 		case 0xa: return surface[no].flags_0;
 		case 0xb: return surface[no].flags_1;
-		case 0xc: return surface[no].fg_col;
-		case 0xd: return surface[no].bg_col;
-		case 0xe: return surface[no].keycolor;
+//		case 0xc: return surface[no].fg_col;
+//		case 0xd: return surface[no].bg_col;
+//		case 0xe: return surface[no].keycolor;
 		case 0xf: return surface[no].index;
 		default:  return 0x00;
 	}
@@ -438,9 +428,9 @@ void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
 		case 0x9: surface[no].base_page = (surface[no].base_page & 0xff00) | value;        break;
 		case 0xa: surface[no].flags_0 = value; break;
 		case 0xb: surface[no].flags_1 = value; break;
-		case 0xc: surface[no].fg_col = value; break;
-		case 0xd: surface[no].bg_col = value; break;
-		case 0xe: surface[no].keycolor = value; break;
+//		case 0xc: surface[no].fg_col = value; break;
+//		case 0xd: surface[no].bg_col = value; break;
+//		case 0xe: surface[no].keycolor = value; break;
 		case 0xf: surface[no].index = value; break;
 		default:  break;
 	}
@@ -726,9 +716,9 @@ void blitter_ic::init_font_4x6()
 			for (int x=0; x<4; x++) {
 				if (get_font_4x6_pixel(i, x, y)) {
 					font_4x6[(i * 4 * 6) + (y * 4) + x] = PUNCH_LIGHTBLUE;
-					font_4x6[((i + 128) * 4 * 6) + (y * 4) + x] = PUNCH_BLUE;
+					font_4x6[((i + 128) * 4 * 6) + (y * 4) + x] = 0x00;
 				} else {
-					font_4x6[(i * 4 * 6) + (y * 4) + x] = PUNCH_BLUE;
+					font_4x6[(i * 4 * 6) + (y * 4) + x] = 0x00;
 					font_4x6[((i + 128) * 4 * 6) + (y * 4) + x] = PUNCH_LIGHTBLUE;
 				}
 			}
@@ -737,135 +727,18 @@ void blitter_ic::init_font_4x6()
 	
 	// correction for j
 	font_4x6[(0x6a * 4 * 6) + 1] = PUNCH_LIGHTBLUE;
-	font_4x6[((0x6a + 0x80) * 4 * 6) + 1] = PUNCH_BLUE;
+	font_4x6[((0x6a + 0x80) * 4 * 6) + 1] = 0x00;
 	
 	// 6 bytes / symbol * 18 symbols = 108
 	for (int i=0; i<(108); i++) {
 		for (int j=0; j<4; j++) {
 			if (blocks[i] & (0b1<<(3-j))) {
 				font_4x6[(i*4)+j] = PUNCH_LIGHTBLUE;
-				font_4x6[(128*4*6)+(i*4)+j] = PUNCH_BLUE;
+				font_4x6[(128*4*6)+(i*4)+j] = 0x00;
 			} else {
-				font_4x6[(i*4)+j] = PUNCH_BLUE;
+				font_4x6[(i*4)+j] = 0x00;
 				font_4x6[(128*4*6)+(i*4)+j] = PUNCH_LIGHTBLUE;
 			}
 		}
 	}
 }
-
-///*
-// * Returns number of pixels written.
-// */
-//uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
-//{
-//	uint32_t pixelcount = 0;
-//	
-//	auto min = [](int16_t a, int16_t b) { return a < b ? a : b; };
-//	auto max = [](int16_t a, int16_t b) { return a > b ? a : b; };
-//	auto swap = [](int16_t &a, int16_t &b) { int16_t c = a; a = b; b = c; };
-//	
-//	uint8_t dw = (src->flags_1 & FLAGS1_DBLWIDTH) ? 1 : 0;
-//	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) ? 1 : 0;
-//	
-//	int16_t startx, endx, starty, endy;
-//	
-//	/*
-//	 * Following values are coordinates in the src rectangle
-//	 */
-//	if (!(src->flags_1 & FLAGS1_XY_FLIP)) {
-//		startx = max(0, -src->x);
-//		endx = min(src->w << dw, -src->x + dest->w);
-//		starty = max(0, -src->y);
-//		endy = min(src->h << dh, -src->y + dest->h);
-//	} else {
-//		startx = max(0, -src->y);
-//		endx = min(src->w << dw, -src->y + dest->h);
-//		starty = max(0, -src->x);
-//		endy = min(src->h << dh, -src->x + dest->w);
-//	}
-//	
-//	if (src->flags_1 & FLAGS1_HOR_FLIP) {
-//		int16_t temp_value = startx;
-//		startx = (src->w << dw) - endx;
-//		endx   = (src->w << dw) - temp_value;
-//	}
-//	
-//	if (src->flags_1 & FLAGS1_VER_FLIP) {
-//		int16_t temp_value = starty;
-//		starty = (src->h << dh) - endy;
-//		endy   = (src->h << dh) - temp_value;
-//	}
-//
-//	uint32_t offset = (src->index * src->w * src->h);
-//	
-//	int16_t dest_x;
-//	int16_t dest_y;
-//
-//	for (int y = starty; y < endy; y++) {
-//		for (int x = startx; x < endx; x++) {
-//			if (pixel_saldo) {
-//				uint8_t px{0};
-//				
-//				/*
-//				 * Pixel selector from vram or font
-//				 */
-//				switch ((src->flags_0 & 0b11000000) >> 6) {
-//					case 0b00:
-//						px = vram[(src->base_page << 8) + (offset + (x >> dw) + (src->w * (y >> dh))) & VRAM_SIZE_MASK];
-//						break;
-//					case 0b01:
-//					case 0b10:
-//					case 0b11:
-//						px = font_4x6[(offset + (x >> dw) + (src->w * (y >> dh))) & 0x1fff];
-//						break;
-//				}
-//				
-//				if (src->flags_1 & FLAGS1_HOR_FLIP) dest_x = (src->w << dw) - 1 - x; else dest_x = x;
-//				if (src->flags_1 & FLAGS1_VER_FLIP) dest_y = (src->h << dh) - 1 - y; else dest_y = y;
-//				if (src->flags_1 & FLAGS1_XY_FLIP) swap(dest_x, dest_y);
-//				
-//				/*
-//				 * Color selection
-//				 * TODO: Can this be sped up?
-//				 */
-//				switch (src->flags_0 & 0b1101) {
-//					case 0b0000:
-//					case 0b1000:
-//						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
-//						break;
-//					case 0b0100:
-//					case 0b1100:
-//						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
-//						break;
-//					case 0b0001:
-//						if (px != src->keycolor) {
-//							vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
-//						}
-//						break;
-//					case 0b0101:
-//						if (px != src->keycolor) {
-//							vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
-//						}
-//						break;
-//					case 0b1001:
-//						if (px != src->keycolor) {
-//							vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
-//						} else {
-//							vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
-//						}
-//						break;
-//					case 0b1101:
-//						if (px != src->keycolor) {
-//							vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->fg_col;
-//						} else {
-//							vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->bg_col;
-//						}
-//						break;
-//				}
-//				pixelcount++;
-//				pixel_saldo--;
-//			}
-//		}
-//	}
-//	return pixelcount;
-//}
