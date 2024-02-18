@@ -75,6 +75,9 @@ debugger_t::debugger_t(system_t *s)
 	terminal->clear();
 	print_version();
 
+	/*
+	 * Setting up Bruce Lee
+	 */
 	blitter->surface[0xc].index = 2;
 	blitter->surface[0xc].base_page = 0x0003;
 	blitter->surface[0xc].flags_0 = 0b00000000;
