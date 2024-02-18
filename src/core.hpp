@@ -17,17 +17,16 @@
 #include "timer.hpp"
 #include "clocks.hpp"
 
-#define BLITTER_SURFACES	0x04
-#define BLITTER_COLOR_INDICES		0x05
-#define BLITTER_PALETTE		0x06
-#define CORE_PAGE			0x08
-#define KEYBOARD_PAGE		0x09
-#define	TIMER_PAGE			0x0a
+#define BLITTER_SURFACES		0x04
+#define BLITTER_COLOR_INDICES	0x05
+#define CORE_PAGE				0x08
+#define KEYBOARD_PAGE			0x09
+#define	TIMER_PAGE				0x0a
 // 0x0b available
-#define SOUND_PAGE			0x0c // + 0x0d
-#define	BLITTER_PAGE		0x0e
-#define VRAM_PEEK_PAGE		0x0f
-#define	ROM_PAGE			0xfe
+#define SOUND_PAGE				0x0c // + 0x0d
+#define	BLITTER_PAGE			0x0e
+#define VRAM_PEEK_PAGE			0x0f
+#define	ROM_PAGE				0xfe
 
 enum output_states {
 	NORMAL,

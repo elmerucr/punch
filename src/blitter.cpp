@@ -403,9 +403,9 @@ uint8_t blitter_ic::io_surfaces_read8(uint16_t address)
 		case 0x9: return surface[no].base_page & 0xff;
 		case 0xa: return surface[no].flags_0;
 		case 0xb: return surface[no].flags_1;
-//		case 0xc: return surface[no].fg_col;
-//		case 0xd: return surface[no].bg_col;
-//		case 0xe: return surface[no].keycolor;
+//		case 0xc:
+//		case 0xd:
+//		case 0xe:
 		case 0xf: return surface[no].index;
 		default:  return 0x00;
 	}
@@ -428,9 +428,9 @@ void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
 		case 0x9: surface[no].base_page = (surface[no].base_page & 0xff00) | value;        break;
 		case 0xa: surface[no].flags_0 = value; break;
 		case 0xb: surface[no].flags_1 = value; break;
-//		case 0xc: surface[no].fg_col = value; break;
-//		case 0xd: surface[no].bg_col = value; break;
-//		case 0xe: surface[no].keycolor = value; break;
+//		case 0xc:
+//		case 0xd:
+//		case 0xe:
 		case 0xf: surface[no].index = value; break;
 		default:  break;
 	}

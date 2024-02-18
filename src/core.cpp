@@ -62,9 +62,9 @@ uint8_t core_t::read8(uint16_t address)
 			return blitter->io_surfaces_read8(address);
 		case BLITTER_COLOR_INDICES:
 			return blitter->io_color_indices_read8(address);
-		case BLITTER_PALETTE:
-		case BLITTER_PALETTE+1:
-			return blitter->io_palette_read8(address);
+//		case BLITTER_PALETTE:
+//		case BLITTER_PALETTE+1:
+//			return blitter->io_palette_read8(address);
 		case CORE_PAGE:
 			return io_read8(address);
 		case KEYBOARD_PAGE:
@@ -96,10 +96,10 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case BLITTER_COLOR_INDICES:
 			blitter->io_color_indices_write8(address, value);
 			break;
-		case BLITTER_PALETTE:
-		case BLITTER_PALETTE+1:
-			blitter->io_palette_write8(address, value);
-			break;
+//		case BLITTER_PALETTE:
+//		case BLITTER_PALETTE+1:
+//			blitter->io_palette_write8(address, value);
+//			break;
 		case CORE_PAGE:
 			io_write8(address, value);
 			break;

@@ -11,8 +11,8 @@ Notable features include:
 
 ## Table of Contents
 
-* [Chapter 1 - Memory Model](docs/memory.md)
-* [Chapter 2 - Blitter](docs/blitter.md)
+* [Memory Model](docs/memory.md)
+* [Blitter](docs/blitter.md)
 
 ## Screenshots
 

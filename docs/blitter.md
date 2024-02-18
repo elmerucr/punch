@@ -1,6 +1,6 @@
-[back to main](../README.md)
+[contents](../README.md) | [previous chapter](memory.md) |
 
-# Chapter 2 - Blitter
+# Blitter
 
 *...work in progress...*
 

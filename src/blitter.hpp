@@ -115,21 +115,21 @@ public:
 	uint8_t io_color_indices_read8(uint16_t address);
 	void io_color_indices_write8(uint16_t address, uint8_t value);
 	
-	uint8_t io_palette_read8(uint16_t address) {
-		if (address & 0b1) {
-			return palette[(address & 0x1ff) >> 1] & 0xff;
-		} else {
-			return (palette[(address & 0x1ff) >> 1] & 0xff00) >> 8;
-		}
-	}
+//	uint8_t io_palette_read8(uint16_t address) {
+//		if (address & 0b1) {
+//			return palette[(address & 0x1ff) >> 1] & 0xff;
+//		} else {
+//			return (palette[(address & 0x1ff) >> 1] & 0xff00) >> 8;
+//		}
+//	}
 	
-	void io_palette_write8(uint16_t address, uint8_t value) {
-		if (address & 0b1) {
-			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0xff00) | value;
-		} else {
-			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0x00ff) | (value << 8);
-		}
-	}
+//	void io_palette_write8(uint16_t address, uint8_t value) {
+//		if (address & 0b1) {
+//			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0xff00) | value;
+//		} else {
+//			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0x00ff) | (value << 8);
+//		}
+//	}
 	
 	/*
 	 * All return number of pixels changed
