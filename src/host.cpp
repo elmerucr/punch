@@ -184,7 +184,7 @@ void host_t::video_init()
 		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	}
 
-	SDL_SetRenderDrawColor(video_renderer, 11, 11, 11, 255);
+	SDL_SetRenderDrawColor(video_renderer, 18, 18, 18, 255);
 	
 	SDL_RendererInfo current_renderer;
 	SDL_GetRendererInfo(video_renderer, &current_renderer);

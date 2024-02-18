@@ -52,7 +52,7 @@ debugger_t::debugger_t(system_t *s)
 	/* font surface in slot 0xe */
 	blitter->surface[0xe].w = 4;
 	blitter->surface[0xe].h = 6;
-	blitter->surface[0xe].flags_0 = 0b01000011;
+	blitter->surface[0xe].flags_0 = 0b01110011;
 	blitter->surface[0xe].flags_1 = 0b00000000;
 //	blitter->surface[0xe].keycolor = PUNCH_BLUE;
 	
@@ -80,14 +80,17 @@ debugger_t::debugger_t(system_t *s)
 	 */
 	blitter->surface[0xc].index = 2;
 	blitter->surface[0xc].base_page = 0x0003;
-	blitter->surface[0xc].flags_0 = 0b00000000;
+	blitter->surface[0xc].flags_0 = 0b00010000;
 	blitter->surface[0xc].flags_1 = 0b00000001;
 	blitter->surface[0xc].w = 8;
 	blitter->surface[0xc].h = 21;
 	blitter->surface[0xc].x = 30;
 	blitter->surface[0xc].y = 159;
+	blitter->surface[0xc].color_indices[0b00] = 0xc7;
+	blitter->surface[0xc].color_indices[0b01] = 0x54;
+	blitter->surface[0xc].color_indices[0b10] = 0xfb;
 	
-	for (int i=0; i<(3*21*8); i++) {
+	for (int i=0; i<(2*21*3); i++) {
 		blitter->vram[(blitter->surface[0xc].base_page << 8) + i] = bruce_data[i];
 	}
 }

@@ -95,11 +95,17 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 {
 	uint32_t old_pixel_saldo = pixel_saldo;
 	
+	/*
+	 * Convenience lambda functions
+	 */
 	auto min = [](int16_t a, int16_t b) { return a < b ? a : b; };
 	auto max = [](int16_t a, int16_t b) { return a > b ? a : b; };
 	auto swap = [](int16_t &a, int16_t &b) { int16_t c = a; a = b; b = c; };
 	
-	uint8_t dw = (src->flags_1 & FLAGS1_DBLWIDTH) ? 1 : 0;
+	/*
+	 * Calculate potential bitshifts for double width and height
+	 */
+	uint8_t dw = (src->flags_1 & FLAGS1_DBLWIDTH)  ? 1 : 0;
 	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) ? 1 : 0;
 	
 	int16_t startx, endx, starty, endy;
@@ -107,7 +113,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	/*
 	 * Following values are coordinates in the src rectangle
 	 */
-	if (!(src->flags_1 & FLAGS1_XY_FLIP)) {
+	if (!(src->flags_1 & FLAGS1_X_Y_FLIP)) {
 		startx = max(0, -src->x);
 		endx = min(src->w << dw, -src->x + dest->w);
 		starty = max(0, -src->y);
@@ -131,29 +137,31 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 		endy   = (src->h << dh) - temp_value;
 	}
 	
-	int16_t dest_x;
-	int16_t dest_y;
-	
 	/*
 	 * Pixel selector from vram or font + offset + mask selector
 	 */
-	uint8_t *pixel_mem{nullptr};
-	uint32_t mask{0};
-	uint32_t offset = (src->index * src->w * src->h);
+	uint8_t *memory{nullptr};
+	uint32_t memory_mask{0};
+	uint32_t base_address{0};
+	uint32_t index = (src->index * src->w * src->h);
 	
 	switch ((src->flags_0 & 0b11000000) >> 6) {
 		case 0b00:
-			pixel_mem = vram;
-			offset += (src->base_page << 8);
-			mask = VRAM_SIZE_MASK;
+			memory = vram;
+			memory_mask = VRAM_SIZE_MASK;
+			base_address = (src->base_page << 8);
 			break;
 		case 0b01:
 		case 0b10:
 		case 0b11:
-			pixel_mem = font_4x6;
-			mask = 0x1fff;
+			memory = font_4x6;
+			memory_mask = 0x1fff;
 			break;
 	}
+	
+	uint8_t color_mode = (src->flags_0 & 0b00110000) >> 4;
+	
+	int16_t dest_x, dest_y;
 
 	for (int y = starty; y < endy; y++) {
 		for (int x = startx; x < endx; x++) {
@@ -163,26 +171,36 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				 */
 				if (src->flags_1 & FLAGS1_HOR_FLIP) dest_x = (src->w << dw) - 1 - x; else dest_x = x;
 				if (src->flags_1 & FLAGS1_VER_FLIP) dest_y = (src->h << dh) - 1 - y; else dest_y = y;
-				if (src->flags_1 & FLAGS1_XY_FLIP) swap(dest_x, dest_y);
+				if (src->flags_1 & FLAGS1_X_Y_FLIP) swap(dest_x, dest_y);
 				
 				/*
-				 * Color selection and placement if needed
+				 * Color selection
 				 */
-				uint8_t px = pixel_mem[(offset + (x >> dw) + (src->w * (y >> dh))) & mask];
+				uint32_t alt_index = index + (x >> dw) + (src->w * (y >> dh));	// index can't change during the for loops!
+				uint8_t px = memory[(base_address + (alt_index / color_modes[color_mode].pixels_per_byte)) & memory_mask];
 				
-				switch ((src->flags_0 & 0b011) | (px ? 0b100 : 0b000)) {
-					case 0b000: // no pix, back off, fore off, do nothing
-					case 0b010: // no pix, back off, fore on, do nothing
+				// TODO: this looks like a mess
+				px >>= color_modes[color_mode].bits_per_pixel * (color_modes[color_mode].pixels_per_byte - (alt_index % color_modes[color_mode].pixels_per_byte) - 1);
+				px &= color_modes[color_mode].mask;
+//				uint8_t px = memory[(base_address + index + (x >> dw) + (src->w * (y >> dh))) & memory_mask];
+				
+				bool px_present = px;
+				
+				if (color_modes[color_mode].color_lookup) px = src->color_indices[px];
+				
+				switch ((src->flags_0 & 0b011) | (px_present ? 0b100 : 0b000)) {
+					case 0b000: // no pixel, bg off, fore off, do nothing
+					case 0b010: // no pixel, bg off, fore on, do nothing
 						break;
-					case 0b001: // no pix, back on, fore off
-					case 0b011: // no pix, back on, fore on
+					case 0b001: // no pixel, bg on, fore off
+					case 0b011: // no pixel, bg on, fore on
 						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
 						break;
-					case 0b100: // pix, take it
-					case 0b101: // pix, back on, fore off
+					case 0b100: // pixel, take it
+					case 0b101: // pixel, bg on, fore off
 						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 						break;
-					case 0b110: // pix, back off, fore on
+					case 0b110: // pixel, bg off, fore on
 					case 0b111:
 						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
 						break;
@@ -426,8 +444,8 @@ void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
 		case 0x7: surface[no].h = (surface[no].h & 0xff00) | value;        break;
 		case 0x8: surface[no].base_page = (surface[no].base_page & 0x00ff) | (value << 8); break;
 		case 0x9: surface[no].base_page = (surface[no].base_page & 0xff00) | value;        break;
-		case 0xa: surface[no].flags_0 = value; break;
-		case 0xb: surface[no].flags_1 = value; break;
+		case 0xa: surface[no].flags_0 = value & 0b11110011; break;
+		case 0xb: surface[no].flags_1 = value & 0b01110011; break;
 //		case 0xc:
 //		case 0xd:
 //		case 0xe:

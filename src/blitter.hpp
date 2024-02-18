@@ -16,7 +16,7 @@
 #define FLAGS1_DBLHEIGHT	0b00000010
 #define FLAGS1_HOR_FLIP		0b00010000
 #define FLAGS1_VER_FLIP		0b00100000
-#define	FLAGS1_XY_FLIP		0b01000000
+#define	FLAGS1_X_Y_FLIP		0b01000000
 
 /*
  * for both pixels and tiles!!!
@@ -36,11 +36,11 @@ struct surface_t {
 	 * Color related
 	 *
 	 * 7 6 5 4 3 2 1 0
-	 * | |         | |
-	 * | |         | |
-	 * | |         | +-- Use background color (0 = off, 1 = on)
-	 * | |         +---- Use foreground color (0 = off, 1 = on)
-	 * | |
+	 * | | | |     | |
+	 * | | | |     | |
+	 * | | | |     | +-- Use background color (0 = off, 1 = on)
+	 * | | | |     +---- Use foreground color (0 = off, 1 = on)
+	 * | | +-+---------- Bits per pixel (0b00 = 1, 0b01 = 2, 0b10 = 4, 0b11 = 8)
 	 * +-+-------------- Rom font selection (00 = off, 01 = tiny_font, 10... 11...)
 	 *
 	 * bits 2 to 5: Reserved
@@ -75,7 +75,6 @@ struct surface_t {
 
 class blitter_ic {
 private:
-	
 	// blitter registers
 	uint8_t src_surface{0};
 	uint8_t dst_surface{0};
@@ -94,12 +93,27 @@ private:
 	uint32_t pixel_saldo{0};
 	
 	/*
-	 * Returns number of pixels changed
+	 * Returns number of pixels written
 	 */
 	uint32_t blit(const surface_t *src, surface_t *dst);
 	
 	uint8_t *font_4x6;
 	void init_font_4x6();
+	
+	struct color_mode_t {
+		uint8_t bits_per_pixel;
+		uint8_t pixels_per_byte;
+		uint8_t mask;
+		bool color_lookup;
+	};
+	
+	const struct color_mode_t color_modes[4] = {
+		{ 1, 8, 0b00000001, true  },
+		{ 2, 4, 0b00000011, true  },
+		{ 4, 2, 0b00001111, true  },
+		{ 8, 1, 0b11111111, false }
+	};
+
 public:
 	blitter_ic();
 	~blitter_ic();
