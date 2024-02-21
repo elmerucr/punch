@@ -37,6 +37,8 @@ public:
 
 	void memory_dump(uint16_t address);
 	void enter_memory_line(char *buffer);
+	
+	void vram_dump(uint32_t address, uint32_t width);
 
 	bool hex_string_to_int(const char *temp_string, uint32_t *return_value);
 

@@ -233,7 +233,7 @@ void debugger_t::process_command(char *c)
 	
 	have_prompt = true;
 	
-	char *token0, *token1;
+	char *token0, *token1, *token2;
 	token0 = strtok(c, " ");
 	
 	if (token0 == NULL) {
@@ -312,6 +312,81 @@ void debugger_t::process_command(char *c)
 				}
 			}
 		}
+	} else if (strcmp(token0, "v") == 0) {
+		have_prompt = false;
+		token1 = strtok(NULL, " ");
+		token2 = strtok(NULL, " ");
+		
+		uint8_t lines_remaining = terminal->lines_remaining();
+		if (lines_remaining == 0) lines_remaining = 1;
+		
+		uint32_t address{0};
+		uint32_t width{0x10};
+		
+		if (token1 == NULL) {
+			// no address
+			terminal->printf("\nerror: missing arguments");
+			have_prompt = true;
+		} else {
+			// decode address
+			if (!hex_string_to_int(token1, &address)) {
+				// address is wrong
+				terminal->printf("\nerror: '%s' is not a hex number", token1);
+				have_prompt = true;
+			} else {
+				// address is ok
+				if (token2 == NULL) {
+					// missing argument
+					terminal->printf("\nerror: missing arguments");
+					have_prompt = true;
+				} else {
+					// decode width
+					if (!hex_string_to_int(token2, &width)) {
+						// arg wrong
+						terminal->printf("\nerror: '%s' is not a hex number", token2);
+						have_prompt = true;
+					} else {
+						address &= VRAM_SIZE_MASK;
+						if (width == 0) width = 1;
+						if (width > 0x10) width = 0x10;
+						for (int i=0; i<lines_remaining; i++) {
+							terminal->putchar('\n');
+							vram_dump(address & VRAM_SIZE_MASK, width);
+							address = (address + width) & VRAM_SIZE_MASK;
+						}
+					}
+				}
+			}
+		}
+			
+			
+//			
+//			if (token2 == NULL) {
+//			if (!hex_string_to_int(token1, &address)) {
+//				terminal->printf("\nerror: '%s' is not a hex number", token1);
+//				have_prompt = true;
+//			} else {
+//				for (int i=0; i<lines_remaining; i++) {
+//					terminal->putchar('\n');
+//					vram_dump(address & VRAM_SIZE_MASK, width);
+//					address = (address + width) & VRAM_SIZE_MASK;
+//				}
+//			}
+//		} else {
+//			if(!hex_string_to_int(token2, &width)) {
+//				terminal->printf("\nerror: '%s' is not a hex number", token2);
+//				have_prompt = true;
+//			} else {
+//				if (width == 0) width = 1;
+//				if (width > 0x10) width = 0x10;
+//				// error address not taken!
+//				for (int i=0; i<lines_remaining; i++) {
+//					terminal->putchar('\n');
+//					vram_dump(address & VRAM_SIZE_MASK, width);
+//					address = (address + width) & VRAM_SIZE_MASK;
+//				}
+//			}
+//		}
 	} else if (strcmp(token0, "n") == 0) {
 		system->core->run(true);
 		status();
@@ -533,5 +608,37 @@ void debugger_t::enter_memory_line(char *buffer)
 		original_address &= 0xffff;
 		terminal->printf("\n.:%04x ", original_address);
 		have_prompt = false;
+	}
+}
+
+void debugger_t::vram_dump(uint32_t address, uint32_t width)
+{
+	address &= VRAM_SIZE_MASK;
+	
+	uint32_t temp_address = address;
+	
+	terminal->printf(".;%06x.%02x ", temp_address, width);
+	
+	for (int i=0; i<width; i++) {
+		terminal->printf("%02x ", system->core->blitter->vram[temp_address & VRAM_SIZE_MASK]);
+		temp_address++;
+		temp_address &= VRAM_SIZE_MASK;
+	}
+	
+	temp_address = address;
+	
+	terminal->bg_color = bg_acc;
+
+	for (int i=0; i<width; i++) {
+		terminal->bg_color = system->core->blitter->vram[temp_address];
+		terminal->putsymbol(ASCII_SPACE);
+		temp_address++;
+		temp_address &= VRAM_SIZE_MASK;
+	}
+
+	terminal->bg_color = bg;
+	
+	for (int i=0; i<4*width; i++) {
+		terminal->cursor_left();
 	}
 }

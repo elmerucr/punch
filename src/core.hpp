@@ -45,7 +45,7 @@ private:
 	
 	uint16_t vram_peek{0x0000};
 	
-	uint32_t framebuffer_base_address{0x0e0000};
+	uint32_t framebuffer_base_address{0};
 public:
 	core_t(system_t *s);
 	~core_t();

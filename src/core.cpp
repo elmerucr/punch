@@ -17,14 +17,6 @@ core_t::core_t(system_t *s)
 	
 	blitter = new blitter_ic();
 
-	/*
-	 * Set up framebuffer surface.
-	 * TODO: Could be done from rom as well...
-	 */
-	blitter->surface[0xf].base_address = FRAMEBUFFER_ADDRESS;
-	blitter->surface[0xf].w = MAX_PIXELS_PER_SCANLINE;
-	blitter->surface[0xf].h = MAX_SCANLINES;
-
 	cpu = new cpu_t(system);
 	
 	exceptions = new exceptions_ic();
