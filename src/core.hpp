@@ -44,6 +44,8 @@ private:
 	bool generate_interrupts{false};
 	
 	uint16_t vram_peek{0x0000};
+	
+	uint32_t framebuffer_base_address{0x0e0000};
 public:
 	core_t(system_t *s);
 	~core_t();
@@ -73,6 +75,8 @@ public:
 	
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
+	
+	uint32_t get_framebuffer_base_address() { return framebuffer_base_address; }
 };
 
 #endif

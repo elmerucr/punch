@@ -14,9 +14,9 @@ blitter_ic::blitter_ic()
 {
 	vram = new uint8_t[VRAM_SIZE];
 	
-	for (int i = 0; i < VRAM_SIZE; i++) {
-		vram[i] = (i & 0x40) ? 0xfc : 0x00;
-	}
+//	for (int i = 0; i < VRAM_SIZE; i++) {
+//		vram[i] = (i & 0x40) ? 0xfc : 0x00;
+//	}
 	
 	framebuffer = new uint16_t[PIXELS];
 	
@@ -78,6 +78,13 @@ blitter_ic::~blitter_ic()
 	delete [] palette;
 	delete [] framebuffer;
 	delete [] vram;
+}
+
+void blitter_ic::reset()
+{
+	for (int i = 0; i < VRAM_SIZE; i++) {
+		vram[i] = (i & 0x40) ? 0xfc : 0x00;
+	}
 }
 
 /*
@@ -142,14 +149,14 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	 */
 	uint8_t *memory{nullptr};
 	uint32_t memory_mask{0};
-	uint32_t base_address{0};
+	uint32_t start_address{0};
 	uint32_t index = (src->index * src->w * src->h);
 	
 	switch ((src->flags_0 & 0b11000000) >> 6) {
 		case 0b00:
 			memory = vram;
 			memory_mask = VRAM_SIZE_MASK;
-			base_address = (src->base_page << 8);
+			start_address = src->base_address;
 			break;
 		case 0b01:
 		case 0b10:
@@ -177,7 +184,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				 * Color selection
 				 */
 				uint32_t alt_index = index + (x >> dw) + (src->w * (y >> dh));	// index can't change during the for loops!
-				uint8_t px = memory[(base_address + (alt_index / color_modes[color_mode].pixels_per_byte)) & memory_mask];
+				uint8_t px = memory[(start_address + (alt_index / color_modes[color_mode].pixels_per_byte)) & memory_mask];
 				
 				// TODO: this looks like a mess
 				px >>= color_modes[color_mode].bits_per_pixel * (color_modes[color_mode].pixels_per_byte - (alt_index % color_modes[color_mode].pixels_per_byte) - 1);
@@ -194,15 +201,15 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 						break;
 					case 0b001: // no pixel, bg on, fore off
 					case 0b011: // no pixel, bg on, fore on
-						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
+						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
 						break;
 					case 0b100: // pixel, take it
 					case 0b101: // pixel, bg on, fore off
-						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
+						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 						break;
 					case 0b110: // pixel, bg off, fore on
 					case 0b111:
-						vram[((dest->base_page << 8) + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
+						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
 						break;
 				}
 				
@@ -229,9 +236,9 @@ uint32_t blitter_ic::tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t
 	
 	source.x = ts->x;
 	source.y = ts->y;
-	uint32_t tile = ts->base_page << 8;
-	uint32_t fg_color = (ts->base_page << 8) + (ts->w * ts->h);
-	uint32_t bg_color = (ts->base_page << 8) + (2 * ts->w * ts->h);
+	uint32_t tile = ts->base_address;
+	uint32_t fg_color = ts->base_address + (ts->w * ts->h);
+	uint32_t bg_color = ts->base_address + (2 * ts->w * ts->h);
 	
 	for (int y = 0; y < ts->h; y++) {
 		for (int x = 0; x < ts->w; x++) {
@@ -248,15 +255,15 @@ uint32_t blitter_ic::tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t
 	return pixelcount;
 }
 
-uint32_t blitter_ic::clear_surface(const uint8_t surf_no)
+uint32_t blitter_ic::clear_surface(const uint8_t c, const uint8_t d)
 {
-	surface_t *s = &surface[surf_no & 0xf];
+	surface_t *s = &surface[d & 0xf];
 	uint32_t pixels = s->w * s->h;
 	uint32_t old_pixel_saldo = pixel_saldo;
 	
 	for (uint32_t i=0; i < pixels; i++) {
 		if (pixel_saldo) {
-			vram[((s->base_page << 8) + i) & VRAM_SIZE_MASK] = s->color_indices[0];
+			vram[(s->base_address + i) & VRAM_SIZE_MASK] = c;
 			pixel_saldo--;
 		} else {
 			break;
@@ -285,7 +292,7 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 		if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 			if (pixel_saldo) {
 				pixel_saldo--;
-				vram[(s->base_page << 8) + (y0 * s->w) + x0] = c;
+				vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 			}
 		}
 		
@@ -306,7 +313,7 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 	if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 		if (pixel_saldo) {
 			   pixel_saldo--;
-			   vram[(s->base_page << 8) + (y0 * s->w) + x0] = c;
+			   vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 		}
 	}
 	
@@ -325,7 +332,7 @@ uint32_t blitter_ic::rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, u
 	return pixels;
 }
 
-uint32_t blitter_ic::fill_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
+uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
 {
 	uint32_t pixels{0};
 	
@@ -376,13 +383,12 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 		case 0x01:
 			// control register
 			switch (value) {
-				case 0b00000001: clear_surface(dst_surface); break;
-				case 0b00000010: blit(src_surface, dst_surface); break;
-				case 0b00000100: tile_blit(src_surface, dst_surface, tile_surface); break;
+				case 0b00000001: blit(src_surface, dst_surface); break;
+				case 0b00000010: tile_blit(src_surface, dst_surface, tile_surface); break;
+				case 0b00000100: clear_surface(draw_color, dst_surface); break;
 				case 0b00001000: line(x0, y0, x1, y1, draw_color, dst_surface); break;
 				case 0b00010000: rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
-				case 0b00100000: fill_rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
-//				case 0b01000000: flood_fill(x0, y0, draw_color, dst_surface); break;
+				case 0b00100000: solid_rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
 				default: break;
 			}
 			break;
@@ -417,12 +423,12 @@ uint8_t blitter_ic::io_surfaces_read8(uint16_t address)
 		case 0x5: return surface[no].w & 0xff;
 		case 0x6: return (surface[no].h & 0xff00) >> 8;
 		case 0x7: return surface[no].h & 0xff;
-		case 0x8: return (surface[no].base_page & 0xff00) >> 8;
-		case 0x9: return surface[no].base_page & 0xff;
-		case 0xa: return surface[no].flags_0;
-		case 0xb: return surface[no].flags_1;
-//		case 0xc:
-//		case 0xd:
+		case 0x8: return 0x00;
+		case 0x9: return (surface[no].base_address & 0x00ff0000) >> 16;
+		case 0xa: return (surface[no].base_address & 0x0000ff00) >>  8;
+		case 0xb: return surface[no].base_address & 0x000000ff;
+		case 0xc: return surface[no].flags_0;
+		case 0xd: return surface[no].flags_1;
 //		case 0xe:
 		case 0xf: return surface[no].index;
 		default:  return 0x00;
@@ -442,12 +448,12 @@ void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
 		case 0x5: surface[no].w = (surface[no].w & 0xff00) | value;        break;
 		case 0x6: surface[no].h = (surface[no].h & 0x00ff) | (value << 8); break;
 		case 0x7: surface[no].h = (surface[no].h & 0xff00) | value;        break;
-		case 0x8: surface[no].base_page = (surface[no].base_page & 0x00ff) | (value << 8); break;
-		case 0x9: surface[no].base_page = (surface[no].base_page & 0xff00) | value;        break;
-		case 0xa: surface[no].flags_0 = value & 0b11110011; break;
-		case 0xb: surface[no].flags_1 = value & 0b01110011; break;
-//		case 0xc:
-//		case 0xd:
+		case 0x8: break;
+		case 0x9: surface[no].base_address = (surface[no].base_address & 0x0000ffff) | (value << 16); break;
+		case 0xa: surface[no].base_address = (surface[no].base_address & 0x00ff00ff) | (value << 8);  break;
+		case 0xb: surface[no].base_address = (surface[no].base_address & 0x00ffff00) | value;         break;
+		case 0xc: surface[no].flags_0 = value & 0b11110011; break;
+		case 0xd: surface[no].flags_1 = value & 0b01110011; break;
 //		case 0xe:
 		case 0xf: surface[no].index = value; break;
 		default:  break;
@@ -466,10 +472,10 @@ void blitter_ic::io_color_indices_write8(uint16_t address, uint8_t value)
 	surface[no].color_indices[address & 0xf] = value;
 }
 
-void blitter_ic::update_framebuffer()
+void blitter_ic::update_framebuffer(uint32_t base_address)
 {
 	for (int i = 0; i < PIXELS; i++) {
-		framebuffer[i] = palette[vram[(FRAMEBUFFER_PAGE << 8) + i]];
+		framebuffer[i] = palette[vram[(base_address + i) & VRAM_SIZE_MASK]];
 	}
 }
 

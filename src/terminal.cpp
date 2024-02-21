@@ -16,18 +16,18 @@ terminal_t::terminal_t(system_t *s, surface_t *t, blitter_ic *b)
 void terminal_t::clear()
 {
 	for (int i=0; i < characters; i++) {
-		blitter->vram[((ts->base_page << 8) + (0 * characters) + i) & VRAM_SIZE_MASK] = ' ';
-		blitter->vram[((ts->base_page << 8) + (1 * characters) + i) & VRAM_SIZE_MASK] = fg_color;
-		blitter->vram[((ts->base_page << 8) + (2 * characters) + i) & VRAM_SIZE_MASK] = bg_color;
+		blitter->vram[(ts->base_address + (0 * characters) + i) & VRAM_SIZE_MASK] = ' ';
+		blitter->vram[(ts->base_address + (1 * characters) + i) & VRAM_SIZE_MASK] = fg_color;
+		blitter->vram[(ts->base_address + (2 * characters) + i) & VRAM_SIZE_MASK] = bg_color;
 	}
 	cursor_position = 0;
 }
 
 void terminal_t::putsymbol_at_cursor(char symbol)
 {
-	blitter->vram[((ts->base_page << 8) + (0 * characters) + cursor_position) & VRAM_SIZE_MASK] = symbol;
-	blitter->vram[((ts->base_page << 8) + (1 * characters) + cursor_position) & VRAM_SIZE_MASK] = fg_color;
-	blitter->vram[((ts->base_page << 8) + (2 * characters) + cursor_position) & VRAM_SIZE_MASK] = bg_color;
+	blitter->vram[(ts->base_address + (0 * characters) + cursor_position) & VRAM_SIZE_MASK] = symbol;
+	blitter->vram[(ts->base_address + (1 * characters) + cursor_position) & VRAM_SIZE_MASK] = fg_color;
+	blitter->vram[(ts->base_address + (2 * characters) + cursor_position) & VRAM_SIZE_MASK] = bg_color;
 }
 
 void terminal_t::putsymbol(char symbol)
@@ -45,17 +45,17 @@ void terminal_t::add_bottom_row()
 	uint16_t no_of_tiles_to_move = characters - ts->w;
 
 	for (int i=0; i < no_of_tiles_to_move; i++) {
-		blitter->vram[((ts->base_page << 8) + (0 * characters) + i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + (0 * characters) + ts->w + i) & VRAM_SIZE_MASK];
-		blitter->vram[((ts->base_page << 8) + (1 * characters) + i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + (1 * characters) + ts->w + i) & VRAM_SIZE_MASK];
-		blitter->vram[((ts->base_page << 8) + (2 * characters) + i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + (2 * characters) + ts->w + i) & VRAM_SIZE_MASK];
+		blitter->vram[(ts->base_address + (0 * characters) + i) & VRAM_SIZE_MASK] =
+			blitter->vram[(ts->base_address + (0 * characters) + ts->w + i) & VRAM_SIZE_MASK];
+		blitter->vram[(ts->base_address + (1 * characters) + i) & VRAM_SIZE_MASK] =
+			blitter->vram[(ts->base_address + (1 * characters) + ts->w + i) & VRAM_SIZE_MASK];
+		blitter->vram[(ts->base_address + (2 * characters) + i) & VRAM_SIZE_MASK] =
+			blitter->vram[(ts->base_address + (2 * characters) + ts->w + i) & VRAM_SIZE_MASK];
 	}
 	for (int i=no_of_tiles_to_move; i < characters; i++) {
-		blitter->vram[((ts->base_page << 8) + (0 * characters) + i) & VRAM_SIZE_MASK] = ' ';
-		blitter->vram[((ts->base_page << 8) + (1 * characters) + i) & VRAM_SIZE_MASK] = fg_color;
-		blitter->vram[((ts->base_page << 8) + (2 * characters) + i) & VRAM_SIZE_MASK] = bg_color;
+		blitter->vram[(ts->base_address + (0 * characters) + i) & VRAM_SIZE_MASK] = ' ';
+		blitter->vram[(ts->base_address + (1 * characters) + i) & VRAM_SIZE_MASK] = fg_color;
+		blitter->vram[(ts->base_address + (2 * characters) + i) & VRAM_SIZE_MASK] = bg_color;
 	}
 }
 
@@ -112,9 +112,9 @@ int terminal_t::printf(const char *format, ...)
 
 void terminal_t::activate_cursor()
 {
-	cursor_original_char = blitter->vram[((ts->base_page << 8) + cursor_position) & VRAM_SIZE_MASK];
-	cursor_original_color = blitter->vram[((ts->base_page << 8) + characters + cursor_position) & VRAM_SIZE_MASK];
-	cursor_original_background_color = blitter->vram[((ts->base_page << 8) + (2 * characters) + cursor_position) & VRAM_SIZE_MASK];
+	cursor_original_char = blitter->vram[(ts->base_address + cursor_position) & VRAM_SIZE_MASK];
+	cursor_original_color = blitter->vram[(ts->base_address + characters + cursor_position) & VRAM_SIZE_MASK];
+	cursor_original_background_color = blitter->vram[(ts->base_address + (2 * characters) + cursor_position) & VRAM_SIZE_MASK];
 	cursor_blinking = true;
 	cursor_countdown = 0;
 }
@@ -122,20 +122,20 @@ void terminal_t::activate_cursor()
 void terminal_t::deactivate_cursor()
 {
 	cursor_blinking = false;
-	blitter->vram[((ts->base_page << 8) + cursor_position) & VRAM_SIZE_MASK] = cursor_original_char;
-	blitter->vram[((ts->base_page << 8) + characters + cursor_position) & VRAM_SIZE_MASK] = cursor_original_color;
-	blitter->vram[((ts->base_page << 8) + (2 * characters) + cursor_position) & VRAM_SIZE_MASK] = cursor_original_background_color;
+	blitter->vram[(ts->base_address + cursor_position) & VRAM_SIZE_MASK] = cursor_original_char;
+	blitter->vram[(ts->base_address + characters + cursor_position) & VRAM_SIZE_MASK] = cursor_original_color;
+	blitter->vram[(ts->base_address + (2 * characters) + cursor_position) & VRAM_SIZE_MASK] = cursor_original_background_color;
 }
 
 void terminal_t::process_cursor_state()
 {
 	if (cursor_blinking == true) {
 		if (cursor_countdown == 0) {
-			blitter->vram[((ts->base_page << 8) + cursor_position) & VRAM_SIZE_MASK] ^= 0x80;
-			if (((blitter->vram[((ts->base_page << 8) + cursor_position) & VRAM_SIZE_MASK]) & 0x80) != (cursor_original_char & 0x80)) {
-				blitter->vram[((ts->base_page << 8) + characters + cursor_position) & VRAM_SIZE_MASK] = fg_color;
+			blitter->vram[(ts->base_address + cursor_position) & VRAM_SIZE_MASK] ^= 0x80;
+			if (((blitter->vram[(ts->base_address + cursor_position) & VRAM_SIZE_MASK]) & 0x80) != (cursor_original_char & 0x80)) {
+				blitter->vram[(ts->base_address + characters + cursor_position) & VRAM_SIZE_MASK] = fg_color;
 			} else {
-				blitter->vram[((ts->base_page << 8) + characters + cursor_position) & VRAM_SIZE_MASK] = cursor_original_color;
+				blitter->vram[(ts->base_address + characters + cursor_position) & VRAM_SIZE_MASK] = cursor_original_color;
 			}
 			cursor_countdown += cursor_interval;
 		}
@@ -208,17 +208,17 @@ void terminal_t::backspace()
 	if (pos > min_pos) {
 		cursor_position--;
 		while (pos % ts->w) {
-			blitter->vram[((ts->base_page << 8) + pos - 1) & VRAM_SIZE_MASK] =
-				blitter->vram[((ts->base_page << 8) + pos) & VRAM_SIZE_MASK];
-			blitter->vram[((ts->base_page << 8) + characters + pos - 1) & VRAM_SIZE_MASK] =
-				blitter->vram[((ts->base_page << 8) + characters + pos) & VRAM_SIZE_MASK];
-			blitter->vram[((ts->base_page << 8) + (2 * characters) + pos - 1) & VRAM_SIZE_MASK] =
-				blitter->vram[((ts->base_page << 8) + (2 * characters) + pos) & VRAM_SIZE_MASK];
+			blitter->vram[(ts->base_address + pos - 1) & VRAM_SIZE_MASK] =
+				blitter->vram[(ts->base_address + pos) & VRAM_SIZE_MASK];
+			blitter->vram[(ts->base_address + characters + pos - 1) & VRAM_SIZE_MASK] =
+				blitter->vram[(ts->base_address + characters + pos) & VRAM_SIZE_MASK];
+			blitter->vram[(ts->base_address + (2 * characters) + pos - 1) & VRAM_SIZE_MASK] =
+				blitter->vram[(ts->base_address + (2 * characters) + pos) & VRAM_SIZE_MASK];
 			pos++;
 		}
-		blitter->vram[((ts->base_page << 8) + pos - 1) & VRAM_SIZE_MASK] = ' ';
-		blitter->vram[((ts->base_page << 8) + characters + pos - 1) & VRAM_SIZE_MASK] = fg_color;
-		blitter->vram[((ts->base_page << 8) + (2 * characters) + pos - 1) & VRAM_SIZE_MASK] = bg_color;
+		blitter->vram[(ts->base_address + pos - 1) & VRAM_SIZE_MASK] = ' ';
+		blitter->vram[(ts->base_address + characters + pos - 1) & VRAM_SIZE_MASK] = fg_color;
+		blitter->vram[(ts->base_address + (2 * characters) + pos - 1) & VRAM_SIZE_MASK] = bg_color;
 	}
 }
 
@@ -249,7 +249,7 @@ void terminal_t::get_command(char *c, int l)
 	uint16_t pos = cursor_position - (cursor_position % ts->w);
 	
 	for (int i=0; i<length; i++) {
-		c[i] = blitter->vram[(ts->base_page << 8) + pos + i];
+		c[i] = blitter->vram[ts->base_address + pos + i];
 	}
 	c[length] = 0;
 	
@@ -265,11 +265,11 @@ enum output_type terminal_t::check_output(bool top_down, uint32_t *address)
 	enum output_type output = NOTHING;
 
 	for (int i = 0; i < characters; i += ts->w) {
-		if (blitter->vram[((ts->base_page << 8) + i + 1)] == ':') {
+		if (blitter->vram[(ts->base_address + i + 1) & VRAM_SIZE_MASK] == ':') {
 			output = MEMORY;
 			char potential_address[5];
 			for (int j=0; j<4; j++) {
-				potential_address[j] = blitter->vram[((ts->base_page << 8) + i + 2 + j)];
+				potential_address[j] = blitter->vram[(ts->base_address + i + 2 + j) & VRAM_SIZE_MASK];
 			}
 			potential_address[4] = 0;
 			system->debugger->hex_string_to_int(potential_address, address);
@@ -286,16 +286,16 @@ void terminal_t::add_top_row()
 	uint16_t last_tile = characters - 1;
 
 	for (int i=0; i < no_of_tiles_to_move; i++) {
-		blitter->vram[((ts->base_page << 8) + last_tile + (0 * characters) - i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + last_tile + (0 * characters) - ts->w - i) & VRAM_SIZE_MASK];
-		blitter->vram[((ts->base_page << 8) + last_tile + (1 * characters) - i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + last_tile + (1 * characters) - ts->w - i) & VRAM_SIZE_MASK];
-		blitter->vram[((ts->base_page << 8) + last_tile + (2 * characters) - i) & VRAM_SIZE_MASK] =
-			blitter->vram[((ts->base_page << 8) + last_tile + (2 * characters) - ts->w - i) & VRAM_SIZE_MASK];
+		blitter->vram[(ts->base_address + last_tile + (0 * characters) - i) & VRAM_SIZE_MASK] =
+			blitter->vram[(ts->base_address + last_tile + (0 * characters) - ts->w - i) & VRAM_SIZE_MASK];
+		blitter->vram[(ts->base_address + last_tile + (1 * characters) - i) & VRAM_SIZE_MASK] =
+			blitter->vram[(ts->base_address + last_tile + (1 * characters) - ts->w - i) & VRAM_SIZE_MASK];
+		blitter->vram[(ts->base_address + last_tile + (2 * characters) - i) & VRAM_SIZE_MASK] =
+			blitter->vram[(ts->base_address + last_tile + (2 * characters) - ts->w - i) & VRAM_SIZE_MASK];
 	}
 	for (int i=0; i < ts->w; i++) {
-		blitter->vram[((ts->base_page << 8) + (0 * characters) + i) & VRAM_SIZE_MASK] = ' ';
-		blitter->vram[((ts->base_page << 8) + (1 * characters) + i) & VRAM_SIZE_MASK] = fg_color;
-		blitter->vram[((ts->base_page << 8) + (2 * characters) + i) & VRAM_SIZE_MASK] = bg_color;
+		blitter->vram[(ts->base_address + (0 * characters) + i) & VRAM_SIZE_MASK] = ' ';
+		blitter->vram[(ts->base_address + (1 * characters) + i) & VRAM_SIZE_MASK] = fg_color;
+		blitter->vram[(ts->base_address + (2 * characters) + i) & VRAM_SIZE_MASK] = bg_color;
 	}
 }

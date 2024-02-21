@@ -29,7 +29,7 @@ struct surface_t {
 	uint16_t w{0};
 	uint16_t h{0};
 	
-	uint16_t base_page{0};
+	uint32_t base_address{0};
 	
 	/*
 	 * Properties related to flags_0 (as encoded inside machine)
@@ -118,6 +118,8 @@ public:
 	blitter_ic();
 	~blitter_ic();
 	
+	void reset();
+	
 	surface_t surface[16];
 	
 	uint8_t io_read8(uint16_t address);
@@ -148,18 +150,17 @@ public:
 	/*
 	 * All return number of pixels changed
 	 */
-	uint32_t clear_surface(const uint8_t surf_no);
 	uint32_t blit(const uint8_t s, const uint8_t d);
 	uint32_t tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t _ts);
+	uint32_t clear_surface(const uint8_t c, const uint8_t d);
 	uint32_t line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
-	uint32_t fill_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
-//	uint32_t flood_fill(int16_t x0, int16_t y0, uint8_t c, uint8_t d);
+	uint32_t solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	
 	void set_pixel_saldo(uint32_t s) { pixel_saldo = s; }
 	uint32_t get_pixel_saldo() { return pixel_saldo; }
 	
-	void update_framebuffer();
+	void update_framebuffer(uint32_t base_address);
 	
 	uint8_t *vram;
 	uint16_t *framebuffer;

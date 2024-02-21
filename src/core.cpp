@@ -21,12 +21,9 @@ core_t::core_t(system_t *s)
 	 * Set up framebuffer surface.
 	 * TODO: Could be done from rom as well...
 	 */
-	blitter->surface[15].base_page = FRAMEBUFFER_PAGE;
-	blitter->surface[15].x = -23;
-	blitter->surface[15].y = 0;
-	blitter->surface[15].w = MAX_PIXELS_PER_SCANLINE;
-	blitter->surface[15].h = MAX_SCANLINES;
-	blitter->surface[15].color_indices[0] = 0b00000101;
+	blitter->surface[0xf].base_address = FRAMEBUFFER_ADDRESS;
+	blitter->surface[0xf].w = MAX_PIXELS_PER_SCANLINE;
+	blitter->surface[0xf].h = MAX_SCANLINES;
 
 	cpu = new cpu_t(system);
 	
@@ -133,6 +130,7 @@ void core_t::reset()
 	sound->reset();
 	timer->reset();
 	cpu->reset();
+	blitter->reset();
 	
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 }
@@ -180,6 +178,14 @@ uint8_t core_t::io_read8(uint16_t address)
 		case 0x03:
 			// vram peek low byte
 			return vram_peek & 0x00ff;
+		case 0x04:
+			return 0x00;
+		case 0x05:
+			return (framebuffer_base_address & 0xff0000) >> 16;
+		case 0x06:
+			return (framebuffer_base_address & 0x00ff00) >> 8;
+		case 0x07:
+			return framebuffer_base_address & 0xff;
 		default:
 			return 0;
 	}
@@ -204,6 +210,17 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 		case 0x03:
 			// vram peek low byte
 			vram_peek = (vram_peek & 0xff00) | value;
+			break;
+		case 0x04:
+			break;
+		case 0x05:
+			framebuffer_base_address = (framebuffer_base_address & 0x00ffff) | (value << 16);
+			break;
+		case 0x06:
+			framebuffer_base_address = (framebuffer_base_address & 0xff00ff) | (value << 8);
+			break;
+		case 0x07:
+			framebuffer_base_address = (framebuffer_base_address & 0xffff00) | value;
 			break;
 		default:
 			break;

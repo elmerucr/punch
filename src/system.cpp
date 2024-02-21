@@ -119,7 +119,7 @@ void system_t::run()
 			case DEBUG_MODE:
 				debugger->run();
 				debugger->redraw();
-				debugger->blitter->update_framebuffer();
+				debugger->blitter->update_framebuffer(debugger->blitter->surface[0xf].base_address);
 				host->update_debugger_texture(debugger->blitter->framebuffer);
 				break;
 		}
@@ -129,7 +129,7 @@ void system_t::run()
 			core->sound->run(audio_cycles - sound_cycle_saldo);
 		}
 		
-		core->blitter->update_framebuffer();
+		core->blitter->update_framebuffer(core->get_framebuffer_base_address());
 		
 		host->update_core_texture(core->blitter->framebuffer);
 		

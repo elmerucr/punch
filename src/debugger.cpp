@@ -48,24 +48,23 @@ debugger_t::debugger_t(system_t *s)
 	irq_no = system->core->exceptions->connect_device("debugger");
 	
 	blitter = new blitter_ic();
+	blitter->reset();
 	
 	/* font surface in slot 0xe */
 	blitter->surface[0xe].w = 4;
 	blitter->surface[0xe].h = 6;
 	blitter->surface[0xe].flags_0 = 0b01110011;
 	blitter->surface[0xe].flags_1 = 0b00000000;
-//	blitter->surface[0xe].keycolor = PUNCH_BLUE;
 	
 	/* framebuffer surface in slot 0xf */
-	blitter->surface[0xf].base_page = FRAMEBUFFER_PAGE;
+	blitter->surface[0xf].base_address = FRAMEBUFFER_ADDRESS;
 	blitter->surface[0xf].w = MAX_PIXELS_PER_SCANLINE;
 	blitter->surface[0xf].h = MAX_PIXELS_PER_SCANLINE;
-	blitter->surface[0xf].color_indices[0] = 0b00000000;
 	
 	/* character screen in slot 0xd */
 	blitter->surface[0xd].w = MAX_PIXELS_PER_SCANLINE / blitter->surface[0xe].w;
 	blitter->surface[0xd].h = MAX_SCANLINES / blitter->surface[0xe].h;
-	blitter->surface[0xd].base_page = 0x0100;
+	blitter->surface[0xd].base_address = 0x010000;
 	blitter->surface[0xd].x = 0;
 	blitter->surface[0xd].y = 0;
 	
@@ -79,7 +78,7 @@ debugger_t::debugger_t(system_t *s)
 	 * Setting up Bruce Lee
 	 */
 	blitter->surface[0xc].index = 2;
-	blitter->surface[0xc].base_page = 0x0003;
+	blitter->surface[0xc].base_address = 0x000300;
 	blitter->surface[0xc].flags_0 = 0b00010000;
 	blitter->surface[0xc].flags_1 = 0b00000001;
 	blitter->surface[0xc].w = 8;
@@ -91,7 +90,7 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xc].color_indices[0b10] = 0xfb;
 	
 	for (int i=0; i<(2*21*3); i++) {
-		blitter->vram[(blitter->surface[0xc].base_page << 8) + i] = bruce_data[i];
+		blitter->vram[blitter->surface[0xc].base_address + i] = bruce_data[i];
 	}
 }
 
@@ -126,7 +125,7 @@ debugger_t::~debugger_t()
 void debugger_t::redraw()
 {
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
-	blitter->clear_surface(0xf);
+	//blitter->clear_surface(PUNCH_BLACK, 0xf);	// no need, everything is redrawn already
 	blitter->tile_blit(0xe, 0xf, 0xd);
 	
 	// Bruce is just for fun
@@ -273,7 +272,7 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "exit") == 0) {
 		terminal->printf("\nexit punch (y/n)");
 		redraw();
-		blitter->update_framebuffer();
+		blitter->update_framebuffer(blitter->surface[0xf].base_address);
 		system->host->update_debugger_texture(blitter->framebuffer);
 		system->host->update_screen();
 		if (system->host->events_yes_no()) {
@@ -336,7 +335,7 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
 		redraw();
-		blitter->update_framebuffer();
+		blitter->update_framebuffer(blitter->surface[0xf].base_address);
 		system->host->update_debugger_texture(blitter->framebuffer);
 		system->host->update_screen();
 		if (system->host->events_yes_no()) {
