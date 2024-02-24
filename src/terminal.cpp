@@ -196,6 +196,15 @@ void terminal_t::cursor_down()
 				add_bottom_row();
 				system->debugger->memory_dump((address + 8) & 0xffff);
 				break;
+			case MEMORY_VIDEO:
+			case MEMORY_VIDEO_BINARY:
+				break;
+			case DISASSEMBLY:
+				address += system->core->cpu->disassemble_instruction(text_buffer, address);
+				add_bottom_row();
+				printf("\r.");
+				system->debugger->disassemble_instruction(address);
+				break;
 		}
 	}
 }
@@ -252,22 +261,25 @@ void terminal_t::get_command(char *c, int l)
 		c[i] = blitter->vram[ts->base_address + pos + i];
 	}
 	c[length] = 0;
-	
-	//command = command_buffer;
-	
-	//command = trim_space(command);
-	
-//	while (*command == '.') command++;
 }
 
 enum output_type terminal_t::check_output(bool top_down, uint32_t *address)
 {
 	enum output_type output = NOTHING;
+	
+	char potential_address[5];
 
 	for (int i = 0; i < characters; i += ts->w) {
 		if (blitter->vram[(ts->base_address + i + 1) & VRAM_SIZE_MASK] == ':') {
 			output = MEMORY;
-			char potential_address[5];
+			for (int j=0; j<4; j++) {
+				potential_address[j] = blitter->vram[(ts->base_address + i + 2 + j) & VRAM_SIZE_MASK];
+			}
+			potential_address[4] = 0;
+			system->debugger->hex_string_to_int(potential_address, address);
+			if (top_down) break;
+		} else if (blitter->vram[(ts->base_address + i + 1) & VRAM_SIZE_MASK] == ',') {
+			output = DISASSEMBLY;
 			for (int j=0; j<4; j++) {
 				potential_address[j] = blitter->vram[(ts->base_address + i + 2 + j) & VRAM_SIZE_MASK];
 			}

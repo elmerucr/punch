@@ -128,7 +128,7 @@ void debugger_t::redraw()
 	//blitter->clear_surface(PUNCH_BLACK, 0xf);	// no need, everything is redrawn already
 	blitter->tile_blit(0xe, 0xf, 0xd);
 	
-	// Bruce is just for fun
+	// Bruce
 	static int state = 0;
 	static int wait = 100;
 	static bool right = true;
@@ -164,9 +164,9 @@ void debugger_t::redraw()
 		wait = 0;
 		change_direction = true;
 	}
-	// end Bruce
 	
 	blitter->blit(0xc, 0xf);
+	// end Bruce
 }
 
 void debugger_t::run()
@@ -269,6 +269,31 @@ void debugger_t::process_command(char *c)
 		}
 	} else if (strcmp(token0, "cls") == 0) {
 		terminal->clear();
+	} else if (strcmp(token0, "d") == 0) {
+		have_prompt = false;
+		token1 = strtok(NULL, " ");
+		
+		uint8_t lines_remaining = terminal->lines_remaining();
+		if (lines_remaining == 0) lines_remaining = 1;
+		
+		uint32_t temp_pc = system->core->cpu->get_pc();
+		
+		if (token1 == NULL) {
+			for (int i=0; i<lines_remaining; i++) {
+				terminal->printf("\n.");
+				temp_pc += disassemble_instruction(temp_pc);
+			}
+		} else {
+			if (!hex_string_to_int(token1, &temp_pc)) {
+				terminal->printf("\nerror: '%s' is not a hex number", token1);
+				have_prompt = true;
+			} else {
+				for (int i=0; i<lines_remaining; i++) {
+					terminal->printf("\n.");
+					temp_pc += disassemble_instruction(temp_pc);
+				}
+			}
+		}
 	} else if (strcmp(token0, "exit") == 0) {
 		terminal->printf("\nexit punch (y/n)");
 		redraw();
@@ -312,7 +337,7 @@ void debugger_t::process_command(char *c)
 				}
 			}
 		}
-	} else if (strcmp(token0, "v") == 0) {
+	} else if (strcmp(token0, "mv") == 0) {
 		have_prompt = false;
 		token1 = strtok(NULL, " ");
 		token2 = strtok(NULL, " ");
@@ -321,7 +346,7 @@ void debugger_t::process_command(char *c)
 		if (lines_remaining == 0) lines_remaining = 1;
 		
 		uint32_t address{0};
-		uint32_t width{0x10};
+		uint32_t width;
 		
 		if (token1 == NULL) {
 			// no address
@@ -358,35 +383,52 @@ void debugger_t::process_command(char *c)
 				}
 			}
 		}
-			
-			
-//			
-//			if (token2 == NULL) {
-//			if (!hex_string_to_int(token1, &address)) {
-//				terminal->printf("\nerror: '%s' is not a hex number", token1);
-//				have_prompt = true;
-//			} else {
-//				for (int i=0; i<lines_remaining; i++) {
-//					terminal->putchar('\n');
-//					vram_dump(address & VRAM_SIZE_MASK, width);
-//					address = (address + width) & VRAM_SIZE_MASK;
-//				}
-//			}
-//		} else {
-//			if(!hex_string_to_int(token2, &width)) {
-//				terminal->printf("\nerror: '%s' is not a hex number", token2);
-//				have_prompt = true;
-//			} else {
-//				if (width == 0) width = 1;
-//				if (width > 0x10) width = 0x10;
-//				// error address not taken!
-//				for (int i=0; i<lines_remaining; i++) {
-//					terminal->putchar('\n');
-//					vram_dump(address & VRAM_SIZE_MASK, width);
-//					address = (address + width) & VRAM_SIZE_MASK;
-//				}
-//			}
-//		}
+	} else if (strcmp(token0, "mvb") == 0) {
+		have_prompt = false;
+		token1 = strtok(NULL, " ");
+		token2 = strtok(NULL, " ");
+		
+		uint8_t lines_remaining = terminal->lines_remaining();
+		if (lines_remaining == 0) lines_remaining = 1;
+		
+		uint32_t address{0};
+		uint32_t width;
+		
+		if (token1 == NULL) {
+			// no address
+			terminal->printf("\nerror: missing arguments");
+			have_prompt = true;
+		} else {
+			// decode address
+			if (!hex_string_to_int(token1, &address)) {
+				// address is wrong
+				terminal->printf("\nerror: '%s' is not a hex number", token1);
+				have_prompt = true;
+			} else {
+				// address is ok
+				if (token2 == NULL) {
+					// missing argument
+					terminal->printf("\nerror: missing arguments");
+					have_prompt = true;
+				} else {
+					// decode width
+					if (!hex_string_to_int(token2, &width)) {
+						// arg wrong
+						terminal->printf("\nerror: '%s' is not a hex number", token2);
+						have_prompt = true;
+					} else {
+						address &= VRAM_SIZE_MASK;
+						if (width == 0) width = 1;
+						if (width > 0x8) width = 0x8;
+						for (int i=0; i<lines_remaining; i++) {
+							terminal->putchar('\n');
+							vram_binary_dump(address & VRAM_SIZE_MASK, width);
+							address = (address + width) & VRAM_SIZE_MASK;
+						}
+					}
+				}
+			}
+		}
 	} else if (strcmp(token0, "n") == 0) {
 		system->core->run(true);
 		status();
@@ -455,14 +497,8 @@ void debugger_t::status()
 	terminal->printf("\n\n_disassembly_________________________");
 	uint16_t pc = system->core->cpu->get_pc();
 	for (int i=0; i<8; i++) {
-		if (system->core->cpu->breakpoint_array[pc]) {
-			terminal->fg_color = fg_acc;
-			terminal->bg_color = bg_acc;
-		}
-		pc += system->core->cpu->disassemble_instruction(text_buffer, pc);
-		terminal->printf("\n%s", text_buffer);
-		terminal->fg_color = fg;
-		terminal->bg_color = bg;
+		terminal->putchar('\n');
+		pc += disassemble_instruction(pc);
 	}
 	
 	terminal->printf("\n\n_usp___  _ssp___  t_____s___bpm______cycles  IRQ_s__Name_____");
@@ -641,4 +677,49 @@ void debugger_t::vram_dump(uint32_t address, uint32_t width)
 	for (int i=0; i<4*width; i++) {
 		terminal->cursor_left();
 	}
+}
+
+void debugger_t::vram_binary_dump(uint32_t address, uint32_t width)
+{
+	address &= VRAM_SIZE_MASK;
+	
+	uint32_t temp_address = address;
+	
+	terminal->printf(".'%06x.%1x ", temp_address, width);
+	
+	for (int i=0; i<width; i++) {
+		terminal->printf("%c%c%c%c%c%c%c%c",
+			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x80 ? '1' : '.',
+			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x40 ? '1' : '.',
+			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x20 ? '1' : '.',
+			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x10 ? '1' : '.',
+			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x08 ? '1' : '.',
+			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x04 ? '1' : '.',
+			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x02 ? '1' : '.',
+			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x01 ? '1' : '.'
+		);
+		temp_address++;
+		temp_address &= VRAM_SIZE_MASK;
+	}
+	
+	for (int i=0; i<8*width; i++) {
+		terminal->cursor_left();
+	}
+}
+
+uint32_t debugger_t::disassemble_instruction(uint16_t address)
+{
+	uint32_t cycles;
+	if (system->core->cpu->breakpoint_array[address]) {
+		terminal->fg_color = fg_acc;
+		terminal->bg_color = bg_acc;
+	}
+	cycles = system->core->cpu->disassemble_instruction(text_buffer, address) & 0xffff;
+	terminal->printf("%s", text_buffer);
+	terminal->fg_color = fg;
+	terminal->bg_color = bg;
+	
+	terminal->putchar('\r');
+	for (int i=0; i<7; i++) terminal->cursor_right();
+	return cycles;
 }

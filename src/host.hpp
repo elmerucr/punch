@@ -139,6 +139,8 @@ private:
 	 */
 	const uint8_t *sdl_keyboard_state;
 	
+	char current_dir[512];
+	
 public:
 	host_t(system_t *s);
 	~host_t();

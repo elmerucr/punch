@@ -38,7 +38,10 @@ public:
 	void memory_dump(uint16_t address);
 	void enter_memory_line(char *buffer);
 	
+	uint32_t disassemble_instruction(uint16_t address);
+	
 	void vram_dump(uint32_t address, uint32_t width);
+	void vram_binary_dump(uint32_t address, uint32_t width);
 
 	bool hex_string_to_int(const char *temp_string, uint32_t *return_value);
 

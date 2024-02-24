@@ -6,7 +6,10 @@
 
 enum output_type {
 	NOTHING,
-	MEMORY
+	MEMORY,
+	MEMORY_VIDEO,
+	MEMORY_VIDEO_BINARY,
+	DISASSEMBLY
 };
 
 class terminal_t {
@@ -55,7 +58,8 @@ private:
 	bool     cursor_blinking{false};
 	
 	enum output_type check_output(bool top_down, uint32_t *address);
-	//char	command_buffer[256];
+	
+	char	text_buffer[256];
 	//char	*command;
 };
 

@@ -406,6 +406,14 @@ enum events_output_state host_t::events_process_events()
 //					settings->audio_toggle_recording();
 				}
 				break;
+			case SDL_DROPFILE:
+//				printf("dropfile\n");
+			{
+				char *file = event.drop.file;
+				system->debugger->terminal->printf("%s", file);
+				SDL_free(file);
+			}
+				break;
 			case SDL_QUIT:
 				return_value = QUIT_EVENT;
 				break;
