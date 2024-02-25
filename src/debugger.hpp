@@ -37,7 +37,8 @@ public:
 
 	void memory_dump(uint16_t address);
 	void enter_memory_line(char *buffer);
-	void enter_memory_video_line(char *buffer);
+	void enter_vram_line(char *buffer);
+	void enter_vram_binary_line(char *buffer);
 	void enter_assembly_line(char *buffer);
 	
 	uint32_t disassemble_instruction(uint16_t address);

@@ -243,7 +243,10 @@ void debugger_t::process_command(char *c)
 		enter_memory_line(c);
 	} else if (token0[0] == ';') {
 		have_prompt = false;
-		enter_memory_video_line(c);
+		enter_vram_line(c);
+	} else if (token0[0] == '\'') {
+		have_prompt = false;
+		enter_vram_binary_line(c);
 	} else if (token0[0] == ',') {
 		have_prompt = false;
 		enter_assembly_line(c);
@@ -758,7 +761,9 @@ void debugger_t::enter_assembly_line(char *buffer)
 				count++;
 				buffer[8 + (2 * i)] = old_char;
 			} else {
-				// TODO: error ??
+				terminal->putchar('\r');
+				for (int j=0; j<(7 + (2*i)); j++) terminal->cursor_right();
+				terminal->printf("??");
 				break;
 			}
 		}
@@ -776,7 +781,7 @@ void debugger_t::enter_assembly_line(char *buffer)
 	}
 }
 
-void debugger_t::enter_memory_video_line(char *buffer)
+void debugger_t::enter_vram_line(char *buffer)
 {
 	uint32_t address;
 	uint32_t columns;
@@ -817,6 +822,56 @@ void debugger_t::enter_memory_video_line(char *buffer)
 			} else {
 				prompt();
 			}
+		}
+	}
+}
+
+void debugger_t::enter_vram_binary_line(char *buffer)
+{
+	uint32_t address;
+	uint32_t columns;
+//	bool values[0x40];	// max 8 bytes
+	uint64_t result{0};	// holds max 8 bytes
+	
+	bool correct = true;
+	
+	buffer[7] = 0;
+	if (!hex_string_to_int(&buffer[1], &address)) {
+		terminal->putchar('\r');
+		terminal->cursor_right();
+		terminal->cursor_right();
+		terminal->puts("??????");
+		prompt();
+	} else {
+		buffer[9] = 0;
+		if (!hex_string_to_int(&buffer[8], &columns)) {
+			terminal->putchar('\r');
+			for (int i=0; i<9; i++) terminal->cursor_right();
+			terminal->puts("?");
+			prompt();
+		} else {
+			if (columns > 8) columns = 8;
+			for (int i=0; i<8*columns; i++) {
+				result <<= 1;
+				if (buffer[10 + i] == '1') {
+					result |= 0b1;
+				} else if (buffer[10 + i] != '.') {
+					correct = false;
+					terminal->putchar('\r');
+					for (int j=0; j<(11 + i); j++) terminal->cursor_right();
+					terminal->printf("?");
+					prompt();
+					break;
+				}
+			}
+		}
+		if (correct) {
+			for (int i=0; i<columns; i++) {
+				system->core->blitter->vram[(address + i) & VRAM_SIZE_MASK] = (result >> ((columns - i - 1) * 8)) & 0xff;
+			}
+			terminal->putchar('\r');
+			vram_binary_dump(address, columns);
+			terminal->printf("\n.\'%06x.%01x ", (address + columns) & VRAM_SIZE_MASK, columns);
 		}
 	}
 }
