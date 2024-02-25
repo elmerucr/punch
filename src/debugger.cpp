@@ -241,6 +241,9 @@ void debugger_t::process_command(char *c)
 	} else if (token0[0] == ':') {
 		have_prompt = false;
 		enter_memory_line(c);
+	} else if (token0[0] == ';') {
+		have_prompt = false;
+		enter_memory_video_line(c);
 	} else if (token0[0] == ',') {
 		have_prompt = false;
 		enter_assembly_line(c);
@@ -729,8 +732,6 @@ uint32_t debugger_t::disassemble_instruction(uint16_t address)
 
 void debugger_t::enter_assembly_line(char *buffer)
 {
-	//have_prompt = true;
-	
 	uint32_t word;
 	uint32_t address;
 	
@@ -771,6 +772,51 @@ void debugger_t::enter_assembly_line(char *buffer)
 			terminal->printf("\n.,%04x ", address + no);
 		} else {
 			if (!count) terminal->printf("\n.");
+		}
+	}
+}
+
+void debugger_t::enter_memory_video_line(char *buffer)
+{
+	uint32_t address;
+	uint32_t columns;
+	uint32_t values[0x10];
+	
+	buffer[7] = 0;
+	if (!hex_string_to_int(&buffer[1], &address)) {
+		terminal->putchar('\r');
+		terminal->cursor_right();
+		terminal->cursor_right();
+		terminal->puts("??????");
+		prompt();
+	} else {
+		buffer[10] = 0;
+		if (!hex_string_to_int(&buffer[8], &columns)) {
+			terminal->putchar('\r');
+			for (int i=0; i<9; i++) terminal->cursor_right();
+			terminal->puts("??");
+			prompt();
+		} else {
+			bool correct = true;
+			for (int i=0; i<columns; i++) {
+				buffer[13 + (3 * i)] = 0;
+				if (!hex_string_to_int(&buffer[11 + (3 * i)], &values[i])) {
+					terminal->putchar('\r');
+					for (int j=0; j<(12 + (3*i)); j++) terminal->cursor_right();
+					terminal->puts("??");
+					correct = false;
+				}
+			}
+			if (correct) {
+				for (int i=0; i<columns; i++) {
+					system->core->blitter->vram[address + i] = values[i];
+				}
+				terminal->printf("\r");
+				vram_dump(address, columns);
+				terminal->printf("\n.;%06x.%02x ", (address + columns) & VRAM_SIZE_MASK, columns);
+			} else {
+				prompt();
+			}
 		}
 	}
 }

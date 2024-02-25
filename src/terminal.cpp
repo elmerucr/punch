@@ -165,13 +165,26 @@ void terminal_t::cursor_up()
 	if (cursor_position >= characters) {
 		cursor_position += ts->w;
 		uint32_t address;
+		uint32_t width;
 
-		switch (check_output(true, &address)) {
+		switch (check_output(true, &address, &width)) {
 			case NOTHING:
 				break;
 			case MEMORY:
 				add_top_row();
 				system->debugger->memory_dump((address - 8) & 0xffff);
+				break;
+			case MEMORY_VIDEO:
+				add_top_row();
+				printf("\r");
+				system->debugger->vram_dump((address - width) & VRAM_SIZE_MASK, width);
+				break;
+			case MEMORY_VIDEO_BINARY:
+				add_top_row();
+				printf("\r");
+				system->debugger->vram_binary_dump((address - width) & VRAM_SIZE_MASK, width);
+				break;
+			case DISASSEMBLY:
 				break;
 		}
 	}
@@ -186,9 +199,10 @@ void terminal_t::cursor_down()
 		//add_bottom_row();
 		cursor_position -= ts->w;
 		
-		uint32_t address = 0;
+		uint32_t address{0};
+		uint32_t width{0};
 
-		switch (check_output(false, &address)) {
+		switch (check_output(false, &address, &width)) {
 			case NOTHING:
 				add_bottom_row();
 				break;
@@ -197,12 +211,17 @@ void terminal_t::cursor_down()
 				system->debugger->memory_dump((address + 8) & 0xffff);
 				break;
 			case MEMORY_VIDEO:
+				printf("\n");
+				system->debugger->vram_dump((address + width) & VRAM_SIZE_MASK, width);
+				break;
 			case MEMORY_VIDEO_BINARY:
+				printf("\n");
+				system->debugger->vram_binary_dump((address + width) & VRAM_SIZE_MASK, width);
 				break;
 			case DISASSEMBLY:
 				address += system->core->cpu->disassemble_instruction(text_buffer, address);
-				add_bottom_row();
-				printf("\r.");
+				//add_bottom_row();
+				printf("\n.");
 				system->debugger->disassemble_instruction(address);
 				break;
 		}
@@ -263,11 +282,11 @@ void terminal_t::get_command(char *c, int l)
 	c[length] = 0;
 }
 
-enum output_type terminal_t::check_output(bool top_down, uint32_t *address)
+enum output_type terminal_t::check_output(bool top_down, uint32_t *address, uint32_t *width)
 {
 	enum output_type output = NOTHING;
 	
-	char potential_address[5];
+	char potential_address[7];
 
 	for (int i = 0; i < characters; i += ts->w) {
 		if (blitter->vram[(ts->base_address + i + 1) & VRAM_SIZE_MASK] == ':') {
@@ -277,6 +296,33 @@ enum output_type terminal_t::check_output(bool top_down, uint32_t *address)
 			}
 			potential_address[4] = 0;
 			system->debugger->hex_string_to_int(potential_address, address);
+			if (top_down) break;
+		} else if (blitter->vram[(ts->base_address + i + 1) & VRAM_SIZE_MASK] == ';') {
+			output = MEMORY_VIDEO;
+			for (int j=0; j<6; j++) {
+				potential_address[j] = blitter->vram[(ts->base_address + i + 2 + j) & VRAM_SIZE_MASK];
+			}
+			potential_address[6] = 0;
+			system->debugger->hex_string_to_int(potential_address, address);
+			
+			potential_address[0] = blitter->vram[(ts->base_address + i + 9) & VRAM_SIZE_MASK];
+			potential_address[1] = blitter->vram[(ts->base_address + i + 10) & VRAM_SIZE_MASK];
+			potential_address[2] = 0;
+			system->debugger->hex_string_to_int(potential_address, width);
+			
+			if (top_down) break;
+		} else if (blitter->vram[(ts->base_address + i + 1) & VRAM_SIZE_MASK] == '\'') {
+			output = MEMORY_VIDEO_BINARY;
+			for (int j=0; j<6; j++) {
+				potential_address[j] = blitter->vram[(ts->base_address + i + 2 + j) & VRAM_SIZE_MASK];
+			}
+			potential_address[6] = 0;
+			system->debugger->hex_string_to_int(potential_address, address);
+			
+			potential_address[0] = blitter->vram[(ts->base_address + i + 9) & VRAM_SIZE_MASK];
+			potential_address[1] = 0;
+			system->debugger->hex_string_to_int(potential_address, width);
+			
 			if (top_down) break;
 		} else if (blitter->vram[(ts->base_address + i + 1) & VRAM_SIZE_MASK] == ',') {
 			output = DISASSEMBLY;

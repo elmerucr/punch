@@ -57,7 +57,7 @@ private:
 	uint16_t cursor_original_background_color;
 	bool     cursor_blinking{false};
 	
-	enum output_type check_output(bool top_down, uint32_t *address);
+	enum output_type check_output(bool top_down, uint32_t *address, uint32_t *width);
 	
 	char	text_buffer[256];
 	//char	*command;
