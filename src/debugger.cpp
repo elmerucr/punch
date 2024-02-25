@@ -241,6 +241,9 @@ void debugger_t::process_command(char *c)
 	} else if (token0[0] == ':') {
 		have_prompt = false;
 		enter_memory_line(c);
+	} else if (token0[0] == ',') {
+		have_prompt = false;
+		enter_assembly_line(c);
 	} else if (strcmp(token0, "b") == 0) {
 		bool breakpoints_present = false;
 		token1 = strtok(NULL, " ");
@@ -722,4 +725,52 @@ uint32_t debugger_t::disassemble_instruction(uint16_t address)
 	terminal->putchar('\r');
 	for (int i=0; i<7; i++) terminal->cursor_right();
 	return cycles;
+}
+
+void debugger_t::enter_assembly_line(char *buffer)
+{
+	//have_prompt = true;
+	
+	uint32_t word;
+	uint32_t address;
+	
+	uint32_t arguments[5];
+	
+	buffer[5] = '\0';
+	
+	if (!hex_string_to_int(&buffer[1], &word)) {
+		terminal->putchar('\r');
+		terminal->cursor_right();
+		terminal->cursor_right();
+		terminal->puts("????");
+	} else {
+		address = word;
+		
+		uint8_t count{0};
+		char old_char;
+		
+		for (int i=0; i<5; i++) {
+			old_char = buffer[8 + (2 * i)];
+			buffer[8 + (2 * i)] = '\0';
+			if (hex_string_to_int(&buffer[6 + (2 * i)], &word)) {
+				arguments[i] = word;
+				count++;
+				buffer[8 + (2 * i)] = old_char;
+			} else {
+				// TODO: error ??
+				break;
+			}
+		}
+
+		for (int i=0; i<count; i++) {
+			system->core->write8((address + i) & 0xffff, arguments[i]);
+		}
+		if (count) {
+			terminal->printf("\r.");
+			uint8_t no = disassemble_instruction(address);
+			terminal->printf("\n.,%04x ", address + no);
+		} else {
+			if (!count) terminal->printf("\n.");
+		}
+	}
 }
