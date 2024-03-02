@@ -10,6 +10,7 @@
 #include "debugger.hpp"
 #include <thread>
 #include <chrono>
+#include <unistd.h>
 
 host_t::host_t(system_t *s)
 {
@@ -39,6 +40,13 @@ host_t::host_t(system_t *s)
 
 	sdl_preference_path = SDL_GetPrefPath("elmerucr", "punch");
 	printf("[SDL] Preference path is: %s\n", sdl_preference_path);
+	
+#ifdef __APPLE__
+	home = getenv("HOME");
+	printf("[host] User homedir is: %s\n", home);
+#else
+#   error "Unknown compiler"
+#endif
 	
 	audio_init();
 	video_init();
@@ -407,11 +415,15 @@ enum events_output_state host_t::events_process_events()
 				}
 				break;
 			case SDL_DROPFILE:
-//				printf("dropfile\n");
 			{
-				char *file = event.drop.file;
-				system->debugger->terminal->printf("%s", file);
-				SDL_free(file);
+				char *path = event.drop.file;
+				if (chdir(path)) {
+					system->debugger->terminal->printf("run %s", path);
+				} else {
+					system->debugger->terminal->printf("cd %s", path);
+				}
+				//system->debugger->terminal->printf("%s", file);
+				SDL_free(path);
 			}
 				break;
 			case SDL_QUIT:

@@ -53,10 +53,15 @@ private:
 	/*
 	 * color theme
 	 */
-	const uint8_t fg = 0x23;
-	const uint8_t fg_acc = 0x33;
-	const uint8_t bg = 0x00;
-	const uint8_t bg_acc = 0x55;
+//	const uint8_t fg = 0x23;
+//	const uint8_t fg_acc = 0x33;
+//	const uint8_t bg = 0x00;
+//	const uint8_t bg_acc = 0x55;
+	
+	const uint8_t fg = 0x2b;
+	const uint8_t fg_acc = 0x3b;
+	const uint8_t bg = 0x28;
+	const uint8_t bg_acc = 0x29;
 
 	uint8_t irq_no;
 
