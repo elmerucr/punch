@@ -41,7 +41,10 @@ host_t::host_t(system_t *s)
 	sdl_preference_path = SDL_GetPrefPath("elmerucr", "punch");
 	printf("[SDL] Preference path is: %s\n", sdl_preference_path);
 	
-#ifdef __APPLE__
+#if defined(__APPLE__)
+	home = getenv("HOME");
+	printf("[host] User homedir is: %s\n", home);
+#elif defined(__linux)
 	home = getenv("HOME");
 	printf("[host] User homedir is: %s\n", home);
 #else

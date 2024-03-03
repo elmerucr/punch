@@ -58,10 +58,10 @@ private:
 //	const uint8_t bg = 0x00;
 //	const uint8_t bg_acc = 0x55;
 	
-	const uint8_t fg = 0x2b;
-	const uint8_t fg_acc = 0x3b;
-	const uint8_t bg = 0x28;
-	const uint8_t bg_acc = 0x29;
+	const uint8_t fg = 0x7f;
+	const uint8_t fg_acc = 0xbf;
+	const uint8_t bg = 0x7c;
+	const uint8_t bg_acc = 0x7d;
 
 	uint8_t irq_no;
 
