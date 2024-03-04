@@ -65,6 +65,9 @@ struct surface_t {
 	
 	uint8_t index{0};
 	
+	/*
+	 * Default colors at init
+	 */
 	uint8_t color_indices[16] = {
 		0x00, 0xff, 0xc6, 0x7e,
 		0x8e, 0x72, 0x1e, 0xf7,
@@ -151,8 +154,8 @@ public:
 	 * All return number of pixels changed
 	 */
 	uint32_t blit(const uint8_t s, const uint8_t d);
-	uint32_t tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t _ts);
-	uint32_t clear_surface(const uint8_t c, const uint8_t d);
+	uint32_t tile_blit(const uint8_t s, const uint8_t d, const uint8_t _ts);
+	uint32_t clear_surface(const uint8_t col, const uint8_t dest);
 	uint32_t line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);

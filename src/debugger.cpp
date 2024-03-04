@@ -67,6 +67,7 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xd].base_address = 0x010000;
 	blitter->surface[0xd].x = 0;
 	blitter->surface[0xd].y = 0;
+	blitter->surface[0xd].flags_0 = 0b00;
 	
 	terminal = new terminal_t(system, &blitter->surface[0xd], blitter);
 	terminal->fg_color = fg;
@@ -533,8 +534,8 @@ void debugger_t::status()
 				 text_buffer);
 	}
 	
-	terminal->printf("\n\n%6i of %6i frame cycles done", system->core->get_cpu_cycle_saldo(), CPU_CYCLES_PER_FRAME);
-	terminal->printf("\n%6u of %6u pixel writes left for this frame", system->core->blitter->get_pixel_saldo(), MAX_PIXELS_PER_FRAME);
+	terminal->printf("\n\n%6i of %6i frame cpu cycles done", system->core->get_cpu_cycle_saldo(), CPU_CYCLES_PER_FRAME);
+	terminal->printf("\n%6u of %6u blitter pixel writes left for this frame", system->core->blitter->get_pixel_saldo(), MAX_PIXELS_PER_FRAME);
 }
 
 void debugger_t::memory_dump(uint16_t address)

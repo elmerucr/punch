@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    6
-#define PUNCH_BUILD            20240303
+#define PUNCH_BUILD            20240304
 #define PUNCH_YEAR             2024
 
 /*

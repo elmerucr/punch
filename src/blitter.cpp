@@ -221,10 +221,10 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	return old_pixel_saldo - pixel_saldo;
 }
 
-uint32_t blitter_ic::tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t _ts)
+uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _ts)
 {
-	const surface_t *src = &surface[_s & 0b1111];
-	surface_t *dst = &surface[_d & 0b1111];
+	const surface_t *src = &surface[s & 0b1111];
+	surface_t *dst = &surface[d & 0b1111];
 	const surface_t *ts = &surface[_ts & 0b1111];
 	
 	uint32_t pixelcount = 0;
@@ -236,15 +236,20 @@ uint32_t blitter_ic::tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t
 	
 	source.x = ts->x;
 	source.y = ts->y;
-	uint32_t tile = ts->base_address;
-	uint32_t fg_color = ts->base_address + (ts->w * ts->h);
-	uint32_t bg_color = ts->base_address + (2 * ts->w * ts->h);
+	uint32_t tile_index = ts->base_address;
+	uint32_t fg_color_index = tile_index + (ts->w * ts->h);
+	uint32_t bg_color_index = tile_index + (2 * ts->w * ts->h);
+
+	bool use_fixed_bg = ts->flags_0 & 0b01 ? true : false;
+	bool use_fixed_fg = ts->flags_0 & 0b10 ? true : false;
 	
 	for (int y = 0; y < ts->h; y++) {
 		for (int x = 0; x < ts->w; x++) {
-			source.index = vram[tile++ & VRAM_SIZE_MASK];
-			source.color_indices[0] = vram[bg_color++ & VRAM_SIZE_MASK];
-			source.color_indices[1] = vram[fg_color++ & VRAM_SIZE_MASK];
+			source.index = vram[tile_index++ & VRAM_SIZE_MASK];
+			source.color_indices[0] = use_fixed_bg ? ts->color_indices[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
+			source.color_indices[1] = use_fixed_fg ? ts->color_indices[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
+//			source.color_indices[0] = vram[bg_color_index++ & VRAM_SIZE_MASK];
+//			source.color_indices[1] = vram[fg_color_index++ & VRAM_SIZE_MASK];
 			pixelcount += blit(&source, dst);
 			source.x += (source.w << dw);
 		}
@@ -255,15 +260,15 @@ uint32_t blitter_ic::tile_blit(const uint8_t _s, const uint8_t _d, const uint8_t
 	return pixelcount;
 }
 
-uint32_t blitter_ic::clear_surface(const uint8_t c, const uint8_t d)
+uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 {
-	surface_t *s = &surface[d & 0xf];
-	uint32_t pixels = s->w * s->h;
+	surface_t *d = &surface[dest & 0xf];
+	uint32_t pixels = d->w * d->h;
 	uint32_t old_pixel_saldo = pixel_saldo;
 	
 	for (uint32_t i=0; i < pixels; i++) {
 		if (pixel_saldo) {
-			vram[(s->base_address + i) & VRAM_SIZE_MASK] = c;
+			vram[(d->base_address + i) & VRAM_SIZE_MASK] = col;
 			pixel_saldo--;
 		} else {
 			break;
