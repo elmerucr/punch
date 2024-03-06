@@ -125,6 +125,24 @@ void core_t::reset()
 	blitter->reset();
 	
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
+	
+	/*
+	 * Default font 4x6 at surface $e
+	 */
+	blitter->surface[0xe].w = 4;
+	blitter->surface[0xe].h = 6;
+	blitter->surface[0xe].flags_0 = 0b01110010;
+	blitter->surface[0xe].flags_1 = 0b00000000;
+	// no need for base_address (implied by flags_0)
+	
+	/*
+	 * Default: dest screen surface $f
+	 */
+	blitter->surface[0xf].w = 320;
+	blitter->surface[0xf].h = 180;
+	blitter->surface[0xf].base_address = 0xff0000;
+	
+	framebuffer_base_address = 0x00ff0000;
 }
 
 enum output_states core_t::run(bool debug)

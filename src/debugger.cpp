@@ -74,6 +74,7 @@ debugger_t::debugger_t(system_t *s)
 	terminal->bg_color = bg;
 	terminal->clear();
 	print_version();
+	terminal->putchar('\n');
 
 	/*
 	 * Setting up Bruce Lee

@@ -39,8 +39,8 @@ system_t::system_t()
 	/*
 	 * Default start mode
 	 */
-//	switch_to_run_mode();
-	switch_to_debug_mode();
+	switch_to_run_mode();
+//	switch_to_debug_mode();
 	
 	core->reset();
 }

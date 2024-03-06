@@ -42,8 +42,8 @@ public:
 		return ts->h - (cursor_position / ts->w) - 1;
 	}
 	
-	uint8_t fg_color{0b00110100};
-	uint8_t bg_color{0b00000000};
+	uint8_t fg_color{0x7f};
+	uint8_t bg_color{0x7c};
 private:
 	system_t *system;
 	surface_t *ts;
@@ -53,8 +53,8 @@ private:
 	uint8_t  cursor_interval{20};
 	uint8_t  cursor_countdown{0};
 	char     cursor_original_char;
-	uint16_t cursor_original_color;
-	uint16_t cursor_original_background_color;
+	uint8_t  cursor_original_color{0x7f};
+	uint8_t  cursor_original_background_color{0x7c};
 	bool     cursor_blinking{false};
 	
 	enum output_type check_output(bool top_down, uint32_t *address, uint32_t *width);
