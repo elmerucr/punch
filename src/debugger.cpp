@@ -53,7 +53,7 @@ debugger_t::debugger_t(system_t *s)
 	/* font surface in slot 0xe */
 	blitter->surface[0xe].w = 4;
 	blitter->surface[0xe].h = 6;
-	blitter->surface[0xe].flags_0 = 0b01110011;
+	blitter->surface[0xe].flags_0 = 0b01000011;
 	blitter->surface[0xe].flags_1 = 0b00000000;
 	
 	/* framebuffer surface in slot 0xf */

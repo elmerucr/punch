@@ -131,7 +131,7 @@ void core_t::reset()
 	 */
 	blitter->surface[0xe].w = 4;
 	blitter->surface[0xe].h = 6;
-	blitter->surface[0xe].flags_0 = 0b01110010;
+	blitter->surface[0xe].flags_0 = 0b01000010;
 	blitter->surface[0xe].flags_1 = 0b00000000;
 	// no need for base_address (implied by flags_0)
 	

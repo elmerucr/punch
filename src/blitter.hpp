@@ -9,6 +9,7 @@
 #define BLITTER_HPP
 
 #include <cstdint>
+#include "font_4x6.hpp"
 
 #define FLAGS0_ROMFONT		0b01000000
 
@@ -100,8 +101,9 @@ private:
 	 */
 	uint32_t blit(const surface_t *src, surface_t *dst);
 	
-	uint8_t *font_4x6;
-	void init_font_4x6();
+	font_4x6_t font_4x6;
+	//uint8_t *font_4x6;
+	//void init_font_4x6();
 	
 	struct color_mode_t {
 		uint8_t bits_per_pixel;

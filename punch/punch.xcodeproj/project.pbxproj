@@ -120,6 +120,7 @@
 		466AC00E2AFC218200ACA0CE /* punch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = punch.entitlements; sourceTree = "<group>"; };
 		466AC0152AFC220900ACA0CE /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../src/main.cpp; sourceTree = "<group>"; };
 		466AC0232AFC29B100ACA0CE /* common.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = common.hpp; path = ../../src/common.hpp; sourceTree = "<group>"; };
+		467F90D92B9DB6AD00F3861E /* font_4x6.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = font_4x6.hpp; path = ../../src/font_4x6.hpp; sourceTree = "<group>"; };
 		469AE79F2B2E1E5D00EB3B08 /* cpu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cpu.cpp; path = ../../src/cpu.cpp; sourceTree = "<group>"; };
 		469AE7A02B2E1E5D00EB3B08 /* cpu.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cpu.hpp; path = ../../src/cpu.hpp; sourceTree = "<group>"; };
 		46BA60D02B3B76780020C879 /* clocks.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = clocks.hpp; path = ../../src/clocks.hpp; sourceTree = "<group>"; };
@@ -230,6 +231,7 @@
 				4647EAA32B2E434000D0884E /* debugger.hpp */,
 				461AD65E2B2E2642006BAD70 /* exceptions.cpp */,
 				461AD65F2B2E2642006BAD70 /* exceptions.hpp */,
+				467F90D92B9DB6AD00F3861E /* font_4x6.hpp */,
 				4647EAA52B2E43BE00D0884E /* host.cpp */,
 				4647EAA62B2E43BE00D0884E /* host.hpp */,
 				4647EAA92B2E441300D0884E /* keyboard.cpp */,
