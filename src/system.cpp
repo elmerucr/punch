@@ -25,9 +25,6 @@ system_t::system_t()
 	
 	core = new core_t(this);
 	
-//	// TODO: reset blitter?
-//	core->reset();
-	
 	keyboard = new keyboard_t(this);
 	keyboard->reset();
 	keyboard->enable_events();
@@ -99,9 +96,9 @@ void system_t::run()
 		int32_t audio_cycles = SID_CYCLES_PER_FRAME;
 		
 		if (audio_buffer_bytes > (AUDIO_BUFFER_SIZE * 1.2)) {
-			audio_cycles -= SID_CYCLES_PER_FRAME / 100;
+			audio_cycles -= SID_CYCLES_PER_FRAME / 5;
 		} else if (audio_buffer_bytes < (AUDIO_BUFFER_SIZE * 0.8)) {
-			audio_cycles += SID_CYCLES_PER_FRAME / 100;
+			audio_cycles += SID_CYCLES_PER_FRAME / 5;
 		}
 		
 		core->cpu2sid->adjust_target_clock(audio_cycles);
@@ -148,7 +145,7 @@ void system_t::run()
 		 *
 		 * When there's no vsync, sleep time is done manually.
 		 */
-		if (host->vsync_disabled()) {
+		if (host->vsync_disabled() || (stats->current_smoothed_framerate() > (FPS + 1))) {
 			end_of_frame_time += std::chrono::microseconds(1000000/FPS);
 			/*
 			 * If the next update is in the past, calculate a

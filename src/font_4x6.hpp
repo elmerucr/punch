@@ -16,13 +16,13 @@
 
 class font_4x6_t {
 public:
+	uint8_t data[0x400]; // slightly larger then 768 bytes to make masking possible
+	
 	font_4x6_t() {
-		for (int i=0; i<768; i++) {
+		for (int i=0; i<0x300; i++) {
 			data[i] = (tiny_font_raw[i << 1] << 4) | tiny_font_raw[(i << 1) + 1];
 		}
 	}
-	
-	uint8_t data[0x400]; // slightly larger then 768 bytes to make masking possible
 	
 private:
 	const uint8_t tiny_font_raw[6 * 256] = {
