@@ -39,9 +39,12 @@ private:
 	uint32_t sound_cycle_saldo;
 	
 	uint8_t irq_number;
-	bool irq_line{true};
 	
-	bool generate_interrupts{false};
+	bool irq_line_frame_done{true};
+	bool irq_line_rom_insert{true};
+	
+	bool generate_interrupts_frame_done{false};
+	bool generate_interrupts_rom_insert{false};
 	
 	uint16_t vram_peek{0x0000};
 	
@@ -77,6 +80,8 @@ public:
 	void io_write8(uint16_t address, uint8_t value);
 	
 	uint32_t get_framebuffer_base_address() { return framebuffer_base_address; }
+	
+	void rom_insert();
 };
 
 #endif

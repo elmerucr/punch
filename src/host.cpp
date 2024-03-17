@@ -418,6 +418,7 @@ enum events_output_state host_t::events_process_events()
 				}
 				break;
 			case SDL_DROPFILE:
+				system->core->rom_insert();
 			{
 				char *path = event.drop.file;
 				if (chdir(path)) {
