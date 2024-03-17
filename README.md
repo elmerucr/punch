@@ -4,9 +4,10 @@
 
 Punch is a virtual computer system that draws inspiration from iconic computing platforms such as the Commodore 64, Amiga 500, and Atari ST.
 Notable features include:
-* Utilization of the MC6809 CPU using this [library](https://github.com/elmerucr/MC6809)
-* A total of 16MB of video RAM, with 64KB accessible by the CPU
-* Screen resolution of 320x180 pixels, refreshing at a rate of 60Hz
+
+* Utilization of the MC6809 CPU using the [MC6809](https://github.com/elmerucr/MC6809) library
+* A total of 16MB of video RAM, 64KB directly accessible by the CPU
+* Screen resolution of 320x180 pixels, refreshing rate of 60Hz
 * Blitter chip for fast graphics processing
 
 ## Table of Contents
@@ -16,7 +17,13 @@ Notable features include:
 
 ## Screenshots
 
-![punch](./docs/20240108_screenshot.png)
+### Startup screen
+
+![punch](./docs/20240317_screenshot_startup.png)
+
+### Debug screen
+
+![punch](./docs/20240317_screenshot_debug.png)
 
 ## Memory Map
 
