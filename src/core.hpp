@@ -41,10 +41,10 @@ private:
 	uint8_t irq_number;
 	
 	bool irq_line_frame_done{true};
-	bool irq_line_rom_insert{true};
+	bool irq_line_load_bin{true};
 	
 	bool generate_interrupts_frame_done{false};
-	bool generate_interrupts_rom_insert{false};
+	bool generate_interrupts_load_bin{false};
 	
 	uint16_t vram_peek{0x0000};
 	
@@ -81,7 +81,7 @@ public:
 	
 	uint32_t get_framebuffer_base_address() { return framebuffer_base_address; }
 	
-	void rom_insert();
+	void load_bin();
 };
 
 #endif

@@ -182,12 +182,12 @@ uint8_t core_t::io_read8(uint16_t address)
 			// status register
 			return
 				(irq_line_frame_done ? 0b00000000 : 0b00000001) |
-				(irq_line_rom_insert ? 0b00000000 : 0b00000010) ;
+				(irq_line_load_bin ? 0b00000000 : 0b00000010) ;
 		case 0x01:
 			// control register
 			return
 				(generate_interrupts_frame_done ? 0b00000001 : 0b00000000) |
-				(generate_interrupts_rom_insert ? 0b00000010 : 0b00000000) ;
+				(generate_interrupts_load_bin ? 0b00000010 : 0b00000000) ;
 		case 0x02:
 			// vram peek high byte
 			return (vram_peek & 0xff00) >> 8;
@@ -214,14 +214,14 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 			if ((value & 0b00000001) && (!irq_line_frame_done)) {
 				irq_line_frame_done = true;
 			}
-			if ((value & 0b00000010) && (!irq_line_rom_insert)) {
-				irq_line_rom_insert = true;
+			if ((value & 0b00000010) && (!irq_line_load_bin)) {
+				irq_line_load_bin = true;
 			}
-			if (irq_line_frame_done && irq_line_rom_insert) exceptions->release(irq_number);
+			if (irq_line_frame_done && irq_line_load_bin) exceptions->release(irq_number);
 			break;
 		case 0x01:
 			generate_interrupts_frame_done = (value & 0b00000001) ? true : false;
-			generate_interrupts_rom_insert = (value & 0b00000010) ? true : false;
+			generate_interrupts_load_bin = (value & 0b00000010) ? true : false;
 			break;
 		case 0x02:
 			// vram peek high byte
@@ -247,10 +247,10 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 	}
 }
 
-void core_t::rom_insert()
+void core_t::load_bin()
 {
-	if (generate_interrupts_rom_insert) {
-		irq_line_rom_insert = false;
+	if (generate_interrupts_load_bin) {
+		irq_line_load_bin = false;
 		exceptions->pull(irq_number);
 	}
 }

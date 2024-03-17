@@ -418,15 +418,22 @@ enum events_output_state host_t::events_process_events()
 				}
 				break;
 			case SDL_DROPFILE:
-				system->core->rom_insert();
 			{
 				char *path = event.drop.file;
+				
+				system->debugger->terminal->deactivate_cursor();
+				
 				if (chdir(path)) {
-					system->debugger->terminal->printf("run %s", path);
+					system->debugger->terminal->printf("\nloading %s", path);
+					system->core->load_bin();
 				} else {
-					system->debugger->terminal->printf("cd %s", path);
+					system->debugger->terminal->printf("\nwarning: %s is a directory", path);
 				}
-				//system->debugger->terminal->printf("%s", file);
+				
+				if (system->current_mode == DEBUG_MODE) system->debugger->prompt();
+				
+				system->debugger->terminal->activate_cursor();
+
 				SDL_free(path);
 			}
 				break;
