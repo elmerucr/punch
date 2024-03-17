@@ -26,7 +26,7 @@
 #define SOUND_PAGE				0x0c // + 0x0d
 #define	BLITTER_PAGE			0x0e
 #define VRAM_PEEK_PAGE			0x0f
-#define	ROM_PAGE				0xfe
+#define	ROM_PAGE				0xfc
 
 enum output_states {
 	NORMAL,

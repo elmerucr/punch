@@ -166,7 +166,7 @@ uint8_t sound_ic::io_read_byte(uint16_t address)
 				case 0x60:
 				case 0x70:
 					return analog3.read_byte(address & 0x1f);
-				case 0x80:
+				case 0x90:
 					return balance_registers[address & 0x0f];
 				default:
 					return 0x00;
@@ -218,7 +218,7 @@ void sound_ic::io_write_byte(uint16_t address, uint8_t byte)
 				case 0x70:
 					analog3.write_byte(address & 0x1f, byte);
 					break;
-				case 0x80:
+				case 0x90:
 					balance_registers[address & 0x0f] = byte;
 					break;
 				default:

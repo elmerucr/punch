@@ -69,7 +69,9 @@ uint8_t core_t::read8(uint16_t address)
 			return blitter->vram[((vram_peek << 8) | (address & 0xff)) & VRAM_SIZE_MASK];
 		case ROM_PAGE:
 		case ROM_PAGE+1:
-			return rom[address & 0x1ff];
+		case ROM_PAGE+2:
+		case ROM_PAGE+3:
+			return rom[address & 0x3ff];
 		default:
 			return blitter->vram[address];
 	}
