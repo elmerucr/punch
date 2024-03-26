@@ -52,7 +52,7 @@ private:
 	uint16_t cursor_position{0};
 	uint8_t  cursor_interval{20};
 	uint8_t  cursor_countdown{0};
-	char     cursor_original_char;
+	char     cursor_original_char{0x20};
 	uint8_t  cursor_original_color{0x7f};
 	uint8_t  cursor_original_background_color{0x7c};
 	bool     cursor_blinking{false};
