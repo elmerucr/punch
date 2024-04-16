@@ -49,7 +49,7 @@ uint8_t core_t::read8(uint16_t address)
 	switch (page) {
 		case BLITTER_SURFACES:
 			return blitter->io_surfaces_read8(address);
-		case BLITTER_COLOR_INDICES:
+		case BLITTER_COLOR_TABLES:
 			return blitter->io_color_indices_read8(address);
 //		case BLITTER_PALETTE:
 //		case BLITTER_PALETTE+1:
@@ -84,7 +84,7 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case BLITTER_SURFACES:
 			blitter->io_surfaces_write8(address, value);
 			break;
-		case BLITTER_COLOR_INDICES:
+		case BLITTER_COLOR_TABLES:
 			blitter->io_color_indices_write8(address, value);
 			break;
 //		case BLITTER_PALETTE:

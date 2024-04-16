@@ -27,16 +27,29 @@ Notable features include:
 
 ## Memory Map
 
-### Addressable by Blitter & MC6809
+### Addressable by MC6809 and Blitter
 
-* ```$000000-$0000ff``` direct page (after reset)
-* ```$000100-$0003ff``` available ram and system stack pointer (768 bytes)
-* ```$000400-$000fff``` io
-* ```$001000-$00fdff``` 60kb ram (minus 512 bytes)
-* ```$00fe00-$00ffff``` 512 bytes kernel + vectors
+* ```$000-$0ff``` direct page (default after reset)
+* ```$100-$3ff``` available ram and system stack pointer (768 bytes)
+* ```$400-$4ff``` io - blitter surfaces
+* ```$500-$5ff``` io - blitter color tables
+* ```$600-$7ff``` io - reserved area
+* ```$800-$8ff``` io - core
+	* ```$800``` status register
+	* ```$801``` control register
+	* ```$802-$803``` vram peek page (16bits)
+	* ```$804-$807``` framebuffer base address (24 bits, $804 always #$00)
+* ```$900-$9ff``` io - keyboard
+* ```$a00-$aff``` io - timer
+* ```$b00-$bff``` io - reserved area
+* ```$c00-$dff``` io - sound
+* ```$e00-$eff``` io - blitter
+* ```$f00-$fff``` io - vram peek (see $802 as well)
+* ```$1000-$fbff``` 59kb ram
+* ```$fc00-$ffff``` 1kb kernel + vectors
 
-### Addressable by Blitter only
+### Directly addressable by Blitter
 
-* ```$010000-$0dffff``` available vram (832kb)
-* ```$0e0000-$0fffff``` framebuffer vram (128kb)
-* ```$100000-$ffffff``` framebuffer vram (15mb)
+* ```$010000-$feffff``` available vram (16.256kb)
+* ```$ff0000-$ffe0ff``` default framebuffer vram (57.600 bytes)
+* ```$ffe100-$ffffff``` available vram (73.472 bytes)

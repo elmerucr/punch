@@ -4,6 +4,8 @@
 #include "system.hpp"
 #include "blitter.hpp"
 
+#define TEXT_BUFFER_SIZE	256
+
 enum output_type {
 	NOTHING,
 	MEMORY,
@@ -59,7 +61,7 @@ private:
 	
 	enum output_type check_output(bool top_down, uint32_t *address, uint32_t *width);
 	
-	char	text_buffer[256];
+	char	text_buffer[TEXT_BUFFER_SIZE];
 	//char	*command;
 };
 

@@ -59,6 +59,8 @@ blitter_ic::blitter_ic()
 		r = (factor * r) / 3;
 		g = (factor * g) / 3;
 		b = (factor * b) / 3;
+		
+		//printf("\t0x00%02x%02x%02x,\n", 17 * r, 17 * g, 17 * b);
 
 		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
 	}
@@ -419,7 +421,7 @@ uint8_t blitter_ic::io_surfaces_read8(uint16_t address)
 		case 0x5: return surface[no].w & 0xff;
 		case 0x6: return (surface[no].h & 0xff00) >> 8;
 		case 0x7: return surface[no].h & 0xff;
-		case 0x8: return 0x00;
+//		case 0x8: return 0x00;
 		case 0x9: return (surface[no].base_address & 0x00ff0000) >> 16;
 		case 0xa: return (surface[no].base_address & 0x0000ff00) >>  8;
 		case 0xb: return surface[no].base_address & 0x000000ff;
@@ -444,13 +446,13 @@ void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
 		case 0x5: surface[no].w = (surface[no].w & 0xff00) | value;        break;
 		case 0x6: surface[no].h = (surface[no].h & 0x00ff) | (value << 8); break;
 		case 0x7: surface[no].h = (surface[no].h & 0xff00) | value;        break;
-		case 0x8: break;
+//		case 0x8: break;
 		case 0x9: surface[no].base_address = (surface[no].base_address & 0x0000ffff) | (value << 16); break;
 		case 0xa: surface[no].base_address = (surface[no].base_address & 0x00ff00ff) | (value << 8);  break;
 		case 0xb: surface[no].base_address = (surface[no].base_address & 0x00ffff00) | value;         break;
 		case 0xc: surface[no].flags_0 = value & 0b11110011; break;
 		case 0xd: surface[no].flags_1 = value & 0b01110011; break;
-//		case 0xe:
+//		case 0xe: break;
 		case 0xf: surface[no].index = value; break;
 		default:  break;
 	}

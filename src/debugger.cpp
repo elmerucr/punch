@@ -725,7 +725,7 @@ uint32_t debugger_t::disassemble_instruction(uint16_t address)
 		terminal->fg_color = fg_acc;
 		terminal->bg_color = bg_acc;
 	}
-	cycles = system->core->cpu->disassemble_instruction(text_buffer, address) & 0xffff;
+	cycles = system->core->cpu->disassemble_instruction(text_buffer, T_BUFFER_SIZE, address) & 0xffff;
 	terminal->printf("%s", text_buffer);
 	terminal->fg_color = fg;
 	terminal->bg_color = bg;

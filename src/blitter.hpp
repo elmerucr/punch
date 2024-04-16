@@ -9,6 +9,7 @@
 #define BLITTER_HPP
 
 #include <cstdint>
+#include "common.hpp"
 #include "font_4x6.hpp"
 
 #define FLAGS0_ROMFONT		0b01000000
@@ -67,13 +68,13 @@ struct surface_t {
 	uint8_t index{0};
 	
 	/*
-	 * Default colors at init
+	 * Default 16 colors at init, resemble c64
 	 */
 	uint8_t color_indices[16] = {
-		0x00, 0xff, 0xc6, 0x7e,
-		0x8e, 0x72, 0x1e, 0xf7,
-		0xe2, 0x91, 0xea, 0xa9,
-		0xab, 0xbb, 0xae, 0xfe
+		PUNCH_BLACK, PUNCH_WHITE, PUNCH_RED, PUNCH_CYAN,
+		PUNCH_PURPLE, PUNCH_GREEN, PUNCH_BLUE, PUNCH_YELLOW,
+		PUNCH_ORANGE, PUNCH_BROWN, PUNCH_LIGHTRED, PUNCH_DARKGREY,
+		PUNCH_GREY, PUNCH_LIGHTGREEN, PUNCH_LIGHTBLUE, PUNCH_LIGHTGREY
 	};
 };
 

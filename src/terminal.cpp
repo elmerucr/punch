@@ -219,7 +219,7 @@ void terminal_t::cursor_down()
 				system->debugger->vram_binary_dump((address + width) & VRAM_SIZE_MASK, width);
 				break;
 			case DISASSEMBLY:
-				address += system->core->cpu->disassemble_instruction(text_buffer, address);
+				address += system->core->cpu->disassemble_instruction(text_buffer, TEXT_BUFFER_SIZE, address);
 				//add_bottom_row();
 				printf("\n.");
 				system->debugger->disassemble_instruction(address);

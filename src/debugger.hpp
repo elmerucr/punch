@@ -15,6 +15,8 @@
 #include "terminal.hpp"
 #include "rca.hpp"
 
+#define T_BUFFER_SIZE 2048
+
 class debugger_t {
 public:
 	debugger_t(system_t *s);
@@ -65,7 +67,7 @@ private:
 
 	uint8_t irq_no;
 
-	char text_buffer[2048];
+	char text_buffer[TEXT_BUFFER_SIZE];
 
 	bool have_prompt{true};
 
