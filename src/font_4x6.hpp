@@ -1821,10 +1821,3 @@ private:
 };
 
 #endif
-
-//int main()
-//{
-//	for (int i=0; i<3 * 256; i++) {
-//		printf("%02x\n", (tiny_font[i << 1] << 4) | tiny_font[(i << 1) + 1]);
-//	}
-//}
