@@ -17,6 +17,10 @@
 #include "timer.hpp"
 #include "clocks.hpp"
 
+#include "lua.hpp"
+#include "lualib.h"
+#include "lauxlib.h"
+
 #define BLITTER_SURFACES		0x04
 #define BLITTER_COLOR_TABLES	0x05
 #define CORE_PAGE				0x08
@@ -49,6 +53,8 @@ private:
 	uint16_t vram_peek{0x0000};
 	
 	uint32_t framebuffer_base_address{0};
+
+	lua_State *L{nullptr};
 public:
 	core_t(system_t *s);
 	~core_t();

@@ -30,10 +30,30 @@ core_t::core_t(system_t *s)
 	cpu2sid = new clocks(CPU_CLOCK_SPEED/FPS, SID_CLOCK_SPEED/FPS);
 	
 	irq_number = exceptions->connect_device("core");
+
+	        /*
+         * Start Lua
+         */
+        if (!L) L = luaL_newstate();
+
+        if (!L) {
+                printf("[core] error, couldn't start Lua\n");
+                // TODO: failure... exit?
+        } else {
+                printf("[core] %s\n", LUA_COPYRIGHT);
+        }
+
+        luaL_openlibs(L);
 }
 
 core_t::~core_t()
-{
+{       
+	/*
+	 * Clean up Lua
+	 */
+	printf("[core] Closing Lua\n");
+	lua_close(L);
+	
 	delete cpu2sid;
 	delete sound;
 	delete timer;

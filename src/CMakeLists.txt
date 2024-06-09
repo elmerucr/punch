@@ -15,7 +15,8 @@ add_library(system STATIC
 	timer.cpp
 )
 
-target_link_libraries(system MC6809 resid)
+target_link_libraries(system lua MC6809 resid)
 
+add_subdirectory(lua-5.4.6/src/)
 add_subdirectory(MC6809/)
 add_subdirectory(resid-0.16/)
