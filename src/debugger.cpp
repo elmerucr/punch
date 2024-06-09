@@ -305,7 +305,7 @@ void debugger_t::process_command(char *c)
 				}
 			}
 		}
-	} else if (strcmp(token0, "exit") == 0) {
+	} else if (strcmp(token0, "x") == 0) {
 		terminal->printf("\nexit punch (y/n)");
 		redraw();
 		blitter->update_framebuffer(blitter->surface[0xf].base_address);
