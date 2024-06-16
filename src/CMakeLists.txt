@@ -8,6 +8,7 @@ add_library(system STATIC
 	host.cpp
 	keyboard.cpp
 	rom.cpp
+	scriptor.cpp
 	sound.cpp
 	stats.cpp
 	system.cpp

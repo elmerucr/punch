@@ -12,8 +12,8 @@
  * Version information
  */
 #define PUNCH_MAJOR_VERSION    0
-#define PUNCH_MINOR_VERSION    6
-#define PUNCH_BUILD            20240609
+#define PUNCH_MINOR_VERSION    7
+#define PUNCH_BUILD            20240616
 #define PUNCH_YEAR             2024
 
 /*

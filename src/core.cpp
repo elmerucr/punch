@@ -30,30 +30,16 @@ core_t::core_t(system_t *s)
 	cpu2sid = new clocks(CPU_CLOCK_SPEED/FPS, SID_CLOCK_SPEED/FPS);
 	
 	irq_number = exceptions->connect_device("core");
-
-	        /*
-         * Start Lua
-         */
-        if (!L) L = luaL_newstate();
-
-        if (!L) {
-                printf("[core] error, couldn't start Lua\n");
-                // TODO: failure... exit?
-        } else {
-                printf("[core] %s\n", LUA_COPYRIGHT);
-        }
-
-        luaL_openlibs(L);
+	
+	/*
+	 * Last one!
+	 */
+	scriptor = new scriptor_t(system);
 }
 
 core_t::~core_t()
-{       
-	/*
-	 * Clean up Lua
-	 */
-	printf("[core] Closing Lua\n");
-	lua_close(L);
-	
+{
+	delete scriptor;
 	delete cpu2sid;
 	delete sound;
 	delete timer;
@@ -80,6 +66,8 @@ uint8_t core_t::read8(uint16_t address)
 			return system->keyboard->io_read8(address);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
+		case SCRIPTOR_PAGE:
+			return scriptor->io_read8(address & 0xff);
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
 			return sound->io_read_byte(address & 0x1ff);
@@ -118,7 +106,10 @@ void core_t::write8(uint16_t address, uint8_t value) {
 			system->keyboard->io_write8(address, value);
 			break;
 		case TIMER_PAGE:
-			timer->io_write_byte(address &0xff, value);
+			timer->io_write_byte(address & 0xff, value);
+			break;
+		case SCRIPTOR_PAGE:
+			scriptor->io_write8(address & 0xff, value);
 			break;
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
@@ -165,6 +156,8 @@ void core_t::reset()
 	blitter->surface[0xf].base_address = 0xff0000;
 	
 	framebuffer_base_address = 0x00ff0000;
+	
+	scriptor->reset();
 }
 
 enum output_states core_t::run(bool debug)
@@ -172,9 +165,9 @@ enum output_states core_t::run(bool debug)
 	enum output_states output_state = NORMAL;
 	
 	do {
-		uint8_t cpu_cycles = cpu->execute();
+		uint16_t cpu_cycles = cpu->execute();
 		timer->run(cpu_cycles);
-		uint8_t sound_cycles = cpu2sid->clock(cpu_cycles);
+		uint16_t sound_cycles = cpu2sid->clock(cpu_cycles);
 		sound->run(sound_cycles);
 		cpu_cycle_saldo += cpu_cycles;
 		sound_cycle_saldo += sound_cycles;

@@ -16,17 +16,14 @@
 #include "sound.hpp"
 #include "timer.hpp"
 #include "clocks.hpp"
-
-#include "lua.hpp"
-#include "lualib.h"
-#include "lauxlib.h"
+#include "scriptor.hpp"
 
 #define BLITTER_SURFACES		0x04
 #define BLITTER_COLOR_TABLES	0x05
 #define CORE_PAGE				0x08
 #define KEYBOARD_PAGE			0x09
 #define	TIMER_PAGE				0x0a
-// 0x0b available
+#define SCRIPTOR_PAGE			0x0b
 #define SOUND_PAGE				0x0c // + 0x0d
 #define	BLITTER_PAGE			0x0e
 #define VRAM_PEEK_PAGE			0x0f
@@ -53,8 +50,6 @@ private:
 	uint16_t vram_peek{0x0000};
 	
 	uint32_t framebuffer_base_address{0};
-
-	lua_State *L{nullptr};
 public:
 	core_t(system_t *s);
 	~core_t();
@@ -81,6 +76,7 @@ public:
 	sound_ic *sound;
 	cpu_t *cpu;
 	clocks *cpu2sid;
+	scriptor_t *scriptor;
 	
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);

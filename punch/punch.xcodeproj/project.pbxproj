@@ -75,6 +75,7 @@
 		466AC00D2AFC218200ACA0CE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */; };
 		466AC0162AFC220900ACA0CE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0152AFC220900ACA0CE /* main.cpp */; };
 		469AE7A12B2E1E5D00EB3B08 /* cpu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 469AE79F2B2E1E5D00EB3B08 /* cpu.cpp */; };
+		46CC17E62C17766800596713 /* scriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46CC17E42C17766700596713 /* scriptor.cpp */; };
 		46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */; };
 		46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */; };
 		46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181572B00E79800E7FDC8 /* mc6809_addressing_modes.cpp */; };
@@ -218,6 +219,8 @@
 		469AE79F2B2E1E5D00EB3B08 /* cpu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cpu.cpp; path = ../../src/cpu.cpp; sourceTree = "<group>"; };
 		469AE7A02B2E1E5D00EB3B08 /* cpu.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cpu.hpp; path = ../../src/cpu.hpp; sourceTree = "<group>"; };
 		46BA60D02B3B76780020C879 /* clocks.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = clocks.hpp; path = ../../src/clocks.hpp; sourceTree = "<group>"; };
+		46CC17E42C17766700596713 /* scriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scriptor.cpp; path = ../../src/scriptor.cpp; sourceTree = "<group>"; };
+		46CC17E52C17766700596713 /* scriptor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = scriptor.hpp; path = ../../src/scriptor.hpp; sourceTree = "<group>"; };
 		46E53FEE2B72D81E0058BE66 /* rca.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rca.hpp; path = ../../src/rca.hpp; sourceTree = "<group>"; };
 		46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_disassembler.cpp; path = ../../src/MC6809/mc6809_disassembler.cpp; sourceTree = "<group>"; };
 		46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_instructions.cpp; path = ../../src/MC6809/mc6809_instructions.cpp; sourceTree = "<group>"; };
@@ -402,6 +405,8 @@
 				466AC0152AFC220900ACA0CE /* main.cpp */,
 				46E53FEE2B72D81E0058BE66 /* rca.hpp */,
 				4654C9842B3772E300AF2582 /* rom.cpp */,
+				46CC17E42C17766700596713 /* scriptor.cpp */,
+				46CC17E52C17766700596713 /* scriptor.hpp */,
 				4647EADE2B2E471400D0884E /* sound.cpp */,
 				4647EADC2B2E471400D0884E /* sound.hpp */,
 				4644873E2B3CD6C4004B04BA /* stats.cpp */,
@@ -513,6 +518,7 @@
 				46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */,
 				46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */,
 				4614F9F52B2E2A70005C9BE3 /* blitter.cpp in Sources */,
+				46CC17E62C17766800596713 /* scriptor.cpp in Sources */,
 				4662832F2C15DA7400822655 /* ltablib.c in Sources */,
 				4654C9852B3772E300AF2582 /* rom.cpp in Sources */,
 				466283212C15DA7400822655 /* lbaselib.c in Sources */,
