@@ -165,6 +165,7 @@ enum output_states core_t::run(bool debug)
 	enum output_states output_state = NORMAL;
 	
 	do {
+
 		uint16_t cpu_cycles = cpu->execute();
 		timer->run(cpu_cycles);
 		uint16_t sound_cycles = cpu2sid->clock(cpu_cycles);
@@ -266,4 +267,9 @@ void core_t::load_bin()
 		irq_line_load_bin = false;
 		exceptions->pull(irq_number);
 	}
+}
+
+void core_t::load_lua()
+{
+	//
 }

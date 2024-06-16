@@ -424,8 +424,16 @@ enum events_output_state host_t::events_process_events()
 				system->debugger->terminal->deactivate_cursor();
 				
 				if (chdir(path)) {
+					const char *dot = strrchr(path, '.'); dot++;
+					
+					//if(!dot || dot == filename);
 					system->debugger->terminal->printf("\nloading %s", path);
-					system->core->load_bin();
+					system->debugger->terminal->printf("\nextension is %s", dot);
+					if (strcmp(dot, "lua") == 0) {
+						system->core->load_lua();
+					} else {
+						system->core->load_bin();
+					}
 				} else {
 					system->debugger->terminal->printf("\nwarning: %s is a directory", path);
 				}
