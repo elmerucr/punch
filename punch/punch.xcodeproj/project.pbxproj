@@ -47,7 +47,6 @@
 		4662831F2C15DA7400822655 /* lstate.c in Sources */ = {isa = PBXBuildFile; fileRef = 466282E72C15DA7300822655 /* lstate.c */; };
 		466283202C15DA7400822655 /* loslib.c in Sources */ = {isa = PBXBuildFile; fileRef = 466282E92C15DA7300822655 /* loslib.c */; };
 		466283212C15DA7400822655 /* lbaselib.c in Sources */ = {isa = PBXBuildFile; fileRef = 466282EA2C15DA7300822655 /* lbaselib.c */; };
-		466283222C15DA7400822655 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 466282EF2C15DA7300822655 /* Makefile */; };
 		466283232C15DA7400822655 /* ltable.c in Sources */ = {isa = PBXBuildFile; fileRef = 466282F02C15DA7300822655 /* ltable.c */; };
 		466283242C15DA7400822655 /* lzio.c in Sources */ = {isa = PBXBuildFile; fileRef = 466282F32C15DA7300822655 /* lzio.c */; };
 		466283252C15DA7400822655 /* ldo.c in Sources */ = {isa = PBXBuildFile; fileRef = 466282F42C15DA7300822655 /* ldo.c */; };
@@ -169,7 +168,6 @@
 		466282EC2C15DA7300822655 /* lopcodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lopcodes.h; path = "../../src/lua-5.4.6/src/lopcodes.h"; sourceTree = "<group>"; };
 		466282ED2C15DA7300822655 /* lctype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lctype.h; path = "../../src/lua-5.4.6/src/lctype.h"; sourceTree = "<group>"; };
 		466282EE2C15DA7300822655 /* llimits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = llimits.h; path = "../../src/lua-5.4.6/src/llimits.h"; sourceTree = "<group>"; };
-		466282EF2C15DA7300822655 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = "../../src/lua-5.4.6/src/Makefile"; sourceTree = "<group>"; };
 		466282F02C15DA7300822655 /* ltable.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ltable.c; path = "../../src/lua-5.4.6/src/ltable.c"; sourceTree = "<group>"; };
 		466282F12C15DA7300822655 /* lparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lparser.h; path = "../../src/lua-5.4.6/src/lparser.h"; sourceTree = "<group>"; };
 		466282F22C15DA7300822655 /* ltm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ltm.h; path = "../../src/lua-5.4.6/src/ltm.h"; sourceTree = "<group>"; };
@@ -336,7 +334,6 @@
 				466282FE2C15DA7400822655 /* lvm.h */,
 				466282F32C15DA7300822655 /* lzio.c */,
 				466282E02C15DA7300822655 /* lzio.h */,
-				466282EF2C15DA7300822655 /* Makefile */,
 			);
 			name = lua;
 			sourceTree = "<group>";
@@ -470,7 +467,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1540;
 				TargetAttributes = {
 					466AC0012AFC218100ACA0CE = {
 						CreatedOnToolsVersion = 15.0.1;
@@ -512,7 +509,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				466283222C15DA7400822655 /* Makefile in Sources */,
 				4647EACB2B2E46A500D0884E /* wave6581_PST.cc in Sources */,
 				466283272C15DA7400822655 /* lstrlib.c in Sources */,
 				46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */,
@@ -621,6 +617,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -684,6 +681,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -714,6 +712,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"punch/Preview Content\"";
 				DEVELOPMENT_TEAM = HT34RQMQU3;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -746,6 +745,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"punch/Preview Content\"";
 				DEVELOPMENT_TEAM = HT34RQMQU3;
 				ENABLE_HARDENED_RUNTIME = YES;

@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    7
-#define PUNCH_BUILD            20240616
+#define PUNCH_BUILD            20240618
 #define PUNCH_YEAR             2024
 
 /*
@@ -39,7 +39,7 @@
 /*
  * Cpu
  */
-#define CPU_CLOCK_MULTIPLY		2
+#define CPU_CLOCK_MULTIPLY		1
 #define CPU_CLOCK_SPEED			(CPU_CLOCK_MULTIPLY*SID_CLOCK_SPEED)
 #define CPU_CYCLES_PER_FRAME	(CPU_CLOCK_SPEED/FPS)
 
