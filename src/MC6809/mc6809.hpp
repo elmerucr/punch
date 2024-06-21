@@ -58,8 +58,8 @@
 #define	VECTOR_NMI	0xfffc
 #define	VECTOR_RESET	0xfffe
 
-#define SYNC_CYCLES	100
-#define CWAI_CYCLES	100
+#define SYNC_CYCLES	50
+#define CWAI_CYCLES	50
 
 enum cpu_state_t {
 	CPU_NORMAL = 0,

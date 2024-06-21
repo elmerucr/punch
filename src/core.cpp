@@ -34,12 +34,12 @@ core_t::core_t(system_t *s)
 	/*
 	 * Last one!
 	 */
-	scriptor = new scriptor_t(system);
+	moon = new moon_t(system);
 }
 
 core_t::~core_t()
 {
-	delete scriptor;
+	delete moon;
 	delete cpu2sid;
 	delete sound;
 	delete timer;
@@ -66,8 +66,8 @@ uint8_t core_t::read8(uint16_t address)
 			return system->keyboard->io_read8(address);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
-		case SCRIPTOR_PAGE:
-			return scriptor->io_read8(address & 0xff);
+		case MOON_PAGE:
+			return moon->io_read8(address & 0xff);
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
 			return sound->io_read_byte(address & 0x1ff);
@@ -108,8 +108,8 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case TIMER_PAGE:
 			timer->io_write_byte(address & 0xff, value);
 			break;
-		case SCRIPTOR_PAGE:
-			scriptor->io_write8(address & 0xff, value);
+		case MOON_PAGE:
+			moon->io_write8(address & 0xff, value);
 			break;
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
@@ -157,7 +157,7 @@ void core_t::reset()
 	
 	framebuffer_base_address = 0x00ff0000;
 	
-	scriptor->reset();
+	moon->reset();
 }
 
 enum output_states core_t::run(bool debug)
@@ -196,12 +196,14 @@ uint8_t core_t::io_read8(uint16_t address)
 			// status register
 			return
 				(irq_line_frame_done ? 0b00000000 : 0b00000001) |
-				(irq_line_load_bin ? 0b00000000 : 0b00000010) ;
+				(irq_line_load_bin   ? 0b00000000 : 0b00000010) |
+				(irq_line_load_lua   ? 0b00000000 : 0b00000100) ;
 		case 0x01:
 			// control register
 			return
 				(generate_interrupts_frame_done ? 0b00000001 : 0b00000000) |
-				(generate_interrupts_load_bin ? 0b00000010 : 0b00000000) ;
+				(generate_interrupts_load_bin   ? 0b00000010 : 0b00000000) |
+				(generate_interrupts_load_lua   ? 0b00000100 : 0b00000000) ;
 		case 0x02:
 			// vram peek high byte
 			return (vram_peek & 0xff00) >> 8;
@@ -231,11 +233,15 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 			if ((value & 0b00000010) && (!irq_line_load_bin)) {
 				irq_line_load_bin = true;
 			}
-			if (irq_line_frame_done && irq_line_load_bin) exceptions->release(irq_number);
+			if ((value & 0b00000100) && (!irq_line_load_lua)) {
+				irq_line_load_lua = true;
+			}
+			if (irq_line_frame_done && irq_line_load_bin && irq_line_load_lua) exceptions->release(irq_number);
 			break;
 		case 0x01:
 			generate_interrupts_frame_done = (value & 0b00000001) ? true : false;
-			generate_interrupts_load_bin = (value & 0b00000010) ? true : false;
+			generate_interrupts_load_bin   = (value & 0b00000010) ? true : false;
+			generate_interrupts_load_lua   = (value & 0b00000100) ? true : false;
 			break;
 		case 0x02:
 			// vram peek high byte
@@ -269,7 +275,13 @@ void core_t::load_bin()
 	}
 }
 
-void core_t::load_lua()
+void core_t::load_lua(const char *p)
 {
-	//
+	if (generate_interrupts_load_lua) {
+		if (!moon->load(p)) {
+			// loading succesful
+			irq_line_load_lua = false;
+			exceptions->pull(irq_number);
+		}
+	}
 }

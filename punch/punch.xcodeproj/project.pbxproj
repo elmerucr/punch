@@ -37,6 +37,7 @@
 		4647EADA2B2E46A500D0884E /* wave.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4647EACA2B2E46A500D0884E /* wave.cc */; };
 		4647EADF2B2E471400D0884E /* analog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4647EADD2B2E471400D0884E /* analog.cpp */; };
 		4647EAE02B2E471400D0884E /* sound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4647EADE2B2E471400D0884E /* sound.cpp */; };
+		4651A8E12C246AD400B0D24E /* moon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4651A8DF2C246AD400B0D24E /* moon.cpp */; };
 		4654C9852B3772E300AF2582 /* rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4654C9842B3772E300AF2582 /* rom.cpp */; };
 		466283192C15DA7400822655 /* lutf8lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 466282DA2C15DA7300822655 /* lutf8lib.c */; };
 		4662831A2C15DA7400822655 /* lmathlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 466282DC2C15DA7300822655 /* lmathlib.c */; };
@@ -74,7 +75,6 @@
 		466AC00D2AFC218200ACA0CE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 466AC00C2AFC218200ACA0CE /* Preview Assets.xcassets */; };
 		466AC0162AFC220900ACA0CE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 466AC0152AFC220900ACA0CE /* main.cpp */; };
 		469AE7A12B2E1E5D00EB3B08 /* cpu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 469AE79F2B2E1E5D00EB3B08 /* cpu.cpp */; };
-		46CC17E62C17766800596713 /* scriptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46CC17E42C17766700596713 /* scriptor.cpp */; };
 		46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */; };
 		46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */; };
 		46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F181572B00E79800E7FDC8 /* mc6809_addressing_modes.cpp */; };
@@ -146,6 +146,8 @@
 		4647EADC2B2E471400D0884E /* sound.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sound.hpp; path = ../../src/sound.hpp; sourceTree = "<group>"; };
 		4647EADD2B2E471400D0884E /* analog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = analog.cpp; path = ../../src/analog.cpp; sourceTree = "<group>"; };
 		4647EADE2B2E471400D0884E /* sound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sound.cpp; path = ../../src/sound.cpp; sourceTree = "<group>"; };
+		4651A8DF2C246AD400B0D24E /* moon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = moon.cpp; path = ../../src/moon.cpp; sourceTree = "<group>"; };
+		4651A8E02C246AD400B0D24E /* moon.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = moon.hpp; path = ../../src/moon.hpp; sourceTree = "<group>"; };
 		4654C9842B3772E300AF2582 /* rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rom.cpp; path = ../../src/rom.cpp; sourceTree = "<group>"; };
 		466282DA2C15DA7300822655 /* lutf8lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lutf8lib.c; path = "../../src/lua-5.4.6/src/lutf8lib.c"; sourceTree = "<group>"; };
 		466282DB2C15DA7300822655 /* lprefix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lprefix.h; path = "../../src/lua-5.4.6/src/lprefix.h"; sourceTree = "<group>"; };
@@ -217,8 +219,6 @@
 		469AE79F2B2E1E5D00EB3B08 /* cpu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cpu.cpp; path = ../../src/cpu.cpp; sourceTree = "<group>"; };
 		469AE7A02B2E1E5D00EB3B08 /* cpu.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cpu.hpp; path = ../../src/cpu.hpp; sourceTree = "<group>"; };
 		46BA60D02B3B76780020C879 /* clocks.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = clocks.hpp; path = ../../src/clocks.hpp; sourceTree = "<group>"; };
-		46CC17E42C17766700596713 /* scriptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scriptor.cpp; path = ../../src/scriptor.cpp; sourceTree = "<group>"; };
-		46CC17E52C17766700596713 /* scriptor.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = scriptor.hpp; path = ../../src/scriptor.hpp; sourceTree = "<group>"; };
 		46E53FEE2B72D81E0058BE66 /* rca.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rca.hpp; path = ../../src/rca.hpp; sourceTree = "<group>"; };
 		46F181542B00E79800E7FDC8 /* mc6809_disassembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_disassembler.cpp; path = ../../src/MC6809/mc6809_disassembler.cpp; sourceTree = "<group>"; };
 		46F181552B00E79800E7FDC8 /* mc6809_instructions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mc6809_instructions.cpp; path = ../../src/MC6809/mc6809_instructions.cpp; sourceTree = "<group>"; };
@@ -400,10 +400,10 @@
 				4647EAA92B2E441300D0884E /* keyboard.cpp */,
 				4647EAA82B2E441300D0884E /* keyboard.hpp */,
 				466AC0152AFC220900ACA0CE /* main.cpp */,
+				4651A8DF2C246AD400B0D24E /* moon.cpp */,
+				4651A8E02C246AD400B0D24E /* moon.hpp */,
 				46E53FEE2B72D81E0058BE66 /* rca.hpp */,
 				4654C9842B3772E300AF2582 /* rom.cpp */,
-				46CC17E42C17766700596713 /* scriptor.cpp */,
-				46CC17E52C17766700596713 /* scriptor.hpp */,
 				4647EADE2B2E471400D0884E /* sound.cpp */,
 				4647EADC2B2E471400D0884E /* sound.hpp */,
 				4644873E2B3CD6C4004B04BA /* stats.cpp */,
@@ -514,7 +514,6 @@
 				46F1815A2B00E79800E7FDC8 /* mc6809_instructions.cpp in Sources */,
 				46F1815B2B00E79800E7FDC8 /* mc6809_addressing_modes.cpp in Sources */,
 				4614F9F52B2E2A70005C9BE3 /* blitter.cpp in Sources */,
-				46CC17E62C17766800596713 /* scriptor.cpp in Sources */,
 				4662832F2C15DA7400822655 /* ltablib.c in Sources */,
 				4654C9852B3772E300AF2582 /* rom.cpp in Sources */,
 				466283212C15DA7400822655 /* lbaselib.c in Sources */,
@@ -532,6 +531,7 @@
 				4662832E2C15DA7400822655 /* lopcodes.c in Sources */,
 				4647EACE2B2E46A500D0884E /* wave8580_P_T.cc in Sources */,
 				46F181592B00E79800E7FDC8 /* mc6809_disassembler.cpp in Sources */,
+				4651A8E12C246AD400B0D24E /* moon.cpp in Sources */,
 				4662831E2C15DA7400822655 /* llex.c in Sources */,
 				466283262C15DA7400822655 /* lparser.c in Sources */,
 				4662831F2C15DA7400822655 /* lstate.c in Sources */,

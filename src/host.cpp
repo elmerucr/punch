@@ -388,9 +388,9 @@ enum events_output_state host_t::events_process_events()
 					video_toggle_linear_filtering();
 				} else if ((event.key.keysym.sym == SDLK_d) && alt_pressed) {
 					video_change_hor_blur();
-//				} else if ((event.key.keysym.sym == SDLK_r) && alt_pressed) {
-//					events_wait_until_key_released(SDLK_r);
-//					hud->show_notification("\nResetting system");
+				} else if ((event.key.keysym.sym == SDLK_r) && alt_pressed) {
+					events_wait_until_key_released(SDLK_r);
+					system->core->reset();
 				} else if( (event.key.keysym.sym == SDLK_q) && alt_pressed ) {
 					events_wait_until_key_released(SDLK_q);
 					return_value = QUIT_EVENT;
@@ -430,7 +430,7 @@ enum events_output_state host_t::events_process_events()
 					system->debugger->terminal->printf("\nloading %s", path);
 					system->debugger->terminal->printf("\nextension is %s", dot);
 					if (strcmp(dot, "lua") == 0) {
-						system->core->load_lua();
+						system->core->load_lua(path);
 					} else {
 						system->core->load_bin();
 					}

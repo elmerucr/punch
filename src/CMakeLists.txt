@@ -7,8 +7,8 @@ add_library(system STATIC
 	exceptions.cpp
 	host.cpp
 	keyboard.cpp
+	moon.cpp
 	rom.cpp
-	scriptor.cpp
 	sound.cpp
 	stats.cpp
 	system.cpp
