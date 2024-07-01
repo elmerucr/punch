@@ -2,12 +2,11 @@
 
 ![icon](./docs/punch_icon_80x80.png)
 
-Punch is a virtual computer system that draws inspiration from iconic computing platforms such as the Commodore 64, Amiga 500, and Atari ST.
-Notable features include:
+Punch is a virtual computer system that draws inspiration from iconic computing platforms such as the Commodore 64, Amiga 500, and Atari ST. Notable features include:
 
 * Utilization of the MC6809 CPU using the [MC6809](https://github.com/elmerucr/MC6809) library
 * A total of 16MB of video RAM, 64KB directly accessible by the CPU
-* Screen resolution of 320x180 pixels, refreshing rate of 60Hz
+* Screen resolution of 320x180 pixels, refresh rate of 60Hz
 * Blitter chip for fast graphics processing
 
 ## Table of Contents
@@ -35,12 +34,12 @@ Notable features include:
 	* ```$400-$4ff``` blitter surface descriptors (16 in total, 16 bytes each)
 		* ```$x0/$x1```: x position (16 bit signed)
 		* ```$x2/$x3```: y position (16 bit signed)
-	* ```$500-$5ff``` blitter surface color tables (16)
+	* ```$500-$5ff``` blitter surface color tables (16) for 1, 2 and 4 bit color modes
 	* ```$600-$7ff``` reserved area
 	* ```$800-$8ff``` core
 		* ```$800``` status register
 		* ```$801``` control register
-		* ```$802-$803``` vram peek page (16bits)
+		* ```$802-$803``` vram peek page (16bits, bit 8 to bit 23)
 		* ```$804-$807``` framebuffer base address (24 bits, $804 always #$00)
 	* ```$900-$9ff``` keyboard
 	* ```$a00-$aff``` timer
@@ -60,7 +59,7 @@ Notable features include:
 		* ```$e0a/$e0b``` y0 for drawing operations (16 bit signed)
 		* ```$e0c/$e0d``` x1 for drawing operations (16 bit signed)
 		* ```$e0e/$e0f``` y1 for drawing operations (16 bit signed)
-	* ```$f00-$fff``` vram peek (see $802 as well)
+	* ```$f00-$fff``` vram peek (see $802/$803 as well)
 * ```$1000-$fbff``` 59kb ram
 * ```$fc00-$ffff``` 1kb kernel + vectors
 
