@@ -15,9 +15,38 @@
 #include "analog.hpp"
 #include "system.hpp"
 
+#include "common.hpp"
+
 /*
  * TODO: Write description of how dealing with shadow registers: they're always written to!
  */
+
+class digital_delay_t {
+	/*
+	 * What's the max? E.g. 1s (1000ms)
+	 * @48000 sample rate, buffer max of 48000
+	 */
+	uint16_t delay_ms{200}; // 340ms default
+	uint16_t current_buffer_size;
+	
+	float buffer[65536];
+	uint16_t buffer_pointer{0};
+	
+public:
+	digital_delay_t() {
+		current_buffer_size = (SAMPLE_RATE / 1000) * delay_ms;
+		for (int i=0; i<65536; i++)
+			buffer[i] = 0;
+	}
+	float sample(float input) {
+		float output = input + 0.8 * buffer[buffer_pointer];
+		buffer[buffer_pointer] = output;
+		buffer_pointer++;
+		if (buffer_pointer >= current_buffer_size)
+			buffer_pointer = 0;
+		return output;
+	}
+};
 
 class sound_ic {
 private:
@@ -25,13 +54,15 @@ private:
 	 * sid variables etc...
 	 */
 	cycle_count delta_t_sid0;
-	int16_t sample_buffer_mono_sid0[65536];
+	int16_t sample_buffer_mono_sid0[65536] = { 0 };	// this buffer connects to sid library, must be int16_t
+	float f_sample_buffer_mono_sid0[65536] = { 0.0 }; // this buffer is used for processing (no clipping with floats)
+	
 	cycle_count delta_t_sid1;
-	int16_t sample_buffer_mono_sid1[65536];
+	int16_t sample_buffer_mono_sid1[65536] = { 0 };
 	cycle_count delta_t_sid2;
-	int16_t sample_buffer_mono_sid2[65536];
+	int16_t sample_buffer_mono_sid2[65536] = { 0 };
 	cycle_count delta_t_sid3;
-	int16_t sample_buffer_mono_sid3[65536];
+	int16_t sample_buffer_mono_sid3[65536] = { 0 };
 	
 	uint8_t sid_shadow[128];
 	
@@ -48,7 +79,8 @@ private:
 	analog_ic analog1;
 	analog_ic analog2;
 	analog_ic analog3;
-	int16_t sample_buffer_mono_analog0[65536];
+	int16_t sample_buffer_mono_analog0[65536] = { 0 };
+	float f_sample_buffer_mono_analog0[65536] = { 0.0 };
 	int16_t sample_buffer_mono_analog1[65536];
 	int16_t sample_buffer_mono_analog2[65536];
 	int16_t sample_buffer_mono_analog3[65536];
@@ -67,6 +99,7 @@ public:
 	~sound_ic();
 	
 	SID sid[4];
+	digital_delay_t delay[8];
 	
 	// read and write functions to data registers of sid array and mixer
 	uint8_t io_read_byte(uint16_t address);

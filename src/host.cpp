@@ -168,7 +168,7 @@ void host_t::video_init()
 	video_scaling_max--;
 	video_scaling = video_scaling_max;
 	//video_scaling = (3 * video_scaling_max) / 4;
-	printf("[SDL] Max window scaling is %i, defaulting to %i\n", video_scaling_max, video_scaling);
+	printf("[SDL] Max video scaling is %i, defaulting to %i\n", video_scaling_max, video_scaling);
 	
 	/*
 	 * Create window
@@ -607,6 +607,7 @@ void host_t::video_increase_window_size()
 		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * ((10 * MAX_SCANLINES) / 9));
 		SDL_GetWindowSize(video_window, &window_width, &window_height);
 		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		printf("[SDL] Video scaling: %i\n", video_scaling);
 	}
 }
 
@@ -617,6 +618,7 @@ void host_t::video_decrease_window_size()
 		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * ((10 * MAX_SCANLINES) / 9));
 		SDL_GetWindowSize(video_window, &window_width, &window_height);
 		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		printf("[SDL] Video scaling: %i\n", video_scaling);
 	}
 }
 

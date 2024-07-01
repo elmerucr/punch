@@ -259,24 +259,27 @@ void sound_ic::run(uint32_t number_of_cycles)
 	analog3.run(n, sample_buffer_mono_analog3);
 
 	for (int i=0; i<n; i++) {
+		f_sample_buffer_mono_sid0[i] = delay[0].sample(sample_buffer_mono_sid0[i]);
+		f_sample_buffer_mono_analog0[i] = delay[4].sample(sample_buffer_mono_analog0[i]);
+		
 		// left channel
-		sample_buffer_stereo[2 * i] =
-			(sample_buffer_mono_sid0[i]    * balance_registers[0x0]) +
+		sample_buffer_stereo[(2 * i) + 0] =
+			(f_sample_buffer_mono_sid0[i]    * balance_registers[0x0]) +
 			(sample_buffer_mono_sid1[i]    * balance_registers[0x2]) +
 			(sample_buffer_mono_sid2[i]    * balance_registers[0x4]) +
 			(sample_buffer_mono_sid3[i]    * balance_registers[0x6]) +
-			(sample_buffer_mono_analog0[i] * balance_registers[0x8]) +
+			(f_sample_buffer_mono_analog0[i] * balance_registers[0x8]) +
 			(sample_buffer_mono_analog1[i] * balance_registers[0xa]) +
 			(sample_buffer_mono_analog2[i] * balance_registers[0xc]) +
 			(sample_buffer_mono_analog3[i] * balance_registers[0xe]);
 
 		// right channel
 		sample_buffer_stereo[(2 * i) + 1] =
-			(sample_buffer_mono_sid0[i]    * balance_registers[0x1]) +
+			(f_sample_buffer_mono_sid0[i]    * balance_registers[0x1]) +
 			(sample_buffer_mono_sid1[i]    * balance_registers[0x3]) +
 			(sample_buffer_mono_sid2[i]    * balance_registers[0x5]) +
 			(sample_buffer_mono_sid3[i]    * balance_registers[0x7]) +
-			(sample_buffer_mono_analog0[i] * balance_registers[0x9]) +
+			(f_sample_buffer_mono_analog0[i] * balance_registers[0x9]) +
 			(sample_buffer_mono_analog1[i] * balance_registers[0xb]) +
 			(sample_buffer_mono_analog2[i] * balance_registers[0xd]) +
 			(sample_buffer_mono_analog3[i] * balance_registers[0xf]);
@@ -289,7 +292,7 @@ void sound_ic::run(uint32_t number_of_cycles)
 		 * maximum (float) output ranges from -4.0 to 4.0. That should
 		 * be allright.
 		 */
-		sample_buffer_stereo[2 * i] /= 32768 * 255;		// left
+		sample_buffer_stereo[(2 * i) + 0] /= 32768 * 255;	// left
 		sample_buffer_stereo[(2 * i) + 1] /= 32768 * 255;	// right
 		
 		if (sound_starting) {

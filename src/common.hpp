@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    7
-#define PUNCH_BUILD            20240621
+#define PUNCH_BUILD            20240701
 #define PUNCH_YEAR             2024
 
 /*
@@ -32,7 +32,7 @@
  * Audio
  */
 #define SAMPLE_RATE				48000
-#define AUDIO_BUFFER_SIZE		7000.0
+#define AUDIO_BUFFER_SIZE		8000.0
 #define SID_CLOCK_SPEED			985248
 #define SID_CYCLES_PER_FRAME	(SID_CLOCK_SPEED/FPS)
 
