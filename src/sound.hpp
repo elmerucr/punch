@@ -26,25 +26,29 @@ class digital_delay_t {
 	 * What's the max? E.g. 1s (1000ms)
 	 * @48000 sample rate, buffer max of 48000
 	 */
-	uint16_t delay_ms{200}; // 340ms default
+	uint16_t delay_ms{200};
 	uint16_t current_buffer_size;
 	
-	float buffer[65536];
+	float decay{0.6};
+	float dry{1.0};
+	float wet{0.8};
+	
+	float delay_buffer[65536] = { 0 };
 	uint16_t buffer_pointer{0};
 	
 public:
 	digital_delay_t() {
 		current_buffer_size = (SAMPLE_RATE / 1000) * delay_ms;
-		for (int i=0; i<65536; i++)
-			buffer[i] = 0;
+//		for (int i=0; i<65536; i++)
+//			buffer[i] = 0;
 	}
-	float sample(float input) {
-		float output = input + 0.8 * buffer[buffer_pointer];
-		buffer[buffer_pointer] = output;
+	inline float sample(float input) {
+		float output = decay * delay_buffer[buffer_pointer];
+		delay_buffer[buffer_pointer] = input + output;
 		buffer_pointer++;
 		if (buffer_pointer >= current_buffer_size)
 			buffer_pointer = 0;
-		return output;
+		return (dry * input) + (wet * output);
 	}
 };
 

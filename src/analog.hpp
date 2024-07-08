@@ -141,6 +141,8 @@ private:
 	double   pitch_bend();
 
 	rca	uniform_white_noise;
+	
+	uint8_t midi_value;
 
 public:
 	analog_ic(uint8_t no);

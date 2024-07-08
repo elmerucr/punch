@@ -103,6 +103,23 @@ function timer7()
   print('timer7')
 end
 
+midi = {
+	[0] = 0x008b, 0x0093, 0x009c, 0x00a6, 0x00af, 0x00ba, 0x00c5, 0x00d1,
+	0x00dd, 0x00ea, 0x00f8, 0x0107, 0x0116, 0x0127, 0x0139, 0x014b,
+	0x015f, 0x0174, 0x018a, 0x01a1, 0x01ba, 0x01d4, 0x01f0, 0x020e,
+	0x022d, 0x024e, 0x0271, 0x0296, 0x02be, 0x02e7, 0x0314, 0x0342,
+	0x0374, 0x03a9, 0x03e0, 0x041b, 0x045a, 0x049c, 0x04e2, 0x052d,
+	0x057b, 0x05cf, 0x0627, 0x0685, 0x06e8, 0x0751, 0x07c1, 0x0837,
+	0x08b4, 0x0938, 0x09c4, 0x0a59, 0x0af7, 0x0b9d, 0x0c4e, 0x0d0a,
+	0x0dd0, 0x0ea2, 0x0f81, 0x106d, 0x1167, 0x1270, 0x1389, 0x14b2,
+	0x15ed, 0x173b, 0x189c, 0x1a13, 0x1ba0, 0x1d45, 0x1f02, 0x20da,
+	0x22ce, 0x24e0, 0x2711, 0x2964, 0x2bda, 0x2e76, 0x3139, 0x3426,
+	0x3740, 0x3a89, 0x3e04, 0x41b4, 0x459c, 0x49c0, 0x4e23, 0x52c8,
+	0x57b4, 0x5ceb, 0x6272, 0x684c, 0x6e80, 0x7512, 0x7c08, 0x8368,
+	0x8b39, 0x9380, 0x9c45, 0xa590, 0xaf68, 0xb9d6, 0xc4e3, 0xd099,
+	0xdd00, 0xea24, 0xf810
+}
+
 print('moon is running init code')
 
 )Lua";
@@ -166,13 +183,17 @@ void moon_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00000001) {
 				lua_getglobal(L, "frame");
 				if (lua_pcall(L, 0, 0, 0)) {
-					printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					lua_pop(L, 1);
+					system->switch_to_debug_mode();
 				}
 			}
 			if (value & 0b10000000) {
 				lua_getglobal(L, "init");
 				if (lua_pcall(L, 0, 0, 0)) {
-					printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Moon] Lua error: %s", lua_tostring(L, -1));
+					lua_pop(L, 1);
+					system->switch_to_debug_mode();
 				}
 			}
 			break;
@@ -180,49 +201,65 @@ void moon_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00000001) {
 				lua_getglobal(L, "timer0");
 				if (lua_pcall(L, 0, 0, 0)) {
-					printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					lua_pop(L, 1);
+					system->switch_to_debug_mode();
 				}
 			}
 			if (value & 0b00000010) {
 				lua_getglobal(L, "timer1");
 				if (lua_pcall(L, 0, 0, 0)) {
-					printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					lua_pop(L, 1);
+					system->switch_to_debug_mode();
 				}
 			}
 			if (value & 0b00000100) {
 				lua_getglobal(L, "timer2");
 				if (lua_pcall(L, 0, 0, 0)) {
-					printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					lua_pop(L, 1);
+					system->switch_to_debug_mode();
 				}
 			}
 			if (value & 0b00001000) {
 				lua_getglobal(L, "timer3");
 				if (lua_pcall(L, 0, 0, 0)) {
-					printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					lua_pop(L, 1);
+					system->switch_to_debug_mode();
 				}
 			}
 			if (value & 0b00010000) {
 				lua_getglobal(L, "timer4");
 				 if (lua_pcall(L, 0, 0, 0)) {
-					 printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					 system->debugger->terminal->printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					 lua_pop(L, 1);
+					 system->switch_to_debug_mode();
 				 }
 			}
 			if (value & 0b00100000) {
 				lua_getglobal(L, "timer5");
 				if (lua_pcall(L, 0, 0, 0)) {
-					printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					lua_pop(L, 1);
+					system->switch_to_debug_mode();
 				}
 			}
 			if (value & 0b01000000) {
 				lua_getglobal(L, "timer6");
 				if (lua_pcall(L, 0, 0, 0)) {
-					printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					lua_pop(L, 1);
+					system->switch_to_debug_mode();
 				}
 			}
 			if (value & 0b10000000) {
 				lua_getglobal(L, "timer7");
 				if (lua_pcall(L, 0, 0, 0)) {
-					printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Moon] Lua error: %s\n", lua_tostring(L, -1));
+					lua_pop(L, 1);
+					system->switch_to_debug_mode();
 				}
 			}
 			break;

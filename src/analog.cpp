@@ -9,6 +9,28 @@
 #include <cmath>
 #include <cstdio>
 
+/*
+ * The following table is based on a SID clock frequency of 985248Hz
+ * (PAL). Calculations were made according to Codebase64 article:
+ * https://codebase64.org/doku.php?id=base:how_to_calculate_your_own_sid_frequency_table
+ */
+
+const uint16_t music_notes[256] = {
+	0x008b, 0x0093, 0x009c, 0x00a6, 0x00af, 0x00ba, 0x00c5, 0x00d1, 0x00dd, 0x00ea, 0x00f8, 0x0107,	// N_C-1 (0)  to N B-1 (11)
+	0x0116, 0x0127, 0x0139, 0x014b, 0x015f, 0x0174, 0x018a, 0x01a1, 0x01ba, 0x01d4, 0x01f0, 0x020e,	// N_C0_ (12) to N_B0_ (23)
+	0x022d, 0x024e, 0x0271, 0x0296, 0x02be, 0x02e7, 0x0314, 0x0342, 0x0374, 0x03a9, 0x03e0, 0x041b,	// N_C1_ (24) to N_B1_ (35) ($02be = 28 = E1 = kick drum)
+	0x045a, 0x049c, 0x04e2, 0x052d, 0x057b, 0x05cf, 0x0627, 0x0685, 0x06e8, 0x0751, 0x07c1, 0x0837,	// N_C2_ (36) to N_B2_ (47)
+	0x08b4, 0x0938, 0x09c4, 0x0a59, 0x0af7, 0x0b9d, 0x0c4e, 0x0d0a, 0x0dd0, 0x0ea2, 0x0f81, 0x106d,	// N_C3_ (48) to N_B3_ (59)
+	0x1167, 0x1270, 0x1389, 0x14b2, 0x15ed, 0x173b, 0x189c, 0x1a13, 0x1ba0, 0x1d45, 0x1f02, 0x20da,	// N_C4_ (60) to N_B4_ (71) ($1d45 = 69 = A4 = 440Hz std)
+	0x22ce, 0x24e0, 0x2711, 0x2964, 0x2bda, 0x2e76, 0x3139, 0x3426, 0x3740, 0x3a89, 0x3e04, 0x41b4,	// N_C5_ (72) to N_B5_ (83)
+	0x459c, 0x49c0, 0x4e23, 0x52c8, 0x57b4, 0x5ceb, 0x6272, 0x684c, 0x6e80, 0x7512, 0x7c08, 0x8368,	// N_C6_ (84) to N_B6_ (95)
+	0x8b39, 0x9380, 0x9c45, 0xa590, 0xaf68, 0xb9d6, 0xc4e3, 0xd099, 0xdd00, 0xea24, 0xf810,			// N_C7_ (96) to N_A7S (106)
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0
+};
+
 analog_ic::analog_ic(uint8_t no)
 {
 	id = no;
@@ -61,9 +83,10 @@ analog_ic::analog_ic(uint8_t no)
 	phase = 0;
 	phase_remainder = 0;
 
-	digital_freq = 0x02be;		// E1 kick
-	//digital_freq = 0x0342;		// with sinus wave: G1 kick drum @49Hz!!!
+	midi_value = 28;
+	digital_freq = music_notes[28];		// E1 kick
 	set_frequency();
+	
 	pitch_up = false;
 	pitch_bend_on = true;
 	pitch_factor = 36;		// 3 octaves = 8x higher
@@ -125,6 +148,8 @@ uint8_t analog_ic::read_byte(uint8_t address)
 			return pitch_bend_duration >> 8;
 		case 0x0f:
 			return pitch_bend_duration & 0xff;
+		case 0x10:
+			return midi_value;
 		default:
 			return 0;
 	}
@@ -186,6 +211,11 @@ void analog_ic::write_byte(uint8_t address, uint8_t byte) {
 			break;
 		case 0x0f:
 			pitch_bend_duration = (pitch_bend_duration & 0xff00) | byte;
+			break;
+		case 0x10:
+			midi_value = byte;
+			digital_freq = music_notes[midi_value];
+			set_frequency();
 			break;
 	}
 }
