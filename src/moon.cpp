@@ -12,7 +12,7 @@
 
 system_t *sys;
 
-static int l_pokeb(lua_State *L)
+static int l_poke(lua_State *L)
 {
 	uint16_t address = lua_tointeger(L, 1);
 	uint8_t value = lua_tointeger(L, 2);
@@ -20,14 +20,14 @@ static int l_pokeb(lua_State *L)
 	return 0;
 }
 
-static int l_peekb(lua_State *L)
+static int l_peek(lua_State *L)
 {
 	uint16_t address = lua_tointeger(L, 1);
 	lua_pushinteger(L, sys->core->read8(address));
 	return 1;
 }
 
-static int l_pokew(lua_State *L)
+static int l_poke16(lua_State *L)
 {
 	uint16_t address = lua_tointeger(L, 1);
 	uint16_t value = lua_tointeger(L, 2);
@@ -36,7 +36,7 @@ static int l_pokew(lua_State *L)
 	return 0;
 }
 
-static int l_peekw(lua_State *L)
+static int l_peek16(lua_State *L)
 {
 	uint16_t address = lua_tointeger(L, 1);
 	lua_pushinteger(L, (sys->core->read8(address) << 8) | sys->core->read8(address + 1));
@@ -150,14 +150,14 @@ void moon_t::reset()
 	
 	luaL_openlibs(L);
 	
-	lua_pushcfunction(L, l_pokeb);
-	lua_setglobal(L, "pokeb");
-	lua_pushcfunction(L, l_peekb);
-	lua_setglobal(L, "peekb");
-	lua_pushcfunction(L, l_pokew);
-	lua_setglobal(L, "pokew");
-	lua_pushcfunction(L, l_peekw);
-	lua_setglobal(L, "peekw");
+	lua_pushcfunction(L, l_poke);
+	lua_setglobal(L, "poke");
+	lua_pushcfunction(L, l_peek);
+	lua_setglobal(L, "peek");
+	lua_pushcfunction(L, l_poke16);
+	lua_setglobal(L, "poke16");
+	lua_pushcfunction(L, l_peek16);
+	lua_setglobal(L, "peek16");
 	
 	/*
 	 * Load "resident" Lua program into system
