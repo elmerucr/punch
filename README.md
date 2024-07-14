@@ -63,7 +63,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 * ```$1000-$fbff``` 59kb ram
 * ```$fc00-$ffff``` 1kb kernel + vectors
 
-### Directly addressable by Blitter
+### Addressable by Blitter only
 
 * ```$010000-$feffff``` available vram (16.256kb)
 * ```$ff0000-$ffe0ff``` default framebuffer vram (57.600 bytes)
