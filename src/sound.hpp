@@ -39,8 +39,6 @@ class digital_delay_t {
 public:
 	digital_delay_t() {
 		current_buffer_size = (SAMPLE_RATE / 1000) * delay_ms;
-//		for (int i=0; i<65536; i++)
-//			buffer[i] = 0;
 	}
 	inline float sample(float input) {
 		float output = decay * delay_buffer[buffer_pointer];
@@ -48,7 +46,8 @@ public:
 		buffer_pointer++;
 		if (buffer_pointer >= current_buffer_size)
 			buffer_pointer = 0;
-		return (dry * input) + (wet * output);
+		//return (dry * input) + (wet * output);
+		return input;
 	}
 };
 

@@ -168,6 +168,7 @@ void host_t::video_init()
 	video_scaling_max--;
 	video_scaling = video_scaling_max;
 	//video_scaling = (3 * video_scaling_max) / 4;
+	if (video_scaling_max > 4) video_scaling = 4;
 	printf("[SDL] Max video scaling is %i, defaulting to %i\n", video_scaling_max, video_scaling);
 	
 	/*
