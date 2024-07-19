@@ -40,14 +40,20 @@ public:
 	digital_delay_t() {
 		current_buffer_size = (SAMPLE_RATE / 1000) * delay_ms;
 	}
+	
+	bool active{false};
+	
 	inline float sample(float input) {
-		float output = decay * delay_buffer[buffer_pointer];
-		delay_buffer[buffer_pointer] = input + output;
-		buffer_pointer++;
-		if (buffer_pointer >= current_buffer_size)
-			buffer_pointer = 0;
-		//return (dry * input) + (wet * output);
-		return input;
+		if (!active) {
+			return input;
+		} else {
+			float output = decay * delay_buffer[buffer_pointer];
+			delay_buffer[buffer_pointer] = input + output;
+			buffer_pointer++;
+			if (buffer_pointer >= current_buffer_size)
+				buffer_pointer = 0;
+			return (dry * input) + (wet * output);
+		}
 	}
 };
 
@@ -62,10 +68,15 @@ private:
 	
 	cycle_count delta_t_sid1;
 	int16_t sample_buffer_mono_sid1[65536] = { 0 };
+	float f_sample_buffer_mono_sid1[65536] = { 0.0 }; // this buffer is used for processing (no clipping with floats)
+	
 	cycle_count delta_t_sid2;
 	int16_t sample_buffer_mono_sid2[65536] = { 0 };
+	float f_sample_buffer_mono_sid2[65536] = { 0.0 }; // this buffer is used for processing (no clipping with floats)
+	
 	cycle_count delta_t_sid3;
 	int16_t sample_buffer_mono_sid3[65536] = { 0 };
+	float f_sample_buffer_mono_sid3[65536] = { 0.0 }; // this buffer is used for processing (no clipping with floats)
 	
 	uint8_t sid_shadow[128];
 	
@@ -85,8 +96,11 @@ private:
 	int16_t sample_buffer_mono_analog0[65536] = { 0 };
 	float f_sample_buffer_mono_analog0[65536] = { 0.0 };
 	int16_t sample_buffer_mono_analog1[65536];
+	float f_sample_buffer_mono_analog1[65536] = { 0.0 };
 	int16_t sample_buffer_mono_analog2[65536];
+	float f_sample_buffer_mono_analog2[65536] = { 0.0 };
 	int16_t sample_buffer_mono_analog3[65536];
+	float f_sample_buffer_mono_analog3[65536] = { 0.0 };
 	
 	/*
 	 * General

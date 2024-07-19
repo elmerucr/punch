@@ -188,6 +188,21 @@ uint8_t sound_ic::io_read_byte(uint16_t address)
 				case 0x60:
 				case 0x70:
 					return analog3.read_byte(address & 0x1f);
+				case 0x80:
+					switch (address & 0x0f) {
+						case 0x08:
+							return
+								(delay[0].active ? 0b00000001 : 0b0) |
+								(delay[1].active ? 0b00000010 : 0b0) |
+								(delay[2].active ? 0b00000100 : 0b0) |
+								(delay[3].active ? 0b00001000 : 0b0) |
+								(delay[4].active ? 0b00010000 : 0b0) |
+								(delay[5].active ? 0b00100000 : 0b0) |
+								(delay[6].active ? 0b01000000 : 0b0) |
+								(delay[7].active ? 0b10000000 : 0b0) ;
+						default:
+							return 0x00;
+					}
 				case 0x90:
 					return balance_registers[address & 0x0f];
 				default:
@@ -240,6 +255,22 @@ void sound_ic::io_write_byte(uint16_t address, uint8_t byte)
 				case 0x70:
 					analog3.write_byte(address & 0x1f, byte);
 					break;
+				case 0x80:
+					switch (address & 0x0f) {
+						case 0x08:
+							delay[0].active = (byte & 0b00000001) ? true : false;
+							delay[1].active = (byte & 0b00000010) ? true : false;
+							delay[2].active = (byte & 0b00000100) ? true : false;
+							delay[3].active = (byte & 0b00001000) ? true : false;
+							delay[4].active = (byte & 0b00010000) ? true : false;
+							delay[5].active = (byte & 0b00100000) ? true : false;
+							delay[6].active = (byte & 0b01000000) ? true : false;
+							delay[7].active = (byte & 0b10000000) ? true : false;
+							break;
+						default:
+							break;
+					}
+					break;
 				case 0x90:
 					balance_registers[address & 0x0f] = byte;
 					break;
@@ -282,29 +313,36 @@ void sound_ic::run(uint32_t number_of_cycles)
 
 	for (int i=0; i<n; i++) {
 		f_sample_buffer_mono_sid0[i] = delay[0].sample(sample_buffer_mono_sid0[i]);
+		f_sample_buffer_mono_sid1[i] = delay[1].sample(sample_buffer_mono_sid1[i]);
+		f_sample_buffer_mono_sid2[i] = delay[2].sample(sample_buffer_mono_sid2[i]);
+		f_sample_buffer_mono_sid3[i] = delay[3].sample(sample_buffer_mono_sid3[i]);
+		
 		f_sample_buffer_mono_analog0[i] = delay[4].sample(sample_buffer_mono_analog0[i]);
+		f_sample_buffer_mono_analog1[i] = delay[5].sample(sample_buffer_mono_analog1[i]);
+		f_sample_buffer_mono_analog2[i] = delay[6].sample(sample_buffer_mono_analog2[i]);
+		f_sample_buffer_mono_analog3[i] = delay[7].sample(sample_buffer_mono_analog3[i]);
 		
 		// left channel
 		sample_buffer_stereo[(2 * i) + 0] =
 			(f_sample_buffer_mono_sid0[i]    * balance_registers[0x0]) +
-			(sample_buffer_mono_sid1[i]    * balance_registers[0x2]) +
-			(sample_buffer_mono_sid2[i]    * balance_registers[0x4]) +
-			(sample_buffer_mono_sid3[i]    * balance_registers[0x6]) +
+			(f_sample_buffer_mono_sid1[i]    * balance_registers[0x2]) +
+			(f_sample_buffer_mono_sid2[i]    * balance_registers[0x4]) +
+			(f_sample_buffer_mono_sid3[i]    * balance_registers[0x6]) +
 			(f_sample_buffer_mono_analog0[i] * balance_registers[0x8]) +
-			(sample_buffer_mono_analog1[i] * balance_registers[0xa]) +
-			(sample_buffer_mono_analog2[i] * balance_registers[0xc]) +
-			(sample_buffer_mono_analog3[i] * balance_registers[0xe]);
+			(f_sample_buffer_mono_analog1[i] * balance_registers[0xa]) +
+			(f_sample_buffer_mono_analog2[i] * balance_registers[0xc]) +
+			(f_sample_buffer_mono_analog3[i] * balance_registers[0xe]);
 
 		// right channel
 		sample_buffer_stereo[(2 * i) + 1] =
 			(f_sample_buffer_mono_sid0[i]    * balance_registers[0x1]) +
-			(sample_buffer_mono_sid1[i]    * balance_registers[0x3]) +
-			(sample_buffer_mono_sid2[i]    * balance_registers[0x5]) +
-			(sample_buffer_mono_sid3[i]    * balance_registers[0x7]) +
+			(f_sample_buffer_mono_sid1[i]    * balance_registers[0x3]) +
+			(f_sample_buffer_mono_sid2[i]    * balance_registers[0x5]) +
+			(f_sample_buffer_mono_sid3[i]    * balance_registers[0x7]) +
 			(f_sample_buffer_mono_analog0[i] * balance_registers[0x9]) +
-			(sample_buffer_mono_analog1[i] * balance_registers[0xb]) +
-			(sample_buffer_mono_analog2[i] * balance_registers[0xd]) +
-			(sample_buffer_mono_analog3[i] * balance_registers[0xf]);
+			(f_sample_buffer_mono_analog1[i] * balance_registers[0xb]) +
+			(f_sample_buffer_mono_analog2[i] * balance_registers[0xd]) +
+			(f_sample_buffer_mono_analog3[i] * balance_registers[0xf]);
 
 		/*
 		 * Normalize both channels

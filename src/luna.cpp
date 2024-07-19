@@ -61,6 +61,8 @@ luna_t::~luna_t()
 
 const char lua_init_code[] = R"Lua(
 
+print('[Lua] Running init code')
+
 -- callback functions
 
 function frame()
@@ -119,8 +121,6 @@ midi = {
 	0x8b39, 0x9380, 0x9c45, 0xa590, 0xaf68, 0xb9d6, 0xc4e3, 0xd099,
 	0xdd00, 0xea24, 0xf810
 }
-
-print('moon is running init code')
 
 )Lua";
 
