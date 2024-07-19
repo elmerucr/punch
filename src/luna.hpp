@@ -1,12 +1,12 @@
 /*
- * moon.hpp
+ * luna.hpp
  * punch
  *
  * Copyright © 2024 elmerucr. All rights reserved.
  */
 
-#ifndef MOON_HPP
-#define MOON_HPP
+#ifndef LUNA_HPP
+#define LUNA_HPP
 
 #include "system.hpp"
 
@@ -14,13 +14,13 @@
 
 #include <cstdint>
 
-class moon_t {
+class luna_t {
 private:
 	system_t *system;
 	lua_State *L{nullptr};
 public:
-	moon_t(system_t *s);
-	~moon_t();
+	luna_t(system_t *s);
+	~luna_t();
 	
 	void reset();
 	

@@ -7,7 +7,7 @@ add_library(system STATIC
 	exceptions.cpp
 	host.cpp
 	keyboard.cpp
-	moon.cpp
+	luna.cpp
 	rom.cpp
 	sound.cpp
 	stats.cpp

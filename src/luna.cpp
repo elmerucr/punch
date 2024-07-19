@@ -1,11 +1,11 @@
 /*
- * moon.cpp
+ * luna.cpp
  * punch
  *
  * Copyright © 2024 elmerucr. All rights reserved.
  */
 
-#include "moon.hpp"
+#include "luna.hpp"
 #include "core.hpp"
 #include "debugger.hpp"
 #include "terminal.hpp"
@@ -43,12 +43,12 @@ static int l_peek16(lua_State *L)
 	return 1;
 }
 
-moon_t::moon_t(system_t *s)
+luna_t::luna_t(system_t *s)
 {
 	system = sys = s;
 }
 
-moon_t::~moon_t()
+luna_t::~luna_t()
 {
 	if(L != nullptr) {
 		/*
@@ -124,7 +124,7 @@ print('moon is running init code')
 
 )Lua";
 
-void moon_t::reset()
+void luna_t::reset()
 {
 	if(L != nullptr) {
 		/*
@@ -167,12 +167,12 @@ void moon_t::reset()
 	}
 }
 
-uint8_t moon_t::io_read8(uint16_t address)
+uint8_t luna_t::io_read8(uint16_t address)
 {
 	return 0x00;
 }
 
-void moon_t::io_write8(uint16_t address, uint8_t value)
+void luna_t::io_write8(uint16_t address, uint8_t value)
 {
 	switch (address & 0xf) {
 		case 0x00:
@@ -268,7 +268,7 @@ void moon_t::io_write8(uint16_t address, uint8_t value)
 	}
 }
 
-bool moon_t::load(const char *p)
+bool luna_t::load(const char *p)
 {
 	bool return_value = false;
 	

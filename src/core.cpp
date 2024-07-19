@@ -34,12 +34,12 @@ core_t::core_t(system_t *s)
 	/*
 	 * Last one!
 	 */
-	moon = new moon_t(system);
+	luna = new luna_t(system);
 }
 
 core_t::~core_t()
 {
-	delete moon;
+	delete luna;
 	delete cpu2sid;
 	delete sound;
 	delete timer;
@@ -66,8 +66,8 @@ uint8_t core_t::read8(uint16_t address)
 			return system->keyboard->io_read8(address);
 		case TIMER_PAGE:
 			return timer->io_read_byte(address & 0xff);
-		case MOON_PAGE:
-			return moon->io_read8(address & 0xff);
+		case LUNA_PAGE:
+			return luna->io_read8(address & 0xff);
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
 			return sound->io_read_byte(address & 0x1ff);
@@ -108,8 +108,8 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case TIMER_PAGE:
 			timer->io_write_byte(address & 0xff, value);
 			break;
-		case MOON_PAGE:
-			moon->io_write8(address & 0xff, value);
+		case LUNA_PAGE:
+			luna->io_write8(address & 0xff, value);
 			break;
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
@@ -157,7 +157,7 @@ void core_t::reset()
 	
 	framebuffer_base_address = 0x00ff0000;
 	
-	moon->reset();
+	luna->reset();
 }
 
 enum output_states core_t::run(bool debug)
@@ -278,7 +278,7 @@ void core_t::load_bin()
 void core_t::load_lua(const char *p)
 {
 	if (generate_interrupts_load_lua) {
-		if (!moon->load(p)) {
+		if (!luna->load(p)) {
 			// loading succesful
 			irq_line_load_lua = false;
 			exceptions->pull(irq_number);

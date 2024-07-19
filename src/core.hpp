@@ -16,14 +16,14 @@
 #include "sound.hpp"
 #include "timer.hpp"
 #include "clocks.hpp"
-#include "moon.hpp"
+#include "luna.hpp"
 
 #define BLITTER_SURFACES		0x04
 #define BLITTER_COLOR_TABLES	0x05
 #define CORE_PAGE				0x08
 #define KEYBOARD_PAGE			0x09
 #define	TIMER_PAGE				0x0a
-#define MOON_PAGE				0x0b
+#define LUNA_PAGE				0x0b
 #define SOUND_PAGE				0x0c // + 0x0d
 #define	BLITTER_PAGE			0x0e
 #define VRAM_PEEK_PAGE			0x0f
@@ -78,7 +78,7 @@ public:
 	sound_ic *sound;
 	cpu_t *cpu;
 	clocks *cpu2sid;
-	moon_t *moon;
+	luna_t *luna;
 	
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
