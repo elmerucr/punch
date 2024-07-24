@@ -241,8 +241,6 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 			source.index = vram[tile_index++ & VRAM_SIZE_MASK];
 			source.color_indices[0] = use_fixed_bg ? ts->color_indices[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
 			source.color_indices[1] = use_fixed_fg ? ts->color_indices[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
-//			source.color_indices[0] = vram[bg_color_index++ & VRAM_SIZE_MASK];
-//			source.color_indices[1] = vram[fg_color_index++ & VRAM_SIZE_MASK];
 			pixelcount += blit(&source, dst);
 			source.x += (source.w << dw);
 		}

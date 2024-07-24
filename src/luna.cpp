@@ -65,10 +65,6 @@ print('[Lua] Running init code')
 
 -- callback functions
 
-function frame()
-  print('frame')
-end
-
 function init()
   print('init')
 end
@@ -105,6 +101,12 @@ function timer7()
   print('timer7')
 end
 
+function breakhere(no)
+	for i=1, no do
+		coroutine.yield()
+	end
+end
+
 midi = {
 	[0] = 0x008b, 0x0093, 0x009c, 0x00a6, 0x00af, 0x00ba, 0x00c5, 0x00d1,
 	0x00dd, 0x00ea, 0x00f8, 0x0107, 0x0116, 0x0127, 0x0139, 0x014b,
@@ -121,6 +123,36 @@ midi = {
 	0x8b39, 0x9380, 0x9c45, 0xa590, 0xaf68, 0xb9d6, 0xc4e3, 0xd099,
 	0xdd00, 0xea24, 0xf810
 }
+
+function line(x0, y0, x1, y1, color, surface)
+	poke16(0xe08, x0)
+	poke16(0xe0a, y0)
+	poke16(0xe0c, x1)
+	poke16(0xe0e, y1)
+	poke(0xe05, color)
+	poke(0xe03, surface)
+	poke(0xe01, 0x08)
+end
+
+function rectangle(x0, y0, x1, y1, color, surface)
+	poke16(0xe08, x0)
+	poke16(0xe0a, y0)
+	poke16(0xe0c, x1)
+	poke16(0xe0e, y1)
+	poke(0xe05, color)
+	poke(0xe03, surface)
+	poke(0xe01, 0x10)
+end
+
+function solid_rectangle(x0, y0, x1, y1, color, surface)
+	poke16(0xe08, x0)
+	poke16(0xe0a, y0)
+	poke16(0xe0c, x1)
+	poke16(0xe0e, y1)
+	poke(0xe05, color)
+	poke(0xe03, surface)
+	poke(0xe01, 0x20)
+end
 
 )Lua";
 
@@ -142,7 +174,7 @@ void luna_t::reset()
 	if (!L) L = luaL_newstate();
 
 	if (!L) {
-		printf("[Lua] Error, couldn't start Lua\n");
+		printf("[Lua error] couldn't start Lua\n");
 		// TODO: failure... exit?
 	} else {
 		printf("[Lua] %s\n", LUA_COPYRIGHT);
@@ -163,7 +195,7 @@ void luna_t::reset()
 	 * Load "resident" Lua program into system
 	 */
 	if (luaL_dostring(L, lua_init_code)) {
-		printf("[Lua] Error: %s", lua_tostring(L, -1));
+		printf("[Lua] Error: %s\n", lua_tostring(L, -1));
 	}
 }
 
@@ -183,7 +215,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00000001) {
 				lua_getglobal(L, "frame");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua] Error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -191,7 +223,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b10000000) {
 				lua_getglobal(L, "init");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("\n[Lua] Error: %s", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -201,7 +233,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00000001) {
 				lua_getglobal(L, "timer0");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua] Error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -209,7 +241,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00000010) {
 				lua_getglobal(L, "timer1");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua] Error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -217,7 +249,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00000100) {
 				lua_getglobal(L, "timer2");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua] Error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -225,7 +257,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00001000) {
 				lua_getglobal(L, "timer3");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua] Error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -233,7 +265,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00010000) {
 				lua_getglobal(L, "timer4");
 				 if (lua_pcall(L, 0, 0, 0)) {
-					 system->debugger->terminal->printf("[Lua] Error: %s\n", lua_tostring(L, -1));
+					 system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
 					 lua_pop(L, 1);
 					 system->switch_to_debug_mode();
 				 }
@@ -241,7 +273,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00100000) {
 				lua_getglobal(L, "timer5");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua] Error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -249,7 +281,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b01000000) {
 				lua_getglobal(L, "timer6");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua] Error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -257,7 +289,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b10000000) {
 				lua_getglobal(L, "timer7");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua] Error: %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -273,7 +305,7 @@ bool luna_t::load(const char *p)
 	bool return_value = false;
 	
 	if (luaL_dofile(L, p)) {
-		system->debugger->terminal->printf("\n[Lua] Error: %s", lua_tostring(L, -1));
+		system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 		lua_pop(L, 1);
 		system->switch_to_debug_mode();
 		return_value = true;
