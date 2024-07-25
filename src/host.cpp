@@ -428,11 +428,13 @@ enum events_output_state host_t::events_process_events()
 					const char *dot = strrchr(path, '.'); dot++;
 					
 					//if(!dot || dot == filename);
-					system->debugger->terminal->printf("\nloading %s", path);
-					system->debugger->terminal->printf("\nextension is %s", dot);
 					if (strcmp(dot, "lua") == 0) {
 						system->core->load_lua(path);
+					} else if (strcmp(dot, "nut") == 0) {
+						system->core->load_squirrel(path);
 					} else {
+						system->debugger->terminal->printf("\nloading %s", path);
+						system->debugger->terminal->printf("\nextension is %s", dot);
 						system->core->load_bin();
 					}
 				} else {

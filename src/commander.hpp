@@ -1,30 +1,36 @@
 /*
- * luna.hpp
+ * commander.hpp
  * punch
  *
  * Copyright © 2024 elmerucr. All rights reserved.
  */
 
-#ifndef LUNA_HPP
-#define LUNA_HPP
+#ifndef COMMANDER_HPP
+#define COMMANDER_HPP
 
 #include "system.hpp"
 
 #include "lua.hpp"
 
+#define _SQ64
+#include "squirrel.h"
+#include "sqstdaux.h"
+
 #include <cstdint>
 
-class luna_t {
+class commander_t {
 private:
 	system_t *system;
 	lua_State *L{nullptr};
+	HSQUIRRELVM v{nullptr};
 public:
-	luna_t(system_t *s);
-	~luna_t();
+	commander_t(system_t *s);
+	~commander_t();
 	
 	void reset();
 	
-	bool load(const char *p);
+	bool load_lua(const char *p);
+	bool load_squirrel(const char *p);
 	
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);

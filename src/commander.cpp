@@ -1,11 +1,11 @@
 /*
- * luna.cpp
+ * commander.cpp
  * punch
  *
  * Copyright © 2024 elmerucr. All rights reserved.
  */
 
-#include "luna.hpp"
+#include "commander.hpp"
 #include "core.hpp"
 #include "debugger.hpp"
 #include "terminal.hpp"
@@ -43,25 +43,70 @@ static int l_peek16(lua_State *L)
 	return 1;
 }
 
-luna_t::luna_t(system_t *s)
+static SQInteger s_poke(HSQUIRRELVM v)
+{
+	SQInteger address;
+	SQInteger value;
+	sq_getinteger(v, -2, &address);
+	sq_getinteger(v, -1, &value);
+	sys->core->write8((uint16_t)address, (uint8_t)value);
+	return 0;
+}
+
+static SQInteger s_peek(HSQUIRRELVM v)
+{
+	SQInteger address;
+	sq_getinteger(v, -1, &address);
+	sq_pushinteger(v, sys->core->read8((uint16_t)address));
+	return 1;
+}
+
+static SQInteger s_poke16(HSQUIRRELVM v)
+{
+	SQInteger address;
+	SQInteger value;
+	sq_getinteger(v, -2, &address);
+	sq_getinteger(v, -1, &value);
+	sys->core->write8((uint16_t)address, (uint16_t)value >> 8);
+	sys->core->write8((uint16_t)address + 1, (uint16_t)value & 0xff);
+	return 0;
+}
+
+static SQInteger s_peek16(HSQUIRRELVM v)
+{
+	SQInteger address;
+	sq_getinteger(v, -1, &address);
+	sq_pushinteger(v, (sys->core->read8((uint16_t)address) << 8) | sys->core->read8((uint16_t)address + 1));
+	return 1;
+}
+
+commander_t::commander_t(system_t *s)
 {
 	system = sys = s;
 }
 
-luna_t::~luna_t()
+commander_t::~commander_t()
 {
-	if(L != nullptr) {
+	if (L != nullptr) {
 		/*
 		 * Clean up Lua
 		 */
-		printf("[Moon] Closing Lua\n");
+		printf("[Lua] Closing Lua\n");
 		lua_close(L);
+	}
+	
+	if (v != nullptr) {
+		/*
+		 * Clean up Squirrel
+		 */
+		system->debugger->terminal->printf("[Squirrel] Closing virtual machine\n");
+		sq_close(v);
 	}
 }
 
 const char lua_init_code[] = R"Lua(
 
-print('[Lua] Running init code')
+print('[Lua] Running initialization code')
 
 -- callback functions
 
@@ -156,7 +201,45 @@ end
 
 )Lua";
 
-void luna_t::reset()
+const char squirrel_init_code[] = R"Squirrel(
+
+print("\n[Squirrel] Running initialization code")
+
+//function fib(n)
+//{
+//	if (n < 2) return 1
+//	return fib(n - 2) + fib(n - 1)
+//}
+//
+//for (local i = 0; i <= 20; i++) {
+//	print("\n" + i + " " + fib(i))
+//}
+
+)Squirrel";
+
+void printfunc(HSQUIRRELVM SQ_UNUSED_ARG(v), const SQChar *s, ...)
+{
+	char buffer[1024];
+	va_list arglist;
+	va_start(arglist, s);
+	//vprintf(s, arglist);
+	vsnprintf(buffer, 1024, s, arglist);
+	va_end(arglist);
+	sys->debugger->terminal->puts(buffer);
+}
+
+void errorfunc(HSQUIRRELVM SQ_UNUSED_ARG(v),const SQChar *s,...)
+{
+	char buffer[1024];
+	va_list vl;
+	va_start(vl, s);
+	//vprintf(s, vl);
+	vsnprintf(buffer, 1024, s, vl);
+	va_end(vl);
+	sys->debugger->terminal->puts(buffer);
+}
+
+void commander_t::reset()
 {
 	if(L != nullptr) {
 		/*
@@ -197,16 +280,76 @@ void luna_t::reset()
 	if (luaL_dostring(L, lua_init_code)) {
 		printf("[Lua] Error: %s\n", lua_tostring(L, -1));
 	}
+	
+	/*
+	 * Squirrel initialization stuff
+	 */
+	if (v != nullptr) {
+		sq_close(v);
+		system->debugger->terminal->printf("\n[Squirrel] Closing virtual machine");
+		v = nullptr;
+	}
+	
+	v = sq_open(1024);
+	sqstd_seterrorhandlers(v);
+	sq_setprintfunc(v, printfunc, errorfunc);
+	
+	if (v) {
+		system->debugger->terminal->printf("\n[Squirrel] %s - %s", SQUIRREL_VERSION, SQUIRREL_COPYRIGHT);
+	} else {
+		system->debugger->terminal->printf("\n[Squirrel] Error: Failed to open virtual machine");
+	}
+	
+	/*
+	 * Register global functions, placed well here???? TODO: check
+	 */
+	
+	sq_pushroottable(v);
+	sq_pushstring(v, "poke", -1);
+	sq_newclosure(v, s_poke, 0);
+	sq_newslot(v, -3, SQFalse);
+	sq_pop(v, 1);
+	
+	sq_pushroottable(v);
+	sq_pushstring(v, "peek", -1);
+	sq_newclosure(v, s_peek, 0);
+	sq_newslot(v, -3, SQFalse);
+	sq_pop(v, 1);
+	
+	sq_pushroottable(v);
+	sq_pushstring(v, "poke16", -1);
+	sq_newclosure(v, s_poke16, 0);
+	sq_newslot(v, -3, SQFalse);
+	sq_pop(v, 1);
+	
+	sq_pushroottable(v);
+	sq_pushstring(v, "peek16", -1);
+	sq_newclosure(v, s_peek16, 0);
+	sq_newslot(v, -3, SQFalse);
+	sq_pop(v, 1);
+	
+	/*
+	 * load resident squirrel code into virtual machine
+	 */
+	if (sq_compilebuffer(v, squirrel_init_code, strlen(squirrel_init_code), "squirrel_init_code", SQTrue)) {
+		system->debugger->terminal->printf("\n[Squirrel] Error sq_compilebuffer");
+	} else {
+		sq_pushroottable(v);
+		
+		if (sq_call(v, 1, SQFalse, SQTrue)) {
+			system->debugger->terminal->printf("\n[Squirrel] Error");
+		}
+	}
 }
 
-uint8_t luna_t::io_read8(uint16_t address)
+uint8_t commander_t::io_read8(uint16_t address)
 {
 	return 0x00;
 }
 
-void luna_t::io_write8(uint16_t address, uint8_t value)
+void commander_t::io_write8(uint16_t address, uint8_t value)
 {
-	switch (address & 0xf) {
+	switch (address & 0xff) {
 		case 0x00:
 			// status register
 			break;
@@ -233,7 +376,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00000001) {
 				lua_getglobal(L, "timer0");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -241,7 +384,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00000010) {
 				lua_getglobal(L, "timer1");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -249,7 +392,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00000100) {
 				lua_getglobal(L, "timer2");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -257,7 +400,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00001000) {
 				lua_getglobal(L, "timer3");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -265,7 +408,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00010000) {
 				lua_getglobal(L, "timer4");
 				 if (lua_pcall(L, 0, 0, 0)) {
-					 system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
+					 system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					 lua_pop(L, 1);
 					 system->switch_to_debug_mode();
 				 }
@@ -273,7 +416,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b00100000) {
 				lua_getglobal(L, "timer5");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -281,7 +424,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b01000000) {
 				lua_getglobal(L, "timer6");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
@@ -289,10 +432,31 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 			if (value & 0b10000000) {
 				lua_getglobal(L, "timer7");
 				if (lua_pcall(L, 0, 0, 0)) {
-					system->debugger->terminal->printf("[Lua error] %s\n", lua_tostring(L, -1));
+					system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 					lua_pop(L, 1);
 					system->switch_to_debug_mode();
 				}
+			}
+			break;
+		case 0x80:
+			// status register squirrel
+			break;
+		case 0x81:
+			// control register
+			if (value & 0b00000001) {
+				// frame
+			}
+			if (value & 0b10000000) {
+				// call init
+				sq_pushroottable(v);
+				sq_pushstring(v,"init",-1);
+				sq_get(v,-2); //get the function from the root table
+				sq_pushroottable(v); //'this' (function environment object)
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
 			}
 			break;
 		default:
@@ -300,7 +464,7 @@ void luna_t::io_write8(uint16_t address, uint8_t value)
 	}
 }
 
-bool luna_t::load(const char *p)
+bool commander_t::load_lua(const char *p)
 {
 	bool return_value = false;
 	
@@ -309,6 +473,37 @@ bool luna_t::load(const char *p)
 		lua_pop(L, 1);
 		system->switch_to_debug_mode();
 		return_value = true;
+	}
+	
+	return return_value;
+}
+
+static SQInteger file_lexfeedASCII(SQUserPointer file)
+{
+	int ret;
+	char c;
+	if( ( ret=fread(&c,sizeof(c),1,(FILE *)file )>0) )
+		return c;
+	return 0;
+}
+
+bool commander_t::load_squirrel(const char *p)
+{
+	bool return_value = false;
+	
+	FILE *f = fopen(p, "rb");
+	
+	if (f) {
+		sq_compile(v,file_lexfeedASCII,f,p,1);
+		fclose(f);
+		//return_value = false;
+	}
+	
+	sq_pushroottable(v);
+	
+	if (sq_call(v, 1, SQFalse, SQTrue)) {
+		system->debugger->terminal->printf("\n[Squirrel] Error");
+		system->switch_to_debug_mode();
 	}
 	
 	return return_value;

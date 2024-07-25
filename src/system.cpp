@@ -45,9 +45,9 @@ system_t::system_t()
 system_t::~system_t()
 {
 	delete stats;
-	delete debugger;
 	delete keyboard;
 	delete core;
+	delete debugger;
 	delete host;
 	
 	printf("[punch] %.2f seconds running time\n", (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - system_start_time).count() / 1000);

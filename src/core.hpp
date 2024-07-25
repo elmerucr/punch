@@ -16,14 +16,14 @@
 #include "sound.hpp"
 #include "timer.hpp"
 #include "clocks.hpp"
-#include "luna.hpp"
+#include "commander.hpp"
 
 #define BLITTER_SURFACES		0x04
 #define BLITTER_COLOR_TABLES	0x05
 #define CORE_PAGE				0x08
 #define KEYBOARD_PAGE			0x09
 #define	TIMER_PAGE				0x0a
-#define LUNA_PAGE				0x0b
+#define COMMANDER_PAGE			0x0b
 #define SOUND_PAGE				0x0c // + 0x0d
 #define	BLITTER_PAGE			0x0e
 #define VRAM_PEEK_PAGE			0x0f
@@ -44,10 +44,12 @@ private:
 	bool irq_line_frame_done{true};
 	bool irq_line_load_bin{true};
 	bool irq_line_load_lua{true};
+	bool irq_line_load_squirrel{true};
 	
 	bool generate_interrupts_frame_done{false};
 	bool generate_interrupts_load_bin{false};
 	bool generate_interrupts_load_lua{false};
+	bool generate_interrupts_load_squirrel{false};
 	
 	uint16_t vram_peek{0x0000};
 	
@@ -78,7 +80,7 @@ public:
 	sound_ic *sound;
 	cpu_t *cpu;
 	clocks *cpu2sid;
-	luna_t *luna;
+	commander_t *commander;
 	
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
@@ -87,6 +89,7 @@ public:
 	
 	void load_bin();
 	void load_lua(const char *p);
+	void load_squirrel(const char *p);
 };
 
 #endif

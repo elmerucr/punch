@@ -43,7 +43,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 		* ```$804-$807``` framebuffer base address (24 bits, $804 always #$00)
 	* ```$900-$9ff``` keyboard
 	* ```$a00-$aff``` timer
-	* ```$b00-$bff``` scripting ic
+	* ```$b00-$bff``` commander (scripting engine)
 	* ```$c00-$dff``` sound
 	* ```$e00-$eff``` blitter
 		* ```$e00``` status register (unused)
