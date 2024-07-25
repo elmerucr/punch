@@ -445,15 +445,24 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 			// control register
 			if (value & 0b00000001) {
 				// frame
+				sq_pushroottable(v);
+				sq_pushstring(v, "frame", -1);
+				sq_get(v, -2);
+				sq_pushroottable(v);
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error calling frame() function");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
 			}
 			if (value & 0b10000000) {
 				// call init
 				sq_pushroottable(v);
-				sq_pushstring(v,"init",-1);
+				sq_pushstring(v, "init", -1);
 				sq_get(v,-2); //get the function from the root table
 				sq_pushroottable(v); //'this' (function environment object)
 				if (sq_call(v,1,SQFalse,SQFalse)) {
-					system->debugger->terminal->printf("\n[Squirrel] Error");
+					system->debugger->terminal->printf("\n[Squirrel] Error calling init() function");
 					system->switch_to_debug_mode();
 				}
 				sq_pop(v,2); //pops the roottable and the function
@@ -466,6 +475,8 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 
 bool commander_t::load_lua(const char *p)
 {
+	system->debugger->terminal->printf("\n[Lua] Running %s", p);
+	
 	bool return_value = false;
 	
 	if (luaL_dofile(L, p)) {
@@ -489,6 +500,8 @@ static SQInteger file_lexfeedASCII(SQUserPointer file)
 
 bool commander_t::load_squirrel(const char *p)
 {
+	system->debugger->terminal->printf("\n[Squirrel] Running %s", p);
+	
 	bool return_value = false;
 	
 	FILE *f = fopen(p, "rb");
