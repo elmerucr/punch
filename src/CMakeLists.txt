@@ -16,8 +16,49 @@ add_library(system STATIC
 	timer.cpp
 )
 
-target_link_libraries(system lua MC6809 resid)
+target_link_libraries(system lua MC6809 resid squirrel)
 
 add_subdirectory(lua-5.4.7/src/)
 add_subdirectory(MC6809/)
 add_subdirectory(resid-0.16/)
+
+add_library(squirrel STATIC
+	squirrel3/squirrel/sqclass.cpp
+	squirrel3/squirrel/sqdebug.cpp
+	squirrel3/squirrel/sqlexer.h
+	squirrel3/squirrel/sqpcheader.h
+	squirrel3/squirrel/sqtable.h
+	squirrel3/squirrel/sqvm.h
+	squirrel3/squirrel/sqclass.h
+	squirrel3/squirrel/sqfuncproto.h
+	squirrel3/squirrel/sqmem.cpp
+	squirrel3/squirrel/sqstate.cpp
+	squirrel3/squirrel/sqapi.cppsqclosure.h
+	squirrel3/squirrel/sqfuncstate.cpp
+	squirrel3/squirrel/sqobject.cpp
+	squirrel3/squirrel/sqstate.h
+	squirrel3/squirrel/squserdata.h
+	squirrel3/squirrel/sqarray.h
+	squirrel3/squirrel/sqcompiler.cpp
+	squirrel3/squirrel/sqfuncstate.h
+	squirrel3/squirrel/sqobject.h
+	squirrel3/squirrel/sqstring.h
+	squirrel3/squirrel/squtils.h
+	squirrel3/squirrel/sqbaselib.cpp
+	squirrel3/squirrel/sqcompiler.h
+	squirrel3/squirrel/sqlexer.cpp
+	squirrel3/squirrel/sqopcodes.h
+	squirrel3/squirrel/sqtable.cpp
+	squirrel3/squirrel/sqvm.cpp
+
+	squirrel3/sqstdlib/sqstdaux.cpp
+	squirrel3/sqstdlib/sqstdblobimpl.h
+	squirrel3/sqstdlib/sqstdrex.cpp
+	squirrel3/sqstdlib/sqstdstream.h
+	squirrel3/sqstdlib/sqstdsystem.cpp
+	squirrel3/sqstdlib/sqstdblob.cpp
+	squirrel3/sqstdlib/sqstdio.cpp
+	squirrel3/sqstdlib/sqstdmath.cpp
+	squirrel3/sqstdlib/sqstdstream.cpp
+	squirrel3/sqstdlib/sqstdstring.cpp
+)

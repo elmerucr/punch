@@ -12,6 +12,7 @@ include_directories(
     src/lua-5.4.7/src/
     src/MC6809/
     src/resid-0.16/
+	src/squirrel3/include/
 )
 
 add_subdirectory(src/)
