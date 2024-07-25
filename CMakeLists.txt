@@ -13,6 +13,8 @@ include_directories(
     src/MC6809/
     src/resid-0.16/
 	src/squirrel3/include/
+    src/squirrel3/squirrel/
+    src/squirrel3/sqstdlib/
 )
 
 add_subdirectory(src/)
