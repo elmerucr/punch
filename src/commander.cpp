@@ -468,6 +468,96 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pop(v,2); //pops the roottable and the function
 			}
 			break;
+		case 0x82:
+			if (value & 0b00000001) {
+				sq_pushroottable(v);
+				sq_pushstring(v, "timer0", -1);
+				sq_get(v, -2);
+				sq_pushroottable(v);
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error calling timer0() function");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
+			}
+			if (value & 0b00000010) {
+				sq_pushroottable(v);
+				sq_pushstring(v, "timer1", -1);
+				sq_get(v, -2);
+				sq_pushroottable(v);
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error calling timer1() function");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
+			}
+			if (value & 0b00000100) {
+				sq_pushroottable(v);
+				sq_pushstring(v, "timer2", -1);
+				sq_get(v, -2);
+				sq_pushroottable(v);
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error calling timer2() function");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
+			}
+			if (value & 0b00001000) {
+				sq_pushroottable(v);
+				sq_pushstring(v, "timer3", -1);
+				sq_get(v, -2);
+				sq_pushroottable(v);
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error calling timer3() function");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
+			}
+			if (value & 0b00010000) {
+				sq_pushroottable(v);
+				sq_pushstring(v, "timer4", -1);
+				sq_get(v, -2);
+				sq_pushroottable(v);
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error calling timer4() function");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
+			}
+			if (value & 0b00100000) {
+				sq_pushroottable(v);
+				sq_pushstring(v, "timer5", -1);
+				sq_get(v, -2);
+				sq_pushroottable(v);
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error calling timer5() function");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
+			}
+			if (value & 0b01000000) {
+				sq_pushroottable(v);
+				sq_pushstring(v, "timer6", -1);
+				sq_get(v, -2);
+				sq_pushroottable(v);
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error calling timer6() function");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
+			}
+			if (value & 0b10000000) {
+				sq_pushroottable(v);
+				sq_pushstring(v, "timer7", -1);
+				sq_get(v, -2);
+				sq_pushroottable(v);
+				if (sq_call(v,1,SQFalse,SQFalse)) {
+					system->debugger->terminal->printf("\n[Squirrel] Error calling timer7() function");
+					system->switch_to_debug_mode();
+				}
+				sq_pop(v,2); //pops the roottable and the function
+			}
+			break;
 		default:
 			break;
 	}
