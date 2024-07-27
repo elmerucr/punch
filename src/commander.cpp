@@ -449,7 +449,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "frame", -1);
 				sq_get(v, -2);
 				sq_pushroottable(v);
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling frame() function");
 					system->switch_to_debug_mode();
 				}
@@ -461,7 +461,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "init", -1);
 				sq_get(v,-2); //get the function from the root table
 				sq_pushroottable(v); //'this' (function environment object)
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling init() function");
 					system->switch_to_debug_mode();
 				}
@@ -474,7 +474,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "timer0", -1);
 				sq_get(v, -2);
 				sq_pushroottable(v);
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling timer0() function");
 					system->switch_to_debug_mode();
 				}
@@ -485,7 +485,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "timer1", -1);
 				sq_get(v, -2);
 				sq_pushroottable(v);
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling timer1() function");
 					system->switch_to_debug_mode();
 				}
@@ -496,7 +496,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "timer2", -1);
 				sq_get(v, -2);
 				sq_pushroottable(v);
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling timer2() function");
 					system->switch_to_debug_mode();
 				}
@@ -507,7 +507,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "timer3", -1);
 				sq_get(v, -2);
 				sq_pushroottable(v);
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling timer3() function");
 					system->switch_to_debug_mode();
 				}
@@ -518,7 +518,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "timer4", -1);
 				sq_get(v, -2);
 				sq_pushroottable(v);
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling timer4() function");
 					system->switch_to_debug_mode();
 				}
@@ -529,7 +529,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "timer5", -1);
 				sq_get(v, -2);
 				sq_pushroottable(v);
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling timer5() function");
 					system->switch_to_debug_mode();
 				}
@@ -540,7 +540,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "timer6", -1);
 				sq_get(v, -2);
 				sq_pushroottable(v);
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling timer6() function");
 					system->switch_to_debug_mode();
 				}
@@ -551,7 +551,7 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 				sq_pushstring(v, "timer7", -1);
 				sq_get(v, -2);
 				sq_pushroottable(v);
-				if (sq_call(v,1,SQFalse,SQFalse)) {
+				if (sq_call(v,1,SQFalse,SQTrue)) {
 					system->debugger->terminal->printf("\n[Squirrel] Error calling timer7() function");
 					system->switch_to_debug_mode();
 				}
