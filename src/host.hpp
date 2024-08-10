@@ -123,6 +123,8 @@ private:
 	SDL_Texture *core_texture{nullptr};
 	SDL_Texture *debugger_texture{nullptr};
 	SDL_Texture *scanlines_texture{nullptr};
+	
+	SDL_Texture *shadowmask_texture{nullptr};
 
 	int window_width;
 	int window_height;
@@ -130,6 +132,7 @@ private:
 	void create_core_texture(bool linear_filtering);
 	void create_debugger_texture(bool linear_filtering);
 	void create_scanlines_texture(bool linear_filtering);
+	void create_shadowmask_texture();
 
 	void video_init();
 	void video_stop();

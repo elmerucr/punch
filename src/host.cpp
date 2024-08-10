@@ -221,6 +221,8 @@ void host_t::video_init()
 	scanlines_texture = nullptr;
 	create_scanlines_texture(true);
 	
+	create_shadowmask_texture();
+	
 	SDL_RenderSetLogicalSize(video_renderer, 8*MAX_PIXELS_PER_SCANLINE, 8*MAX_SCANLINES);	// keeps right aspect ratio
 
 	/*
@@ -231,6 +233,8 @@ void host_t::video_init()
 
 void host_t::video_stop()
 {
+	SDL_DestroyTexture(shadowmask_texture);
+	
 	SDL_DestroyTexture(scanlines_texture);
 	SDL_DestroyTexture(debugger_texture);
 	SDL_DestroyTexture(core_texture);
@@ -281,6 +285,10 @@ void host_t::update_screen()
 	SDL_SetTextureAlphaMod(scanlines_texture, video_scanlines_alpha);
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 	
+	///
+	SDL_RenderCopy(video_renderer, shadowmask_texture, NULL, NULL);
+	///
+	
 	if (system->current_mode == DEBUG_MODE) {
 		const SDL_Rect viewer = { (4*8*MAX_PIXELS_PER_SCANLINE)/5, 0, (8*MAX_PIXELS_PER_SCANLINE)/5, (9*8*MAX_PIXELS_PER_SCANLINE)/(5*16) };
 		//SDL_SetTextureAlphaMod(core_texture, 255);
@@ -330,31 +338,29 @@ void host_t::create_debugger_texture(bool linear_filtering)
 
 void host_t::create_scanlines_texture(bool linear_filtering)
 {
-	uint16_t *scanline_buffer = new uint16_t[4 * MAX_PIXELS_PER_SCANLINE * MAX_SCANLINES];
-	
-	if (scanlines_texture) SDL_DestroyTexture(scanlines_texture);
-
-	if (linear_filtering) {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-	} else {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	}
+	uint16_t *scanline_buffer = new uint16_t[3 * MAX_PIXELS_PER_SCANLINE * MAX_SCANLINES];
 	
 	if (scanlines_texture) {
 		SDL_DestroyTexture(scanlines_texture);
 		scanlines_texture = nullptr;
 	}
 	
+	if (linear_filtering) {
+		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+	} else {
+		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+	}
+	
 	scanlines_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444,
-				    SDL_TEXTUREACCESS_STATIC,
-				    MAX_PIXELS_PER_SCANLINE, 4 * MAX_SCANLINES);
+										  SDL_TEXTUREACCESS_STATIC,
+										  MAX_PIXELS_PER_SCANLINE, 3 * MAX_SCANLINES);
 	
 	SDL_SetTextureBlendMode(scanlines_texture, SDL_BLENDMODE_BLEND);
 	
-	for (int i=0; i < 4*MAX_SCANLINES; i++) {
+	for (int i=0; i < 3*MAX_SCANLINES; i++) {
 		for (int j=0; j < MAX_PIXELS_PER_SCANLINE; j++) {
 			uint16_t color;
-			if ((i % 4) == 0 || (i % 4) == 3) {
+			if ((i % 3) == 0 || (i % 3) == 2) {
 				color = 0xf000;
 			} else {
 				color = 0x0000;
@@ -366,6 +372,27 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 	SDL_UpdateTexture(scanlines_texture, NULL, scanline_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint16_t));
 	
 	delete [] scanline_buffer;
+}
+
+void host_t::create_shadowmask_texture()
+{
+	if (shadowmask_texture) {
+		SDL_DestroyTexture(shadowmask_texture);
+		shadowmask_texture = nullptr;
+	}
+	
+	uint16_t buffer[3 * MAX_PIXELS_PER_SCANLINE];
+	
+	for (int i=0; i < 3 * MAX_PIXELS_PER_SCANLINE; i++) {
+		if (i % 3 == 0) buffer[i] = 0x3f00;
+		if (i % 3 == 1) buffer[i] = 0x30f0;
+		if (i % 3 == 2) buffer[i] = 0x300f;
+	}
+	
+	shadowmask_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STATIC, 3 * MAX_PIXELS_PER_SCANLINE, 1);
+	SDL_SetTextureBlendMode(shadowmask_texture, SDL_BLENDMODE_MUL);
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+	SDL_UpdateTexture(shadowmask_texture, NULL, buffer, 3 * MAX_PIXELS_PER_SCANLINE * sizeof(uint16_t));
 }
 
 enum events_output_state host_t::events_process_events()
