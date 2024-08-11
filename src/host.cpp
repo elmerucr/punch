@@ -284,10 +284,10 @@ void host_t::update_screen()
 	
 	SDL_SetTextureAlphaMod(scanlines_texture, video_scanlines_alpha);
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
-	
-	///
-	SDL_RenderCopy(video_renderer, shadowmask_texture, NULL, NULL);
-	///
+
+	if (shadowmask_active) {
+		SDL_RenderCopy(video_renderer, shadowmask_texture, NULL, NULL);
+	}
 	
 	if (system->current_mode == DEBUG_MODE) {
 		const SDL_Rect viewer = { (4*8*MAX_PIXELS_PER_SCANLINE)/5, 0, (8*MAX_PIXELS_PER_SCANLINE)/5, (9*8*MAX_PIXELS_PER_SCANLINE)/(5*16) };
