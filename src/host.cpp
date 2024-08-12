@@ -190,7 +190,9 @@ void host_t::video_init()
 	printf("[SDL] Display refresh rate of current display is %iHz\n", dm.refresh_rate);
 	if (dm.refresh_rate == FPS) {
 		printf("[SDL] Display: this is equal to the FPS of punch, trying for vsync\n");
-		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+		SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
+		//video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	} else {
 		printf("[SDL] Display: this differs from the FPS of punch, going for software FPS\n");
 		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
