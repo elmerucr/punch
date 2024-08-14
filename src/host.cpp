@@ -414,6 +414,8 @@ enum events_output_state host_t::events_process_events()
 				if ((event.key.keysym.sym == SDLK_f) && alt_pressed) {
 					events_wait_until_key_released(SDLK_f);
 					video_toggle_fullscreen();
+				} else if ((event.key.keysym.sym == SDLK_a) && alt_pressed ) {
+					video_toggle_shadowmask();
 				} else if ((event.key.keysym.sym == SDLK_s) && alt_pressed ) {
 					video_change_scanlines_intensity();
 				} else if ((event.key.keysym.sym == SDLK_b) && alt_pressed) {
@@ -632,6 +634,11 @@ void host_t::video_toggle_linear_filtering()
 	create_core_texture(video_linear_filtering);
 	create_debugger_texture(video_linear_filtering);
 	//create_scanlines_texture(video_linear_filtering);
+}
+
+void host_t::video_toggle_shadowmask()
+{
+	shadowmask_active = !shadowmask_active;
 }
 
 void host_t::video_increase_window_size()

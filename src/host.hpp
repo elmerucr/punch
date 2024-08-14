@@ -172,6 +172,7 @@ public:
 	void video_toggle_fullscreen();
 	void video_change_scanlines_intensity();
 	void video_change_hor_blur();
+	void video_toggle_shadowmask();
 	void video_toggle_linear_filtering();
 //    
 //	// getters setters
