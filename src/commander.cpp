@@ -341,6 +341,10 @@ void commander_t::reset()
 	sqstd_seterrorhandlers(v);
 	sq_setprintfunc(v, printfunc, errorfunc);
 	
+	//sqstd_register_bloblib(v);
+	sq_pushroottable(v);
+	sqstd_register_iolib(v);
+	
 	if (v) {
 		system->debugger->terminal->printf("\n[Squirrel] %s - %s", SQUIRREL_VERSION, SQUIRREL_COPYRIGHT);
 	} else {

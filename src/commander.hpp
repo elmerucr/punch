@@ -15,6 +15,8 @@
 #define _SQ64
 #include "squirrel.h"
 #include "sqstdaux.h"
+#include "sqstdblob.h"
+#include "sqstdio.h"
 
 #include <cstdint>
 
