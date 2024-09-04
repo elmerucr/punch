@@ -11,6 +11,8 @@
 #include <thread>
 #include <chrono>
 #include <unistd.h>
+#include <iostream>
+#include <filesystem>
 
 host_t::host_t(system_t *s)
 {
@@ -34,6 +36,9 @@ host_t::host_t(system_t *s)
 	SDL_GetVersion(&linked);
 	printf("[SDL] Linked against SDL version %d.%d.%d\n", linked.major, linked.minor, linked.patch);
 
+	//std::filesystem::path p = SDL_GetBasePath();
+	//std::cout << p << std::endl;
+	
 	char *base_path = SDL_GetBasePath();
 	printf("[SDL] Base path is: %s\n", base_path);
 	SDL_free(base_path);
@@ -455,19 +460,37 @@ enum events_output_state host_t::events_process_events()
 			{
 				char *path = event.drop.file;
 				
+				std::filesystem::path p(path);
+				p.remove_filename();
+				
+				std::filesystem::current_path(p);
+				printf("\np: %s", p.c_str());
+				printf("\ncurrent_path: %s", std::filesystem::current_path().c_str());
+				
+				p.append("music_player.nut");
+				printf("\np: %s", p.c_str());
+				
+				FILE *f = fopen(p.c_str(), "r");
+				if (!f) {
+					printf("\nmusic_player.nut not found");
+				} else {
+					printf("\nmusic_player.nut was found");
+					fclose(f);
+				}
+				
+				
 				system->debugger->terminal->deactivate_cursor();
 				
 				if (chdir(path)) {
-					const char *dot = strrchr(path, '.'); dot++;
+					const char *extension = strrchr(path, '.'); extension++;
 					
-					//if(!dot || dot == filename);
-					if (strcmp(dot, "lua") == 0) {
+					if (strcmp(extension, "lua") == 0) {
 						system->core->load_lua(path);
-					} else if (strcmp(dot, "nut") == 0) {
+					} else if (strcmp(extension, "nut") == 0) {
 						system->core->load_squirrel(path);
 					} else {
 						system->debugger->terminal->printf("\nloading %s", path);
-						system->debugger->terminal->printf("\nextension is %s", dot);
+						system->debugger->terminal->printf("\nextension is %s", extension);
 						system->core->load_bin();
 					}
 				} else {
