@@ -94,7 +94,7 @@ commander_t::~commander_t()
 		printf("[Lua] Closing Lua\n");
 		lua_close(L);
 	}
-	
+
 	if (v != nullptr) {
 		/*
 		 * Clean up Squirrel
@@ -205,6 +205,13 @@ const char squirrel_init_code[] = R"Squirrel(
 
 print("\n[Squirrel] Running initialization code")
 
+/*
+ * Next code to disable too much functionality from iolib, but we want to
+ * keep dofile and loadfile...
+ */
+function writeclosuretofile(destpath, closure) {}
+class file {}
+
 function breakhere(number)
 {
 	for (local i = 0; i < number; i++) {
@@ -294,10 +301,10 @@ void commander_t::reset()
 		 */
 		printf("[Lua] Closing Lua\n");
 		lua_close(L);
-		
+
 		L = nullptr;
 	}
-	
+
 	/*
 	 * Start Lua
 	 */
@@ -309,9 +316,9 @@ void commander_t::reset()
 	} else {
 		printf("[Lua] %s\n", LUA_COPYRIGHT);
 	}
-	
+
 	luaL_openlibs(L);
-	
+
 	lua_pushcfunction(L, l_poke);
 	lua_setglobal(L, "poke");
 	lua_pushcfunction(L, l_peek);
@@ -320,14 +327,14 @@ void commander_t::reset()
 	lua_setglobal(L, "poke16");
 	lua_pushcfunction(L, l_peek16);
 	lua_setglobal(L, "peek16");
-	
+
 	/*
 	 * Load "resident" Lua program into system
 	 */
 	if (luaL_dostring(L, lua_init_code)) {
 		printf("[Lua] Error: %s\n", lua_tostring(L, -1));
 	}
-	
+
 	/*
 	 * Squirrel initialization stuff
 	 */
@@ -336,49 +343,52 @@ void commander_t::reset()
 		system->debugger->terminal->printf("\n[Squirrel] Closing virtual machine");
 		v = nullptr;
 	}
-	
+
 	v = sq_open(1024);
 	sqstd_seterrorhandlers(v);
 	sq_setprintfunc(v, printfunc, errorfunc);
-	
-	//sqstd_register_bloblib(v);
-	sq_pushroottable(v);
-	sqstd_register_iolib(v);
-	
+
 	if (v) {
 		system->debugger->terminal->printf("\n[Squirrel] %s - %s", SQUIRREL_VERSION, SQUIRREL_COPYRIGHT);
 	} else {
 		system->debugger->terminal->printf("\n[Squirrel] Error: Failed to open virtual machine");
 	}
-	
+
+	/*
+	 * Register io lib
+	 */
+	//sqstd_register_bloblib(v);	// not necessary??? manual states that this one needs to be loaded as well...
+	sq_pushroottable(v);
+	sqstd_register_iolib(v);
+
 	/*
 	 * Register global functions, placed well here???? TODO: check
 	 */
-	
+
 	sq_pushroottable(v);
 	sq_pushstring(v, "poke", -1);
 	sq_newclosure(v, s_poke, 0);
 	sq_newslot(v, -3, SQFalse);
 	sq_pop(v, 1);
-	
+
 	sq_pushroottable(v);
 	sq_pushstring(v, "peek", -1);
 	sq_newclosure(v, s_peek, 0);
 	sq_newslot(v, -3, SQFalse);
 	sq_pop(v, 1);
-	
+
 	sq_pushroottable(v);
 	sq_pushstring(v, "poke16", -1);
 	sq_newclosure(v, s_poke16, 0);
 	sq_newslot(v, -3, SQFalse);
 	sq_pop(v, 1);
-	
+
 	sq_pushroottable(v);
 	sq_pushstring(v, "peek16", -1);
 	sq_newclosure(v, s_peek16, 0);
 	sq_newslot(v, -3, SQFalse);
 	sq_pop(v, 1);
-	
+
 	/*
 	 * load resident squirrel code into virtual machine
 	 */
@@ -386,7 +396,7 @@ void commander_t::reset()
 		system->debugger->terminal->printf("\n[Squirrel] Error sq_compilebuffer");
 	} else {
 		sq_pushroottable(v);
-		
+
 		if (sq_call(v, 1, SQFalse, SQTrue)) {
 			system->debugger->terminal->printf("\n[Squirrel] Error");
 		}
@@ -617,16 +627,16 @@ void commander_t::io_write8(uint16_t address, uint8_t value)
 bool commander_t::load_lua(const char *p)
 {
 	system->debugger->terminal->printf("\n[Lua] Running %s", p);
-	
+
 	bool return_value = false;
-	
+
 	if (luaL_dofile(L, p)) {
 		system->debugger->terminal->printf("\n[Lua error] %s", lua_tostring(L, -1));
 		lua_pop(L, 1);
 		system->switch_to_debug_mode();
 		return_value = true;
 	}
-	
+
 	return return_value;
 }
 
@@ -642,23 +652,23 @@ static SQInteger file_lexfeedASCII(SQUserPointer file)
 bool commander_t::load_squirrel(const char *p)
 {
 	system->debugger->terminal->printf("\n[Squirrel] Running %s", p);
-	
+
 	bool return_value = false;
-	
+
 	FILE *f = fopen(p, "rb");
-	
+
 	if (f) {
 		sq_compile(v,file_lexfeedASCII,f,p,1);
 		fclose(f);
 		//return_value = false;
 	}
-	
+
 	sq_pushroottable(v);
-	
+
 	if (sq_call(v, 1, SQFalse, SQTrue)) {
 		system->debugger->terminal->printf("\n[Squirrel] Error");
 		system->switch_to_debug_mode();
 	}
-	
+
 	return return_value;
 }

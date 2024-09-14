@@ -28,12 +28,12 @@ private:
 public:
 	commander_t(system_t *s);
 	~commander_t();
-	
+
 	void reset();
-	
+
 	bool load_lua(const char *p);
 	bool load_squirrel(const char *p);
-	
+
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
 };
