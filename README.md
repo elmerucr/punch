@@ -8,6 +8,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 * A total of 16MB of video RAM, 64KB directly accessible by the CPU
 * Screen resolution of 320x180 pixels, refresh rate of 60Hz
 * Blitter chip for fast graphics processing
+* Programmable using either MC6809 assembly or the Squirrel Programming Language
 
 ## Table of Contents
 
@@ -69,13 +70,15 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 * ```$ff0000-$ffe0ff``` default framebuffer vram (57.600 bytes)
 * ```$ffe100-$ffffff``` available vram (7.936 bytes)
 
-## Building
+## Building with CMake
 
-### MacOS
+### MacOS specific
 
-### Ubuntu / Debian
+### Ubuntu / Debian specific
 
-### Windows
+### Windows specific
+
+to be done
 
 ## Websites and projects of interest
 
@@ -86,12 +89,12 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 * [freeverb](https://github.com/sinshu/freeverb/) - Free, studio-quality reverb SOURCE CODE in the public domain
 * [Hatari](https://hatari.tuxfamily.org) - Hatari is an Atari ST/STE/TT/Falcon emulator.
 * [lib65ce02](https://github.com/elmerucr/lib65ce02) - CSG65CE02 emulator written in C.
-* [Lua](https://www.lua.org) - Lua is a powerful, efficient, lightweight, embeddable scripting language.
 * [MC6809](https://github.com/elmerucr/mC6809) - MC6809 cpu emulator written in C++.
 * [Mega65](http://mega65.org) - The 21st century realization of the C65 heritage.
 * [Moira](https://github.com/dirkwhoffmann/Moira) - Motorola 68000 cpu emulator written in C++ by Dirk W. Hoffmann.
 * [reSID](http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/resid/index.html) - ReSID is a Commodore 6581 or 8580 Sound Interface Device emulator by Dag Lem.
 * [SDL Simple DirectMedia Layer](https://www.libsdl.org) - A cross-platform development library by Sam Lantinga designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware.
+* [Squirrel](http://squirrel-lang.org) - Squirrel is a high level imperative, object-oriented programming language, designed to be a light-weight scripting language that fits in the size, memory bandwidth, and real-time requirements of applications like video games.
 * [stb](https://github.com/nothings/stb) - single-file public domain (or MIT licensed) libraries for C/C++
 * [TIC-80](https://tic80.com) - TIC-80 is a free and open source fantasy computer for making, playing and sharing tiny games.
 * [vAmiga](https://dirkwhoffmann.github.io/vAmiga/) - An Amiga 500, 1000, or 2000 on your Apple Macintosh by Dirk W. Hoffmann.
@@ -101,7 +104,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 
 ## MIT License
 
-Copyright (c) 2023 elmerucr
+Copyright (c) 2023-2024 elmerucr
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
