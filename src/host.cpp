@@ -17,35 +17,35 @@
 host_t::host_t(system_t *s)
 {
 	system = s;
-	
+
 	SDL_Init(SDL_INIT_EVERYTHING);
-	
+
 	/*
 	 * Each call to SDL_PollEvent invokes SDL_PumpEvents() that
 	 * updates this array.
 	 */
 	sdl_keyboard_state = SDL_GetKeyboardState(NULL);
-	
+
 	for (int i=0; i<128; i++) keyboard_state[i] = 0;
-	
+
 	SDL_version compiled;
 	SDL_VERSION(&compiled);
 	printf("[SDL] Compiled against SDL version %d.%d.%d\n", compiled.major, compiled.minor, compiled.patch);
-	
+
 	SDL_version linked;
 	SDL_GetVersion(&linked);
 	printf("[SDL] Linked against SDL version %d.%d.%d\n", linked.major, linked.minor, linked.patch);
 
 	//std::filesystem::path p = SDL_GetBasePath();
 	//std::cout << p << std::endl;
-	
+
 	char *base_path = SDL_GetBasePath();
 	printf("[SDL] Base path is: %s\n", base_path);
 	SDL_free(base_path);
 
 	sdl_preference_path = SDL_GetPrefPath("elmerucr", "punch");
 	printf("[SDL] Preference path is: %s\n", sdl_preference_path);
-	
+
 #if defined(__APPLE__)
 	home = getenv("HOME");
 	printf("[host] User homedir is: %s\n", home);
@@ -55,7 +55,7 @@ host_t::host_t(system_t *s)
 #else
 #   error "Unknown compiler"
 #endif
-	
+
 	audio_init();
 	video_init();
 }
@@ -78,10 +78,10 @@ void host_t::audio_init()
 		printf(" \'%s\' ", SDL_GetAudioDriver(i));
 	}
 	printf("\n");
-	
+
 	// What's this all about???
 	SDL_zero(audio_spec_want);
-	
+
 	/*
 	 * Define audio specification
 	 */
@@ -90,7 +90,7 @@ void host_t::audio_init()
 	audio_spec_want.channels = 2;
 	audio_spec_want.samples = 512;
 	audio_spec_want.callback = nullptr;
-	
+
 	/*
 	 * Open audio device, allowing any changes to the specification
 	 */
@@ -102,7 +102,7 @@ void host_t::audio_init()
 		// consider a system without audio support?
 		SDL_Quit();
 	}
-	
+
 	printf("[SDL] audio now using backend '%s'\n", SDL_GetCurrentAudioDriver());
 	printf("[SDL] audio information:        want\thave\n");
 	printf("[SDL]         frequency         %d\t%d\n", audio_spec_want.freq, audio_spec_have.freq);
@@ -121,15 +121,15 @@ void host_t::audio_init()
 	       SDL_AUDIO_BITSIZE(audio_spec_have.format));
 	printf("[SDL]          channels         %d\t%d\n", audio_spec_want.channels, audio_spec_have.channels);
 	printf("[SDL]          samples          %d\t%d\n", audio_spec_want.samples, audio_spec_have.samples);
-	
+
 	audio_bytes_per_sample = SDL_AUDIO_BITSIZE(audio_spec_have.format) / 8;
 	printf("[SDL] audio is using %d bytes per sample per channel\n", audio_bytes_per_sample);
-	
+
 	audio_bytes_per_ms = (double)SAMPLE_RATE * audio_spec_have.channels * audio_bytes_per_sample / 1000;
 	printf("[SDL] audio is using %f bytes per ms\n", audio_bytes_per_ms);
-	
+
 	audio_running = false;
-	
+
 	audio_start();
 }
 
@@ -175,7 +175,7 @@ void host_t::video_init()
 	//video_scaling = (3 * video_scaling_max) / 4;
 	if (video_scaling_max > 4) video_scaling = 4;
 	printf("[SDL] Max video scaling is %i, defaulting to %i\n", video_scaling_max, video_scaling);
-	
+
 	/*
 	 * Create window
 	 */
@@ -188,7 +188,7 @@ void host_t::video_init()
 
 	SDL_GetWindowSize(video_window, &window_width, &window_height);
 	printf("[SDL] Display window dimension: %u x %u pixels\n", window_width, window_height);
-	
+
 	/*
 	 * Create renderer and link it to window
 	 */
@@ -204,7 +204,7 @@ void host_t::video_init()
 	}
 
 	SDL_SetRenderDrawColor(video_renderer, 18, 18, 18, 255);
-	
+
 	SDL_RendererInfo current_renderer;
 	SDL_GetRendererInfo(video_renderer, &current_renderer);
 	vsync = (current_renderer.flags & SDL_RENDERER_PRESENTVSYNC) ? true : false;
@@ -214,11 +214,11 @@ void host_t::video_init()
 	       (current_renderer.flags & SDL_RENDERER_ACCELERATED) ? "" : "not ");
 	printf("[SDL] Renderer vsync is %s\n", vsync ? "enabled" : "disabled");
 	printf("[SDL] Renderer does%s support rendering to target texture\n", current_renderer.flags & SDL_RENDERER_TARGETTEXTURE ? "" : "n't");
-	
+
 	/*
 	 * Create two textures that are able to refresh very frequently
 	 */
-	
+
 	create_core_texture(video_linear_filtering);
 	create_debugger_texture(video_linear_filtering);
 
@@ -227,9 +227,9 @@ void host_t::video_init()
 	 */
 	scanlines_texture = nullptr;
 	create_scanlines_texture(true);
-	
+
 	create_shadowmask_texture();
-	
+
 	SDL_RenderSetLogicalSize(video_renderer, 8*MAX_PIXELS_PER_SCANLINE, 8*MAX_SCANLINES);	// keeps right aspect ratio
 
 	/*
@@ -241,7 +241,7 @@ void host_t::video_init()
 void host_t::video_stop()
 {
 	SDL_DestroyTexture(shadowmask_texture);
-	
+
 	SDL_DestroyTexture(scanlines_texture);
 	SDL_DestroyTexture(debugger_texture);
 	SDL_DestroyTexture(core_texture);
@@ -266,9 +266,9 @@ void host_t::update_screen()
 	placement.h = 8*MAX_SCANLINES;
 	placement.x = -video_hor_blur;
 	placement.y = 0;
-	
+
 	SDL_RenderClear(video_renderer);
-	
+
 	switch (system->current_mode) {
 		case DEBUG_MODE:
 			SDL_SetTextureAlphaMod(debugger_texture, 85);
@@ -288,14 +288,14 @@ void host_t::update_screen()
 			SDL_RenderCopy(video_renderer, core_texture, NULL, &placement);
 			break;
 	}
-	
+
 	SDL_SetTextureAlphaMod(scanlines_texture, video_scanlines_alpha);
 	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
 
 	if (shadowmask_active) {
 		SDL_RenderCopy(video_renderer, shadowmask_texture, NULL, NULL);
 	}
-	
+
 	if (system->current_mode == DEBUG_MODE) {
 		const SDL_Rect viewer = { (4*8*MAX_PIXELS_PER_SCANLINE)/5, 0, (8*MAX_PIXELS_PER_SCANLINE)/5, (9*8*MAX_PIXELS_PER_SCANLINE)/(5*16) };
 		//SDL_SetTextureAlphaMod(core_texture, 255);
@@ -314,13 +314,13 @@ void host_t::update_screen()
 void host_t::create_core_texture(bool linear_filtering)
 {
 	if (core_texture) SDL_DestroyTexture(core_texture);
-	
+
 	if (linear_filtering) {
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	} else {
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
-	
+
 	core_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444,
 				    SDL_TEXTUREACCESS_STREAMING,
 				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
@@ -330,7 +330,7 @@ void host_t::create_core_texture(bool linear_filtering)
 void host_t::create_debugger_texture(bool linear_filtering)
 {
 	if (debugger_texture) SDL_DestroyTexture(debugger_texture);
-	
+
 	if (linear_filtering) {
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	} else {
@@ -346,24 +346,24 @@ void host_t::create_debugger_texture(bool linear_filtering)
 void host_t::create_scanlines_texture(bool linear_filtering)
 {
 	uint16_t *scanline_buffer = new uint16_t[3 * MAX_PIXELS_PER_SCANLINE * MAX_SCANLINES];
-	
+
 	if (scanlines_texture) {
 		SDL_DestroyTexture(scanlines_texture);
 		scanlines_texture = nullptr;
 	}
-	
+
 	if (linear_filtering) {
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	} else {
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
-	
+
 	scanlines_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444,
 										  SDL_TEXTUREACCESS_STATIC,
 										  MAX_PIXELS_PER_SCANLINE, 3 * MAX_SCANLINES);
-	
+
 	SDL_SetTextureBlendMode(scanlines_texture, SDL_BLENDMODE_BLEND);
-	
+
 	for (int i=0; i < 3*MAX_SCANLINES; i++) {
 		for (int j=0; j < MAX_PIXELS_PER_SCANLINE; j++) {
 			uint16_t color;
@@ -375,9 +375,9 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 			scanline_buffer[(i * MAX_PIXELS_PER_SCANLINE) + j] = color;
 		}
 	}
-	
+
 	SDL_UpdateTexture(scanlines_texture, NULL, scanline_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint16_t));
-	
+
 	delete [] scanline_buffer;
 }
 
@@ -387,15 +387,15 @@ void host_t::create_shadowmask_texture()
 		SDL_DestroyTexture(shadowmask_texture);
 		shadowmask_texture = nullptr;
 	}
-	
+
 	uint16_t buffer[3 * MAX_PIXELS_PER_SCANLINE];
-	
+
 	for (int i=0; i < 3 * MAX_PIXELS_PER_SCANLINE; i++) {
 		if (i % 3 == 0) buffer[i] = 0x3f00;
 		if (i % 3 == 1) buffer[i] = 0x30f0;
 		if (i % 3 == 2) buffer[i] = 0x300f;
 	}
-	
+
 	shadowmask_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB4444, SDL_TEXTUREACCESS_STATIC, 3 * MAX_PIXELS_PER_SCANLINE, 1);
 	SDL_SetTextureBlendMode(shadowmask_texture, SDL_BLENDMODE_MUL);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -405,13 +405,13 @@ void host_t::create_shadowmask_texture()
 enum events_output_state host_t::events_process_events()
 {
 	enum events_output_state return_value = NO_EVENT;
-	
+
 	SDL_Event event;
-	
+
 	//bool shift_pressed = sdl2_keyboard_state[SDL_SCANCODE_LSHIFT] | sdl2_keyboard_state[SDL_SCANCODE_RSHIFT];
 	bool alt_pressed = sdl_keyboard_state[SDL_SCANCODE_LALT] | sdl_keyboard_state[SDL_SCANCODE_RALT];
 	//bool gui_pressed   = sdl2_keyboard_state[SDL_SCANCODE_LGUI] | sdl2_keyboard_state[SDL_SCANCODE_RGUI];
-	
+
 	while (SDL_PollEvent(&event)) {
 		switch(event.type) {
 			case SDL_KEYDOWN:
@@ -459,34 +459,22 @@ enum events_output_state host_t::events_process_events()
 			case SDL_DROPFILE:
 			{
 				char *path = event.drop.file;
-				
+
 				std::filesystem::path p(path);
 				p.remove_filename();
-				
+
 				std::filesystem::current_path(p);
 				printf("\np: %s", p.c_str());
 				printf("\ncurrent_path: %s", std::filesystem::current_path().c_str());
-				
-				p.append("music_player.nut");
-				printf("\np: %s", p.c_str());
-				
-				FILE *f = fopen(p.c_str(), "r");
-				if (!f) {
-					printf("\nmusic_player.nut not found");
-				} else {
-					printf("\nmusic_player.nut was found");
-					fclose(f);
-				}
-				
-				
+
 				system->debugger->terminal->deactivate_cursor();
-				
+
 				if (chdir(path)) {
 					const char *extension = strrchr(path, '.'); extension++;
-					
-					if (strcmp(extension, "lua") == 0) {
-						system->core->load_lua(path);
-					} else if (strcmp(extension, "nut") == 0) {
+
+					//if (strcmp(extension, "lua") == 0) {
+					//	system->core->load_lua(path);
+					if (strcmp(extension, "nut") == 0) {
 						system->core->load_squirrel(path);
 					} else {
 						system->debugger->terminal->printf("\nloading %s", path);
@@ -496,9 +484,9 @@ enum events_output_state host_t::events_process_events()
 				} else {
 					system->debugger->terminal->printf("\nwarning: %s is a directory", path);
 				}
-				
+
 				if (system->current_mode == DEBUG_MODE) system->debugger->prompt();
-				
+
 				system->debugger->terminal->activate_cursor();
 
 				SDL_free(path);
@@ -582,7 +570,7 @@ enum events_output_state host_t::events_process_events()
 		(keyboard_state[SCANCODE_DOWN        ] <<= 1) |= sdl_keyboard_state[SDL_SCANCODE_DOWN        ] ? 0b1 : 0b0;
 		(keyboard_state[SCANCODE_RIGHT       ] <<= 1) |= sdl_keyboard_state[SDL_SCANCODE_RIGHT       ] ? 0b1 : 0b0;
 	};
-	
+
 	if (return_value == QUIT_EVENT) printf("[SDL] detected quit event\n");
 	return return_value;
 }

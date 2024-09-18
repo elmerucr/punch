@@ -10,8 +10,6 @@
 
 #include "system.hpp"
 
-#include "lua.hpp"
-
 #define _SQ64
 #include "squirrel.h"
 #include "sqstdaux.h"
@@ -23,7 +21,6 @@
 class commander_t {
 private:
 	system_t *system;
-	lua_State *L{nullptr};
 	HSQUIRRELVM v{nullptr};
 public:
 	commander_t(system_t *s);
@@ -31,7 +28,6 @@ public:
 
 	void reset();
 
-	bool load_lua(const char *p);
 	bool load_squirrel(const char *p);
 
 	uint8_t io_read8(uint16_t address);

@@ -42,8 +42,7 @@ add_library(sqstd STATIC
 	squirrel3/sqstdlib/sqstdsystem.cpp
 )
 
-target_link_libraries(system lua MC6809 resid squirrel sqstd)
+target_link_libraries(system MC6809 resid squirrel sqstd)
 
-add_subdirectory(lua-5.4.7/src/)
 add_subdirectory(MC6809/)
 add_subdirectory(resid-0.16/)

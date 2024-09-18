@@ -14,23 +14,23 @@ extern uint8_t rom[];
 core_t::core_t(system_t *s)
 {
 	system = s;
-	
+
 	blitter = new blitter_ic();
 
 	cpu = new cpu_t(system);
-	
+
 	exceptions = new exceptions_ic();
 	cpu->assign_nmi_line(&exceptions->nmi_output_pin);
 	cpu->assign_irq_line(&exceptions->irq_output_pin);
-	
+
 	timer = new timer_ic(exceptions);
-	
+
 	sound = new sound_ic(system);
-	
+
 	cpu2sid = new clocks(CPU_CLOCK_SPEED/FPS, SID_CLOCK_SPEED/FPS);
-	
+
 	irq_number = exceptions->connect_device("core");
-	
+
 	/*
 	 * Last one!
 	 */
@@ -51,7 +51,7 @@ core_t::~core_t()
 uint8_t core_t::read8(uint16_t address)
 {
 	uint8_t page = (address & 0xff00) >> 8;
-	
+
 	switch (page) {
 		case BLITTER_SURFACES:
 			return blitter->io_surfaces_read8(address);
@@ -131,14 +131,14 @@ void core_t::reset()
 {
 	cpu_cycle_saldo = 0;
 	irq_line_frame_done = true;
-	
+
 	sound->reset();
 	timer->reset();
 	cpu->reset();
 	blitter->reset();
-	
+
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
-	
+
 	/*
 	 * Default font 4x6 at surface $e
 	 */
@@ -147,23 +147,23 @@ void core_t::reset()
 	blitter->surface[0xe].flags_0 = 0b01000010;
 	blitter->surface[0xe].flags_1 = 0b00000000;
 	// no need for base_address (implied by flags_0)
-	
+
 	/*
 	 * Default: dest screen surface $f
 	 */
 	blitter->surface[0xf].w = 320;
 	blitter->surface[0xf].h = 180;
 	blitter->surface[0xf].base_address = 0xff0000;
-	
+
 	framebuffer_base_address = 0x00ff0000;
-	
+
 	commander->reset();
 }
 
 enum output_states core_t::run(bool debug)
 {
 	enum output_states output_state = NORMAL;
-	
+
 	do {
 
 		uint16_t cpu_cycles = cpu->execute();
@@ -172,11 +172,11 @@ enum output_states core_t::run(bool debug)
 		sound->run(sound_cycles);
 		cpu_cycle_saldo += cpu_cycles;
 		sound_cycle_saldo += sound_cycles;
-		
+
 	} while ((!cpu->breakpoint()) && (cpu_cycle_saldo < CPU_CYCLES_PER_FRAME) && (!debug));
-	
+
 	if (cpu->breakpoint()) output_state = BREAKPOINT;
-	
+
 	if (cpu_cycle_saldo >= CPU_CYCLES_PER_FRAME) {
 		cpu_cycle_saldo -= CPU_CYCLES_PER_FRAME;
 		if (generate_interrupts_frame_done) {
@@ -185,7 +185,7 @@ enum output_states core_t::run(bool debug)
 		}
 		blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 	}
-	
+
 	return output_state;
 }
 
@@ -197,14 +197,14 @@ uint8_t core_t::io_read8(uint16_t address)
 			return
 				(irq_line_frame_done    ? 0b00000000 : 0b00000001) |
 				(irq_line_load_bin      ? 0b00000000 : 0b00000010) |
-				(irq_line_load_lua      ? 0b00000000 : 0b00000100) |
+				//(irq_line_load_lua      ? 0b00000000 : 0b00000100) |
 				(irq_line_load_squirrel ? 0b00000000 : 0b00001000) ;
 		case 0x01:
 			// control register
 			return
 				(generate_interrupts_frame_done    ? 0b00000001 : 0b00000000) |
 				(generate_interrupts_load_bin      ? 0b00000010 : 0b00000000) |
-				(generate_interrupts_load_lua      ? 0b00000100 : 0b00000000) |
+				//(generate_interrupts_load_lua      ? 0b00000100 : 0b00000000) |
 				(generate_interrupts_load_squirrel ? 0b00001000 : 0b00000000) ;
 		case 0x02:
 			// vram peek high byte
@@ -235,18 +235,18 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 			if ((value & 0b00000010) && (!irq_line_load_bin)) {
 				irq_line_load_bin = true;
 			}
-			if ((value & 0b00000100) && (!irq_line_load_lua)) {
-				irq_line_load_lua = true;
-			}
+			// if ((value & 0b00000100) && (!irq_line_load_lua)) {
+			// 	irq_line_load_lua = true;
+			// }
 			if ((value & 0b00001000) && (!irq_line_load_squirrel)) {
 				irq_line_load_squirrel = true;
 			}
-			if (irq_line_frame_done && irq_line_load_bin && irq_line_load_lua && irq_line_load_squirrel) exceptions->release(irq_number);
+			if (irq_line_frame_done && irq_line_load_bin && irq_line_load_squirrel) exceptions->release(irq_number);
 			break;
 		case 0x01:
 			generate_interrupts_frame_done    = (value & 0b00000001) ? true : false;
 			generate_interrupts_load_bin      = (value & 0b00000010) ? true : false;
-			generate_interrupts_load_lua      = (value & 0b00000100) ? true : false;
+			//generate_interrupts_load_lua      = (value & 0b00000100) ? true : false;
 			generate_interrupts_load_squirrel = (value & 0b00001000) ? true : false;
 			break;
 		case 0x02:
@@ -281,16 +281,16 @@ void core_t::load_bin()
 	}
 }
 
-void core_t::load_lua(const char *p)
-{
-	if (generate_interrupts_load_lua) {
-		if (!commander->load_lua(p)) {
-			// loading succesful
-			irq_line_load_lua = false;
-			exceptions->pull(irq_number);
-		}
-	}
-}
+// void core_t::load_lua(const char *p)
+// {
+// 	if (generate_interrupts_load_lua) {
+// 		if (!commander->load_lua(p)) {
+// 			// loading succesful
+// 			irq_line_load_lua = false;
+// 			exceptions->pull(irq_number);
+// 		}
+// 	}
+// }
 
 void core_t::load_squirrel(const char *p)
 {

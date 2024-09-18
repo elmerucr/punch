@@ -9,7 +9,6 @@ find_package(SDL2 REQUIRED)
 include_directories(
     ${SDL2_INCLUDE_DIRS}
     src/
-    src/lua-5.4.7/src/
     src/MC6809/
     src/resid-0.16/
 	src/squirrel3/include/
