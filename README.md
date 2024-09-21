@@ -32,9 +32,16 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 * ```$000-$0ff``` direct page (default after reset)
 * ```$100-$3ff``` available ram and system stack pointer (768 bytes)
 * ```$0400-$0fff``` input/output area
-	* ```$400-$4ff``` blitter surface descriptors (16 in total, 16 bytes each)
-		* ```$x0/$x1```: x position (16 bit signed)
-		* ```$x2/$x3```: y position (16 bit signed)
+	* ```$400-$4ff``` blitter surface descriptors (16 in total, 16 bytes each, below is lowest nibble in address)
+		* ```$0/$1```: x position (16 bit signed)
+		* ```$2/$3```: y position (16 bit signed)
+		* ```$4/$5```: w width (16 bit unsigned)
+		* ```$6/$7```: h height (16 bit unsigned)
+		* ```$8/$b```: base address of surface data ($8 will always contain ```$00```)
+		* ```$c   ```: flags_0
+		* ```$d   ```: flags_1
+		* ```$e   ```: unused / reserved
+		* ```$f   ```: index ("sprite pointer")
 	* ```$500-$5ff``` blitter surface color tables (16) for 1, 2 and 4 bit color modes
 	* ```$600-$7ff``` reserved area
 	* ```$800-$8ff``` core
@@ -52,6 +59,9 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 			* write ```0b00000001```: blit source to destination surface
 			* write ```0b00000010```: tile blit source/dest/tile
 			* write ```0b00000100```: clear destination surface with drawing color
+			* write ```0b00001000```: line
+			* write ```0b00010000```: rectangle
+			* write ```0b00100000```: solid rectangle
 		* ```$e02``` source surface pointer (lowest nibble only)
 		* ```$e03``` destination surface pointer (lowest nibble only)
 		* ```$e04``` tile surface pointer (lowest nibble)
@@ -72,9 +82,20 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 
 ## Building with CMake
 
+Create a build directory in the source tree ```mkdir build```, run ```cmake ..``` from that directory and run ```make```. Alternatively do ```mkdir Debug```, run ```cmake -DCMAKE_BUILD_TYPE=Debug ..``` from that directory and run ```make```.
+
+Below some more OS specific intructions on how to prepare the build environment.
+
 ### MacOS specific
 
+* Install Xcode from App Store
+* When it asks to install command line tools, do that
+* Install Homebrew
+* From the Homebrew command line, install cmake and SDL2 libraries
+
 ### Ubuntu / Debian specific
+
+
 
 ### Windows specific
 
