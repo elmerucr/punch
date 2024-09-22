@@ -49,6 +49,24 @@ static SQInteger s_peek16(HSQUIRRELVM v)
 	return 1;
 }
 
+static SQInteger s_vpoke(HSQUIRRELVM v)
+{
+	SQInteger address;
+	SQInteger value;
+	sq_getinteger(v, -2, &address);
+	sq_getinteger(v, -1, &value);
+	sys->core->blitter->vram[address & VRAM_SIZE_MASK] = (uint8_t)value;
+	return 0;
+}
+
+static SQInteger s_vpeek(HSQUIRRELVM v)
+{
+	SQInteger address;
+	sq_getinteger(v, -1, &address);
+	sq_pushinteger(v, sys->core->blitter->vram[address & VRAM_SIZE_MASK]);
+	return 1;
+}
+
 commander_t::commander_t(system_t *s)
 {
 	system = sys = s;
@@ -210,6 +228,18 @@ void commander_t::reset()
 	sq_pushroottable(v);
 	sq_pushstring(v, "peek16", -1);
 	sq_newclosure(v, s_peek16, 0);
+	sq_newslot(v, -3, SQFalse);
+	sq_pop(v, 1);
+
+	sq_pushroottable(v);
+	sq_pushstring(v, "vpoke", -1);
+	sq_newclosure(v, s_vpoke, 0);
+	sq_newslot(v, -3, SQFalse);
+	sq_pop(v, 1);
+
+	sq_pushroottable(v);
+	sq_pushstring(v, "vpeek", -1);
+	sq_newclosure(v, s_vpeek, 0);
 	sq_newslot(v, -3, SQFalse);
 	sq_pop(v, 1);
 

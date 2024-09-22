@@ -43,17 +43,14 @@ private:
 
 	bool irq_line_frame_done{true};
 	bool irq_line_load_bin{true};
-//	bool irq_line_load_lua{true};
 	bool irq_line_load_squirrel{true};
 
 	bool generate_interrupts_frame_done{false};
 	bool generate_interrupts_load_bin{false};
-//	bool generate_interrupts_load_lua{false};
 	bool generate_interrupts_load_squirrel{false};
 
-	uint16_t vram_peek{0x0000};
-
 	uint32_t framebuffer_base_address{0};
+	uint32_t vram_peek{0};
 public:
 	core_t(system_t *s);
 	~core_t();
