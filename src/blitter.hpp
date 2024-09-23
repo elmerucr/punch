@@ -12,7 +12,8 @@
 #include "common.hpp"
 #include "font_4x6.hpp"
 
-#define FLAGS0_ROMFONT		0b01000000
+#define FLAGS0_NOFONT		0b00000000
+#define FLAGS0_TINYFONT		0b01000000
 
 #define	FLAGS1_DBLWIDTH		0b00000001
 #define FLAGS1_DBLHEIGHT	0b00000010
@@ -30,9 +31,9 @@ struct surface_t {
 
 	uint16_t w{0};
 	uint16_t h{0};
-	
+
 	uint32_t base_address{0};
-	
+
 	/*
 	 * Properties related to flags_0 (as encoded inside machine)
 	 * Color related
@@ -48,7 +49,7 @@ struct surface_t {
 	 * bits 2 to 5: Reserved
 	 */
 	uint8_t flags_0{0};
-	
+
 	/*
 	 * Properties related to flags_1 (as encoded inside machine)
 	 * Size, flips and xy flip
@@ -64,9 +65,9 @@ struct surface_t {
 	 * bits 2,3 and 7: Reserved
 	 */
 	uint8_t flags_1{0};
-	
+
 	uint8_t index{0};
-	
+
 	/*
 	 * Default 16 colors at init, resemble c64
 	 */
@@ -89,30 +90,30 @@ private:
 	int16_t y0{0};
 	int16_t x1{0};
 	int16_t y1{0};
-	
+
 	/*
 	 * To restrain max no of pixels per frame
 	 * At start of frame, set to specific level
 	 * e.g. max. 8 times total pixels in display.
 	 */
 	uint32_t pixel_saldo{0};
-	
+
 	/*
 	 * Returns number of pixels written
 	 */
 	uint32_t blit(const surface_t *src, surface_t *dst);
-	
+
 	font_4x6_t font_4x6;
 	//uint8_t *font_4x6;
 	//void init_font_4x6();
-	
+
 	struct color_mode_t {
 		uint8_t bits_per_pixel;
 		uint8_t pixels_per_byte;
 		uint8_t mask;
 		bool color_lookup;
 	};
-	
+
 	const struct color_mode_t color_modes[4] = {
 		{ 1, 8, 0b00000001, true  },
 		{ 2, 4, 0b00000011, true  },
@@ -123,20 +124,20 @@ private:
 public:
 	blitter_ic();
 	~blitter_ic();
-	
+
 	void reset();
-	
+
 	surface_t surface[16];
-	
+
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
-	
+
 	uint8_t io_surfaces_read8(uint16_t address);
 	void io_surfaces_write8(uint16_t address, uint8_t value);
-	
+
 	uint8_t io_color_indices_read8(uint16_t address);
 	void io_color_indices_write8(uint16_t address, uint8_t value);
-	
+
 //	uint8_t io_palette_read8(uint16_t address) {
 //		if (address & 0b1) {
 //			return palette[(address & 0x1ff) >> 1] & 0xff;
@@ -144,7 +145,7 @@ public:
 //			return (palette[(address & 0x1ff) >> 1] & 0xff00) >> 8;
 //		}
 //	}
-	
+
 //	void io_palette_write8(uint16_t address, uint8_t value) {
 //		if (address & 0b1) {
 //			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0xff00) | value;
@@ -152,7 +153,7 @@ public:
 //			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0x00ff) | (value << 8);
 //		}
 //	}
-	
+
 	/*
 	 * All return number of pixels changed
 	 */
@@ -162,12 +163,12 @@ public:
 	uint32_t line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
-	
+
 	void set_pixel_saldo(uint32_t s) { pixel_saldo = s; }
 	uint32_t get_pixel_saldo() { return pixel_saldo; }
-	
+
 	void update_framebuffer(uint32_t base_address);
-	
+
 	uint8_t *vram;
 	uint16_t *framebuffer;
 	uint16_t *palette;
