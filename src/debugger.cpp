@@ -53,8 +53,9 @@ debugger_t::debugger_t(system_t *s)
 	/* font surface in slot 0xe */
 	blitter->surface[0xe].w = 4;
 	blitter->surface[0xe].h = 6;
-	blitter->surface[0xe].flags_0 = 0b01000011;
+	blitter->surface[0xe].flags_0 = 0b00000011;
 	blitter->surface[0xe].flags_1 = 0b00000000;
+	blitter->surface[0xe].flags_2 = 0b00000001;
 
 	/* framebuffer surface in slot 0xf */
 	blitter->surface[0xf].base_address = FRAMEBUFFER_ADDRESS;
@@ -83,6 +84,7 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xc].base_address = 0x000300;
 	blitter->surface[0xc].flags_0 = 0b00010000;
 	blitter->surface[0xc].flags_1 = 0b00000001;
+	blitter->surface[0xc].flags_2 = 0b00000000;
 	blitter->surface[0xc].w = 8;
 	blitter->surface[0xc].h = 21;
 	blitter->surface[0xc].x = 30;

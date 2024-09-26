@@ -39,14 +39,14 @@ struct surface_t {
 	 * Properties related to flags_0 (as encoded inside machine)
 	 *
 	 * 7 6 5 4 3 2 1 0
-	 * | | | |     | |
-	 * | | | |     | |
-	 * | | | |     | +-- Use background color (0 = off, 1 = on)
-	 * | | | |     +---- Use foreground color (0 = off, 1 = on)
-	 * | | +-+---------- Bits per pixel (0b00 = 1, 0b01 = 2, 0b10 = 4, 0b11 = 8)
-	 * +-+-------------- Rom font selection (00 = off, 01 = tiny_font, 10... 11...)
+	 *     | |     | |
+	 *     | |     | |
+	 *     | |     | +-- Use background color (0 = off, 1 = on)
+	 *     | |     +---- Use foreground color (0 = off, 1 = on)
+	 *     +-+---------- Bits per pixel (0b00 = 1, 0b01 = 2, 0b10 = 4, 0b11 = 8)
 	 *
-	 * bits 2 and 3: Reserved
+	 *
+	 * bits 2, 3, 6 and 7: Reserved
 	 */
 	uint8_t flags_0{0};
 
@@ -65,6 +65,25 @@ struct surface_t {
 	 * bits 2,3 and 7: Reserved
 	 */
 	uint8_t flags_1{0};
+
+	/*
+	 * Properties related to flags_2 (as encoded inside machine)
+	 *
+	 * 7 6 5 4 3 2 1 0
+	 *           | | |
+	 *           +-+-+-- Rom font selection
+	 *                    000 = off
+	 *                    001 = tiny font 4x6
+	 *                    010 = off (reserved)
+	 *                    011 = off (reserved)
+	 *                    100 = cbm font 8x8
+	 *                    101 = off (reserved)
+	 *                    110 = off (reserved)
+	 *                    111 = off (reserved)
+	 *
+	 * bits 3, 4, 5, 6, 7: reserved
+	 */
+	uint8_t flags_2{0};
 
 	uint8_t index{0};
 

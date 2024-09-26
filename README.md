@@ -40,7 +40,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 		* ```$8/$b```: base address of surface data ($8 will always contain ```$00```)
 		* ```$c   ```: flags_0
 		* ```$d   ```: flags_1
-		* ```$e   ```: unused / reserved
+		* ```$e   ```: flags_2
 		* ```$f   ```: index ("sprite pointer")
 	* ```$500-$5ff``` blitter surface color tables (16) for 1, 2 and 4 bit color modes
 	* ```$600-$7ff``` reserved area

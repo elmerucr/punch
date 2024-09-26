@@ -145,18 +145,22 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	uint32_t start_address{0};
 	uint32_t index = (src->index * src->w * src->h);
 
-	switch ((src->flags_0 & 0b11000000) >> 6) {
-		case 0b00:
+	switch (src->flags_2 & 0b00000111) {
+		case 0b000:
+		case 0b010:
+		case 0b011:
+		case 0b101:
+		case 0b110:
+		case 0b111:
 			memory = vram;
 			memory_mask = VRAM_SIZE_MASK;
 			start_address = src->base_address;
 			break;
-		case 0b01:
+		case 0b001:
 			memory = font_4x6.data;
 			memory_mask = 0x3ff;
 			break;
-		case 0b10:
-		case 0b11:
+		case 0b100:
 			memory = font_cbm_8x8.data;
 			memory_mask = 0x7ff;
 			break;
@@ -436,7 +440,7 @@ uint8_t blitter_ic::io_surfaces_read8(uint16_t address)
 		case 0xb: return surface[no].base_address & 0x000000ff;
 		case 0xc: return surface[no].flags_0;
 		case 0xd: return surface[no].flags_1;
-//		case 0xe:
+		case 0xe: return surface[no].flags_2;
 		case 0xf: return surface[no].index;
 		default:  return 0x00;
 	}
@@ -459,9 +463,9 @@ void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
 		case 0x9: surface[no].base_address = (surface[no].base_address & 0x0000ffff) | (value << 16); break;
 		case 0xa: surface[no].base_address = (surface[no].base_address & 0x00ff00ff) | (value << 8);  break;
 		case 0xb: surface[no].base_address = (surface[no].base_address & 0x00ffff00) | value;         break;
-		case 0xc: surface[no].flags_0 = value & 0b11110011; break;
+		case 0xc: surface[no].flags_0 = value & 0b00110011; break;
 		case 0xd: surface[no].flags_1 = value & 0b01110011; break;
-//		case 0xe: break;
+		case 0xe: surface[no].flags_2 = value & 0b00000111; break;
 		case 0xf: surface[no].index = value; break;
 		default:  break;
 	}
