@@ -197,14 +197,12 @@ uint8_t core_t::io_read8(uint16_t address)
 			return
 				(irq_line_frame_done    ? 0b00000000 : 0b00000001) |
 				(irq_line_load_bin      ? 0b00000000 : 0b00000010) |
-				//(irq_line_load_lua      ? 0b00000000 : 0b00000100) |
 				(irq_line_load_squirrel ? 0b00000000 : 0b00001000) ;
 		case 0x01:
 			// control register
 			return
 				(generate_interrupts_frame_done    ? 0b00000001 : 0b00000000) |
 				(generate_interrupts_load_bin      ? 0b00000010 : 0b00000000) |
-				//(generate_interrupts_load_lua      ? 0b00000100 : 0b00000000) |
 				(generate_interrupts_load_squirrel ? 0b00001000 : 0b00000000) ;
 		case 0x04:
 			return 0x00;
@@ -237,9 +235,6 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 			if ((value & 0b00000010) && (!irq_line_load_bin)) {
 				irq_line_load_bin = true;
 			}
-			// if ((value & 0b00000100) && (!irq_line_load_lua)) {
-			// 	irq_line_load_lua = true;
-			// }
 			if ((value & 0b00001000) && (!irq_line_load_squirrel)) {
 				irq_line_load_squirrel = true;
 			}
@@ -248,7 +243,6 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 		case 0x01:
 			generate_interrupts_frame_done    = (value & 0b00000001) ? true : false;
 			generate_interrupts_load_bin      = (value & 0b00000010) ? true : false;
-			//generate_interrupts_load_lua      = (value & 0b00000100) ? true : false;
 			generate_interrupts_load_squirrel = (value & 0b00001000) ? true : false;
 			break;
 		case 0x04:
@@ -286,17 +280,6 @@ void core_t::load_bin()
 		exceptions->pull(irq_number);
 	}
 }
-
-// void core_t::load_lua(const char *p)
-// {
-// 	if (generate_interrupts_load_lua) {
-// 		if (!commander->load_lua(p)) {
-// 			// loading succesful
-// 			irq_line_load_lua = false;
-// 			exceptions->pull(irq_number);
-// 		}
-// 	}
-// }
 
 void core_t::load_squirrel(const char *p)
 {

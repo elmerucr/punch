@@ -11,6 +11,7 @@
 #include <cstdint>
 #include "common.hpp"
 #include "font_4x6.hpp"
+#include "font_cbm_8x8.hpp"
 
 #define FLAGS0_NOFONT		0b00000000
 #define FLAGS0_TINYFONT		0b01000000
@@ -36,7 +37,6 @@ struct surface_t {
 
 	/*
 	 * Properties related to flags_0 (as encoded inside machine)
-	 * Color related
 	 *
 	 * 7 6 5 4 3 2 1 0
 	 * | | | |     | |
@@ -46,7 +46,7 @@ struct surface_t {
 	 * | | +-+---------- Bits per pixel (0b00 = 1, 0b01 = 2, 0b10 = 4, 0b11 = 8)
 	 * +-+-------------- Rom font selection (00 = off, 01 = tiny_font, 10... 11...)
 	 *
-	 * bits 2 to 5: Reserved
+	 * bits 2 and 3: Reserved
 	 */
 	uint8_t flags_0{0};
 
@@ -104,8 +104,7 @@ private:
 	uint32_t blit(const surface_t *src, surface_t *dst);
 
 	font_4x6_t font_4x6;
-	//uint8_t *font_4x6;
-	//void init_font_4x6();
+	font_cbm_8x8_t font_cbm_8x8;
 
 	struct color_mode_t {
 		uint8_t bits_per_pixel;
@@ -160,6 +159,7 @@ public:
 	uint32_t blit(const uint8_t s, const uint8_t d);
 	uint32_t tile_blit(const uint8_t s, const uint8_t d, const uint8_t _ts);
 	uint32_t clear_surface(const uint8_t col, const uint8_t dest);
+	uint32_t pset(int16_t x0, int16_t y0, uint8_t c, uint8_t d);
 	uint32_t line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
 	uint32_t solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);

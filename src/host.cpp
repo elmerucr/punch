@@ -472,8 +472,6 @@ enum events_output_state host_t::events_process_events()
 				if (chdir(path)) {
 					const char *extension = strrchr(path, '.'); extension++;
 
-					//if (strcmp(extension, "lua") == 0) {
-					//	system->core->load_lua(path);
 					if (strcmp(extension, "nut") == 0) {
 						system->core->load_squirrel(path);
 					} else {

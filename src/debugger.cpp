@@ -44,23 +44,23 @@ bool debugger_t::hex_string_to_int(const char *temp_string, uint32_t *return_val
 debugger_t::debugger_t(system_t *s)
 {
 	system = s;
-	
+
 	irq_no = system->core->exceptions->connect_device("debugger");
-	
+
 	blitter = new blitter_ic();
 	blitter->reset();
-	
+
 	/* font surface in slot 0xe */
 	blitter->surface[0xe].w = 4;
 	blitter->surface[0xe].h = 6;
 	blitter->surface[0xe].flags_0 = 0b01000011;
 	blitter->surface[0xe].flags_1 = 0b00000000;
-	
+
 	/* framebuffer surface in slot 0xf */
 	blitter->surface[0xf].base_address = FRAMEBUFFER_ADDRESS;
 	blitter->surface[0xf].w = MAX_PIXELS_PER_SCANLINE;
 	blitter->surface[0xf].h = MAX_PIXELS_PER_SCANLINE;
-	
+
 	/* character screen in slot 0xd */
 	blitter->surface[0xd].w = MAX_PIXELS_PER_SCANLINE / blitter->surface[0xe].w;
 	blitter->surface[0xd].h = MAX_SCANLINES / blitter->surface[0xe].h;
@@ -68,7 +68,7 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xd].x = 0;
 	blitter->surface[0xd].y = 0;
 	blitter->surface[0xd].flags_0 = 0b00;
-	
+
 	terminal = new terminal_t(system, &blitter->surface[0xd], blitter);
 	terminal->fg_color = fg;
 	terminal->bg_color = bg;
@@ -90,7 +90,7 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xc].color_indices[0b00] = 0xc7;
 	blitter->surface[0xc].color_indices[0b01] = 0x54;
 	blitter->surface[0xc].color_indices[0b10] = 0xfb;
-	
+
 	for (int i=0; i<(2*21*3); i++) {
 		blitter->vram[blitter->surface[0xc].base_address + i] = bruce_data[i];
 	}
@@ -129,15 +129,15 @@ void debugger_t::redraw()
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 	//blitter->clear_surface(PUNCH_BLACK, 0xf);	// no need, everything is redrawn already
 	blitter->tile_blit(0xe, 0xf, 0xd);
-	
+
 	// Bruce
 	static int state = 0;
 	static int wait = 100;
 	static bool right = true;
 	static bool change_direction = true;
-	
+
 	right ? blitter->surface[0xc].flags_1 &= 0b11101111 : blitter->surface[0xc].flags_1 |= 0b00010000;
-	
+
 	if (wait < 200) {
 		blitter->surface[0xc].index = 0;
 		state = 0;
@@ -146,27 +146,27 @@ void debugger_t::redraw()
 			if (bruce_rand.byte() < 128) right = true; else right = false;
 			change_direction = false;
 		}
-		
+
 		if (state > 4) {
 			blitter->surface[0xc].index = 1;
 		} else {
 			blitter->surface[0xc].index = 2;
 		}
-		
+
 		blitter->surface[0xc].x += 2 * (right ? 1 : -1);
 		if (blitter->surface[0xc].x > 340) {
 			blitter->surface[0xc].x = -20;
 		} else if (blitter->surface[0xc].x < -20) {
 			blitter->surface[0xc].x = 340;
 		}
-		
+
 		state++; if (state == 8) state = 0;
 	}
 	wait++; if (wait > 300) {
 		wait = 0;
 		change_direction = true;
 	}
-	
+
 	blitter->blit(0xc, 0xf);
 	// end Bruce
 }
@@ -174,9 +174,9 @@ void debugger_t::redraw()
 void debugger_t::run()
 {
 	uint8_t symbol = 0;
-	
+
 	terminal->process_cursor_state();
-	
+
 	while (system->keyboard->events_waiting()) {
 		terminal->deactivate_cursor();
 		symbol = system->keyboard->pop_event();
@@ -232,12 +232,12 @@ void debugger_t::process_command(char *c)
 		c++;
 		cnt++;
 	}
-	
+
 	have_prompt = true;
-	
+
 	char *token0, *token1, *token2;
 	token0 = strtok(c, " ");
-	
+
 	if (token0 == NULL) {
 		//have_prompt = false;
 	} else if (token0[0] == ':') {
@@ -283,12 +283,12 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "d") == 0) {
 		have_prompt = false;
 		token1 = strtok(NULL, " ");
-		
+
 		uint8_t lines_remaining = terminal->lines_remaining();
 		if (lines_remaining == 0) lines_remaining = 1;
-		
+
 		uint32_t temp_pc = system->core->cpu->get_pc();
-		
+
 		if (token1 == NULL) {
 			for (int i=0; i<lines_remaining; i++) {
 				terminal->printf("\n.");
@@ -324,12 +324,12 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "m") == 0) {
 		have_prompt = false;
 		token1 = strtok(NULL, " ");
-		
+
 		uint8_t lines_remaining = terminal->lines_remaining();
 		if (lines_remaining == 0) lines_remaining = 1;
-		
+
 		uint32_t temp_pc = system->core->cpu->get_pc();
-		
+
 		if (token1 == NULL) {
 			for (int i=0; i<lines_remaining; i++) {
 				terminal->putchar('\n');
@@ -352,13 +352,13 @@ void debugger_t::process_command(char *c)
 		have_prompt = false;
 		token1 = strtok(NULL, " ");
 		token2 = strtok(NULL, " ");
-		
+
 		uint8_t lines_remaining = terminal->lines_remaining();
 		if (lines_remaining == 0) lines_remaining = 1;
-		
+
 		uint32_t address{0};
 		uint32_t width;
-		
+
 		if (token1 == NULL) {
 			// no address
 			terminal->printf("\nerror: missing arguments");
@@ -398,13 +398,13 @@ void debugger_t::process_command(char *c)
 		have_prompt = false;
 		token1 = strtok(NULL, " ");
 		token2 = strtok(NULL, " ");
-		
+
 		uint8_t lines_remaining = terminal->lines_remaining();
 		if (lines_remaining == 0) lines_remaining = 1;
-		
+
 		uint32_t address{0};
 		uint32_t width;
-		
+
 		if (token1 == NULL) {
 			// no address
 			terminal->printf("\nerror: missing arguments");
@@ -490,7 +490,7 @@ void debugger_t::process_command(char *c)
 		for (int i=0; i<strlen(token0) + cnt; i++) terminal->cursor_right();
 		terminal->printf("?");
 	}
-	
+
 	if (have_prompt) prompt();
 }
 
@@ -511,17 +511,17 @@ void debugger_t::status()
 		terminal->putchar('\n');
 		pc += disassemble_instruction(pc);
 	}
-	
+
 	terminal->printf("\n\n_usp___  _ssp___  t_____s___bpm______cycles  IRQ_s__Name_____");
-	
+
 	for (int i=0; i<8; i++) {
 		uint16_t usp = (system->core->cpu->get_us() + i) & 0xffff;
 		uint8_t usp_b = system->core->read8(usp);
 		uint16_t ssp = (system->core->cpu->get_sp() + i) & 0xffff;
 		uint8_t ssp_b = system->core->read8(ssp);
-		
+
 		system->core->exceptions->status(text_buffer, 2048, i);
-		
+
 		terminal->printf("\n%04x %02x  %04x %02x  %u %s %s %5u  %10u   %s",
 				 usp,
 				 usp_b,
@@ -534,7 +534,7 @@ void debugger_t::status()
 				 system->core->timer->get_timer_clock_interval(i) - system->core->timer->get_timer_counter(i),
 				 text_buffer);
 	}
-	
+
 	terminal->printf("\n\n%6i of %6i frame cpu cycles done", system->core->get_cpu_cycle_saldo(), CPU_CYCLES_PER_FRAME);
 	terminal->printf("\n%6u of %6u blitter pixel writes left for this frame", system->core->blitter->get_pixel_saldo(), MAX_PIXELS_PER_FRAME);
 }
@@ -565,7 +565,7 @@ void debugger_t::memory_dump(uint16_t address)
 
 	address += 8;
 	address &= 0xffff;
-       
+
 	for (int i=0; i<32; i++) {
 		terminal->cursor_left();
 	}
@@ -574,7 +574,7 @@ void debugger_t::memory_dump(uint16_t address)
 void debugger_t::enter_memory_line(char *buffer)
 {
 	have_prompt = true;
-	
+
 	uint32_t address;
 	uint32_t arg0, arg1, arg2, arg3;
 	uint32_t arg4, arg5, arg6, arg7;
@@ -661,19 +661,19 @@ void debugger_t::enter_memory_line(char *buffer)
 void debugger_t::vram_dump(uint32_t address, uint32_t width)
 {
 	address &= VRAM_SIZE_MASK;
-	
+
 	uint32_t temp_address = address;
-	
+
 	terminal->printf(".;%06x.%02x ", temp_address, width);
-	
+
 	for (int i=0; i<width; i++) {
 		terminal->printf("%02x ", system->core->blitter->vram[temp_address & VRAM_SIZE_MASK]);
 		temp_address++;
 		temp_address &= VRAM_SIZE_MASK;
 	}
-	
+
 	temp_address = address;
-	
+
 	terminal->bg_color = bg_acc;
 
 	for (int i=0; i<width; i++) {
@@ -684,7 +684,7 @@ void debugger_t::vram_dump(uint32_t address, uint32_t width)
 	}
 
 	terminal->bg_color = bg;
-	
+
 	for (int i=0; i<4*width; i++) {
 		terminal->cursor_left();
 	}
@@ -693,11 +693,11 @@ void debugger_t::vram_dump(uint32_t address, uint32_t width)
 void debugger_t::vram_binary_dump(uint32_t address, uint32_t width)
 {
 	address &= VRAM_SIZE_MASK;
-	
+
 	uint32_t temp_address = address;
-	
+
 	terminal->printf(".'%06x.%1x ", temp_address, width);
-	
+
 	for (int i=0; i<width; i++) {
 		terminal->printf("%c%c%c%c%c%c%c%c",
 			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x80 ? '1' : '.',
@@ -712,7 +712,7 @@ void debugger_t::vram_binary_dump(uint32_t address, uint32_t width)
 		temp_address++;
 		temp_address &= VRAM_SIZE_MASK;
 	}
-	
+
 	for (int i=0; i<8*width; i++) {
 		terminal->cursor_left();
 	}
@@ -729,7 +729,7 @@ uint32_t debugger_t::disassemble_instruction(uint16_t address)
 	terminal->printf("%s", text_buffer);
 	terminal->fg_color = fg;
 	terminal->bg_color = bg;
-	
+
 	terminal->putchar('\r');
 	for (int i=0; i<7; i++) terminal->cursor_right();
 	return cycles;
@@ -739,11 +739,11 @@ void debugger_t::enter_assembly_line(char *buffer)
 {
 	uint32_t word;
 	uint32_t address;
-	
+
 	uint32_t arguments[5];
-	
+
 	buffer[5] = '\0';
-	
+
 	if (!hex_string_to_int(&buffer[1], &word)) {
 		terminal->putchar('\r');
 		terminal->cursor_right();
@@ -751,10 +751,10 @@ void debugger_t::enter_assembly_line(char *buffer)
 		terminal->puts("????");
 	} else {
 		address = word;
-		
+
 		uint8_t count{0};
 		char old_char;
-		
+
 		for (int i=0; i<5; i++) {
 			old_char = buffer[8 + (2 * i)];
 			buffer[8 + (2 * i)] = '\0';
@@ -788,7 +788,7 @@ void debugger_t::enter_vram_line(char *buffer)
 	uint32_t address;
 	uint32_t columns;
 	uint32_t values[0x10];
-	
+
 	buffer[7] = 0;
 	if (!hex_string_to_int(&buffer[1], &address)) {
 		terminal->putchar('\r');
@@ -834,9 +834,9 @@ void debugger_t::enter_vram_binary_line(char *buffer)
 	uint32_t columns;
 //	bool values[0x40];	// max 8 bytes
 	uint64_t result{0};	// holds max 8 bytes
-	
+
 	bool correct = true;
-	
+
 	buffer[7] = 0;
 	if (!hex_string_to_int(&buffer[1], &address)) {
 		terminal->putchar('\r');

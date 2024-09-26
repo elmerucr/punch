@@ -85,7 +85,6 @@ public:
 	uint32_t get_framebuffer_base_address() { return framebuffer_base_address; }
 
 	void load_bin();
-//	void load_lua(const char *p);
 	void load_squirrel(const char *p);
 };
 
