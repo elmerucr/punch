@@ -154,9 +154,9 @@ void core_t::reset()
 	 */
 	blitter->surface[0xf].w = 320;
 	blitter->surface[0xf].h = 180;
-	blitter->surface[0xf].base_address = 0xff0000;
+	blitter->surface[0xf].base_address = 0xfe0000;
 
-	framebuffer_base_address = 0x00ff0000;
+	framebuffer_base_address = 0x00fe0000;
 
 	commander->reset();
 }

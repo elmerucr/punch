@@ -71,14 +71,13 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 		* ```$e0c/$e0d``` x1 for drawing operations (16 bit signed)
 		* ```$e0e/$e0f``` y1 for drawing operations (16 bit signed)
 	* ```$f00-$fff``` vram peek (see $802/$803 as well)
-* ```$1000-$fbff``` 59kb ram
+* ```$1000-$fbff``` 59kb ram ($fc00 is initial usp)
 * ```$fc00-$ffff``` 1kb kernel + vectors
 
 ### Addressable by Blitter only
 
-* ```$010000-$feffff``` available vram (16.256kb)
-* ```$ff0000-$ffe0ff``` default framebuffer vram (57.600 bytes)
-* ```$ffe100-$ffffff``` available vram (7.936 bytes)
+* ```$010000-$ffffff``` available vram (16.320kb) of which:
+* ```$fe0000-$fee0ff``` default framebuffer vram (57.600 bytes)
 
 ## Building with CMake
 
