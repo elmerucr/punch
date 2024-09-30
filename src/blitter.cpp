@@ -12,7 +12,7 @@
 
 blitter_ic::blitter_ic()
 {
-	vram = new uint8_t[VRAM_SIZE];
+	_vram = new uint8_t[VRAM_SIZE];
 
 	framebuffer = new uint16_t[PIXELS];
 
@@ -70,13 +70,13 @@ blitter_ic::~blitter_ic()
 {
 	delete [] palette;
 	delete [] framebuffer;
-	delete [] vram;
+	delete [] _vram;
 }
 
 void blitter_ic::reset()
 {
 	for (int i = 0; i < VRAM_SIZE; i++) {
-		vram[i] = (i & 0x40) ? 0xfc : 0x00;
+		_vram[i] = (i & 0x40) ? 0xfc : 0x00;
 	}
 }
 
@@ -152,7 +152,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 		case 0b101:
 		case 0b110:
 		case 0b111:
-			memory = vram;
+			memory = _vram;
 			memory_mask = VRAM_SIZE_MASK;
 			start_address = src->base_address;
 			break;
@@ -201,15 +201,15 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 						break;
 					case 0b001: // no pixel, bg on, fore off
 					case 0b011: // no pixel, bg on, fore on
-						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
+						_vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
 						break;
 					case 0b100: // pixel, take it
 					case 0b101: // pixel, bg on, fore off
-						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
+						_vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 						break;
 					case 0b110: // pixel, bg off, fore on
 					case 0b111:
-						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
+						_vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
 						break;
 				}
 
@@ -245,9 +245,9 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 
 	for (int y = 0; y < ts->h; y++) {
 		for (int x = 0; x < ts->w; x++) {
-			source.index = vram[tile_index++ & VRAM_SIZE_MASK];
-			source.color_indices[0] = use_fixed_bg ? ts->color_indices[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
-			source.color_indices[1] = use_fixed_fg ? ts->color_indices[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
+			source.index = _vram[tile_index++ & VRAM_SIZE_MASK];
+			source.color_indices[0] = use_fixed_bg ? ts->color_indices[0] : _vram[bg_color_index++ & VRAM_SIZE_MASK];
+			source.color_indices[1] = use_fixed_fg ? ts->color_indices[1] : _vram[fg_color_index++ & VRAM_SIZE_MASK];
 			pixelcount += blit(&source, dst);
 			source.x += (source.w << dw);
 		}
@@ -266,7 +266,7 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 
 	for (uint32_t i=0; i < pixels; i++) {
 		if (pixel_saldo) {
-			vram[(d->base_address + i) & VRAM_SIZE_MASK] = col;
+			_vram[(d->base_address + i) & VRAM_SIZE_MASK] = col;
 			pixel_saldo--;
 		} else {
 			break;
@@ -278,7 +278,7 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 
 uint32_t blitter_ic::pset(int16_t x0, int16_t y0, uint8_t c, uint8_t d)
 {
-	vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK] = c;
+	_vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK] = c;
 	pixel_saldo++;
 	return 1;
 }
@@ -302,7 +302,7 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 		if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 			if (pixel_saldo) {
 				pixel_saldo--;
-				vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
+				_vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 			}
 		}
 
@@ -323,7 +323,7 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 	if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 		if (pixel_saldo) {
 			   pixel_saldo--;
-			   vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
+			   _vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 		}
 	}
 
@@ -486,6 +486,6 @@ void blitter_ic::io_color_indices_write8(uint16_t address, uint8_t value)
 void blitter_ic::update_framebuffer(uint32_t base_address)
 {
 	for (int i = 0; i < PIXELS; i++) {
-		framebuffer[i] = palette[vram[(base_address + i) & VRAM_SIZE_MASK]];
+		framebuffer[i] = palette[_vram[(base_address + i) & VRAM_SIZE_MASK]];
 	}
 }

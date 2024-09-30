@@ -55,7 +55,7 @@ static SQInteger s_vpoke(HSQUIRRELVM v)
 	SQInteger value;
 	sq_getinteger(v, -2, &address);
 	sq_getinteger(v, -1, &value);
-	sys->core->blitter->vram[address & VRAM_SIZE_MASK] = (uint8_t)value;
+	sys->core->blitter->_vram[address & VRAM_SIZE_MASK] = (uint8_t)value;
 	return 0;
 }
 
@@ -63,7 +63,7 @@ static SQInteger s_vpeek(HSQUIRRELVM v)
 {
 	SQInteger address;
 	sq_getinteger(v, -1, &address);
-	sq_pushinteger(v, sys->core->blitter->vram[address & VRAM_SIZE_MASK]);
+	sq_pushinteger(v, sys->core->blitter->_vram[address & VRAM_SIZE_MASK]);
 	return 1;
 }
 

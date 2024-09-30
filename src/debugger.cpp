@@ -94,7 +94,7 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xc].color_indices[0b10] = 0xfb;
 
 	for (int i=0; i<(2*21*3); i++) {
-		blitter->vram[blitter->surface[0xc].base_address + i] = bruce_data[i];
+		blitter->_vram[blitter->surface[0xc].base_address + i] = bruce_data[i];
 	}
 }
 
@@ -669,7 +669,7 @@ void debugger_t::vram_dump(uint32_t address, uint32_t width)
 	terminal->printf(".;%06x.%02x ", temp_address, width);
 
 	for (int i=0; i<width; i++) {
-		terminal->printf("%02x ", system->core->blitter->vram[temp_address & VRAM_SIZE_MASK]);
+		terminal->printf("%02x ", system->core->blitter->_vram[temp_address & VRAM_SIZE_MASK]);
 		temp_address++;
 		temp_address &= VRAM_SIZE_MASK;
 	}
@@ -679,7 +679,7 @@ void debugger_t::vram_dump(uint32_t address, uint32_t width)
 	terminal->bg_color = bg_acc;
 
 	for (int i=0; i<width; i++) {
-		terminal->bg_color = system->core->blitter->vram[temp_address];
+		terminal->bg_color = system->core->blitter->_vram[temp_address];
 		terminal->putsymbol(ASCII_SPACE);
 		temp_address++;
 		temp_address &= VRAM_SIZE_MASK;
@@ -702,14 +702,14 @@ void debugger_t::vram_binary_dump(uint32_t address, uint32_t width)
 
 	for (int i=0; i<width; i++) {
 		terminal->printf("%c%c%c%c%c%c%c%c",
-			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x80 ? '1' : '.',
-			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x40 ? '1' : '.',
-			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x20 ? '1' : '.',
-			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x10 ? '1' : '.',
-			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x08 ? '1' : '.',
-			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x04 ? '1' : '.',
-			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x02 ? '1' : '.',
-			system->core->blitter->vram[temp_address & VRAM_SIZE_MASK] & 0x01 ? '1' : '.'
+			system->core->blitter->_vram[temp_address & VRAM_SIZE_MASK] & 0x80 ? '1' : '.',
+			system->core->blitter->_vram[temp_address & VRAM_SIZE_MASK] & 0x40 ? '1' : '.',
+			system->core->blitter->_vram[temp_address & VRAM_SIZE_MASK] & 0x20 ? '1' : '.',
+			system->core->blitter->_vram[temp_address & VRAM_SIZE_MASK] & 0x10 ? '1' : '.',
+			system->core->blitter->_vram[temp_address & VRAM_SIZE_MASK] & 0x08 ? '1' : '.',
+			system->core->blitter->_vram[temp_address & VRAM_SIZE_MASK] & 0x04 ? '1' : '.',
+			system->core->blitter->_vram[temp_address & VRAM_SIZE_MASK] & 0x02 ? '1' : '.',
+			system->core->blitter->_vram[temp_address & VRAM_SIZE_MASK] & 0x01 ? '1' : '.'
 		);
 		temp_address++;
 		temp_address &= VRAM_SIZE_MASK;
@@ -818,7 +818,7 @@ void debugger_t::enter_vram_line(char *buffer)
 			}
 			if (correct) {
 				for (int i=0; i<columns; i++) {
-					system->core->blitter->vram[address + i] = values[i];
+					system->core->blitter->_vram[address + i] = values[i];
 				}
 				terminal->printf("\r");
 				vram_dump(address, columns);
@@ -871,7 +871,7 @@ void debugger_t::enter_vram_binary_line(char *buffer)
 		}
 		if (correct) {
 			for (int i=0; i<columns; i++) {
-				system->core->blitter->vram[(address + i) & VRAM_SIZE_MASK] = (result >> ((columns - i - 1) * 8)) & 0xff;
+				system->core->blitter->_vram[(address + i) & VRAM_SIZE_MASK] = (result >> ((columns - i - 1) * 8)) & 0xff;
 			}
 			terminal->putchar('\r');
 			vram_binary_dump(address, columns);

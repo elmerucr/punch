@@ -20,6 +20,7 @@
 
 #define BLITTER_SURFACES		0x04
 #define BLITTER_COLOR_TABLES	0x05
+#define BLITTER_PALETTE			0x06 // + 0x07
 #define CORE_PAGE				0x08
 #define KEYBOARD_PAGE			0x09
 #define	TIMER_PAGE				0x0a
