@@ -147,6 +147,24 @@ public:
 
 	surface_t surface[16];
 
+	inline uint8_t vram_read8(uint32_t address)
+	{
+		if (address & 0b1) {
+			return _vram[address >> 1] >> 8;
+		} else {
+			return _vram[address >> 1] & 0xff;
+		}
+	}
+
+	inline void vram_write8(uint32_t address, uint8_t value)
+	{
+		if (address & 0b1) {
+			_vram[address >> 1] = (_vram[address >> 1] & 0x00ff) | (value << 8);
+		} else {
+			_vram[address >> 1] = (_vram[address >> 1] & 0xff00) | value;
+		}
+	}
+
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
 
