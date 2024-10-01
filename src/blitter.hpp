@@ -39,11 +39,11 @@ struct surface_t {
 	 * Properties related to flags_0 (as encoded inside machine)
 	 *
 	 * 7 6 5 4 3 2 1 0
-	 *     | |     | |
-	 *     | |     | |
-	 *     | |     | +-- Use background color (0 = off, 1 = on)
-	 *     | |     +---- Use foreground color (0 = off, 1 = on)
-	 *     +-+---------- Bits per pixel (0b00 = 1, 0b01 = 2, 0b10 = 4, 0b11 = 8)
+	 *   | | |     | |
+	 *   | | |     | |
+	 *   | | |     | +-- Use background color (0 = off, 1 = on)
+	 *   | | |     +---- Use foreground color (0 = off, 1 = on)
+	 *   +-+-+---------- Bits per pixel (0b000 = 1, 0b001 = 2, 0b010 = 4, 0b011 = 8, 0b1xx = 16)
 	 *
 	 *
 	 * bits 2, 3, 6 and 7: Reserved
@@ -150,18 +150,18 @@ public:
 	inline uint8_t vram_read8(uint32_t address)
 	{
 		if (address & 0b1) {
-			return _vram[address >> 1] >> 8;
-		} else {
 			return _vram[address >> 1] & 0xff;
+		} else {
+			return _vram[address >> 1] >> 8;
 		}
 	}
 
 	inline void vram_write8(uint32_t address, uint8_t value)
 	{
 		if (address & 0b1) {
-			_vram[address >> 1] = (_vram[address >> 1] & 0x00ff) | (value << 8);
-		} else {
 			_vram[address >> 1] = (_vram[address >> 1] & 0xff00) | value;
+		} else {
+			_vram[address >> 1] = (_vram[address >> 1] & 0x00ff) | (value << 8);
 		}
 	}
 
