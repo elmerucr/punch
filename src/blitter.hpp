@@ -178,7 +178,7 @@ public:
 		if (address & 0b1) {
 			return palette[(address & 0x1ff) >> 1] & 0xff;
 		} else {
-			return (palette[(address & 0x1ff) >> 1] & 0xff00) >> 8;
+			return palette[(address & 0x1ff) >> 1] >> 8;
 		}
 	}
 
