@@ -39,11 +39,11 @@ struct surface_t {
 	 * Properties related to flags_0 (as encoded inside machine)
 	 *
 	 * 7 6 5 4 3 2 1 0
-	 *   | | |     | |
-	 *   | | |     | |
-	 *   | | |     | +-- Use background color (0 = off, 1 = on)
-	 *   | | |     +---- Use foreground color (0 = off, 1 = on)
-	 *   +-+-+---------- Bits per pixel (0b000 = 1, 0b001 = 2, 0b010 = 4, 0b011 = 8, 0b1xx = 16)
+	 *     | |     | |
+	 *     | |     | |
+	 *     | |     | +-- Use background color (0 = off, 1 = on)
+	 *     | |     +---- Use foreground color (0 = off, 1 = on)
+	 *     +-+---------- Bits per pixel (0b00 = 1, 0b01 = 2, 0b10 = 4, 0b11 = 8)
 	 *
 	 *
 	 * bits 2, 3, 6 and 7: Reserved
@@ -147,24 +147,6 @@ public:
 
 	surface_t surface[16];
 
-	inline uint8_t vram_read8(uint32_t address)
-	{
-		if (address & 0b1) {
-			return _vram[address >> 1] & 0xff;
-		} else {
-			return _vram[address >> 1] >> 8;
-		}
-	}
-
-	inline void vram_write8(uint32_t address, uint8_t value)
-	{
-		if (address & 0b1) {
-			_vram[address >> 1] = (_vram[address >> 1] & 0xff00) | value;
-		} else {
-			_vram[address >> 1] = (_vram[address >> 1] & 0x00ff) | (value << 8);
-		}
-	}
-
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
 
@@ -174,21 +156,21 @@ public:
 	uint8_t io_color_indices_read8(uint16_t address);
 	void io_color_indices_write8(uint16_t address, uint8_t value);
 
-	uint8_t io_palette_read8(uint16_t address) {
-		if (address & 0b1) {
-			return palette[(address & 0x1ff) >> 1] & 0xff;
-		} else {
-			return palette[(address & 0x1ff) >> 1] >> 8;
-		}
-	}
+	// uint8_t io_palette_read8(uint16_t address) {
+	// 	if (address & 0b1) {
+	// 		return palette[(address & 0x1ff) >> 1] & 0xff;
+	// 	} else {
+	// 		return palette[(address & 0x1ff) >> 1] >> 8;
+	// 	}
+	// }
 
-	void io_palette_write8(uint16_t address, uint8_t value) {
-		if (address & 0b1) {
-			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0xff00) | value;
-		} else {
-			palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0x00ff) | (value << 8);
-		}
-	}
+	// void io_palette_write8(uint16_t address, uint8_t value) {
+	// 	if (address & 0b1) {
+	// 		palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0xff00) | value;
+	// 	} else {
+	// 		palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0x00ff) | (value << 8);
+	// 	}
+	// }
 
 	/*
 	 * All return number of pixels changed
@@ -206,7 +188,7 @@ public:
 
 	void update_framebuffer(uint32_t base_address);
 
-	uint8_t *_vram;
+	uint8_t *vram;
 	uint16_t *framebuffer;
 	uint16_t *palette;
 };

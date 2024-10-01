@@ -57,9 +57,9 @@ uint8_t core_t::read8(uint16_t address)
 			return blitter->io_surfaces_read8(address);
 		case BLITTER_COLOR_TABLES:
 			return blitter->io_color_indices_read8(address);
-		case BLITTER_PALETTE:
-		case BLITTER_PALETTE+1:
-			return blitter->io_palette_read8(address);
+		// case BLITTER_PALETTE:
+		// case BLITTER_PALETTE+1:
+		// 	return blitter->io_palette_read8(address);
 		case CORE_PAGE:
 			return io_read8(address);
 		case KEYBOARD_PAGE:
@@ -74,14 +74,14 @@ uint8_t core_t::read8(uint16_t address)
 		case BLITTER_PAGE:
 			return blitter->io_read8(address & 0xff);
 		case VRAM_PEEK_PAGE:
-			return blitter->_vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK];
+			return blitter->vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK];
 		case ROM_PAGE:
 		case ROM_PAGE+1:
 		case ROM_PAGE+2:
 		case ROM_PAGE+3:
 			return rom[address & 0x3ff];
 		default:
-			return blitter->_vram[address];
+			return blitter->vram[address];
 	}
 }
 
@@ -95,10 +95,10 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case BLITTER_COLOR_TABLES:
 			blitter->io_color_indices_write8(address, value);
 			break;
-		case BLITTER_PALETTE:
-		case BLITTER_PALETTE+1:
-			blitter->io_palette_write8(address, value);
-			break;
+		// case BLITTER_PALETTE:
+		// case BLITTER_PALETTE+1:
+		// 	blitter->io_palette_write8(address, value);
+		// 	break;
 		case CORE_PAGE:
 			io_write8(address, value);
 			break;
@@ -119,10 +119,10 @@ void core_t::write8(uint16_t address, uint8_t value) {
 			blitter->io_write8(address & 0xff, value);
 			break;
 		case VRAM_PEEK_PAGE:
-			blitter->_vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK] = value;
+			blitter->vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK] = value;
 			break;
 		default:
-			blitter->_vram[address] = value;
+			blitter->vram[address] = value;
 			break;
 	}
 }
@@ -152,11 +152,11 @@ void core_t::reset()
 	/*
 	 * Default: dest screen surface $f
 	 */
-	blitter->surface[0xf].w = 320;
-	blitter->surface[0xf].h = 180;
-	blitter->surface[0xf].base_address = 0xfe0000;
+	blitter->surface[0xf].w = MAX_PIXELS_PER_SCANLINE;
+	blitter->surface[0xf].h = MAX_SCANLINES;
+	blitter->surface[0xf].base_address = FRAMEBUFFER_ADDRESS;
 
-	framebuffer_base_address = 0x00fe0000;
+	framebuffer_base_address = FRAMEBUFFER_ADDRESS;
 
 	commander->reset();
 }

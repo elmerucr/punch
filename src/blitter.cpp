@@ -10,64 +10,9 @@
 #include <cstdio>
 #include <cmath>
 
-/*
- * The alpha_blend lambda expression takes the current color (destination, which is
- * also the destination) and the color that must be blended (source). It
- * returns the value of the blend which, normally, will be written to the
- * destination.
- * At first, this function seemed to drag down total emulation speed. But, with
- * optimizations (minimum -O2) turned on, it is ok.
- *
- * The idea to use a function (and not a lookup table) comes from this website:
- * https://stackoverflow.com/questions/30849261/alpha-blending-using-table-lookup-is-not-as-fast-as-expected
- * Generally, lookup tables mess around with the cpu cache and don't speed up.
- *
- * In three steps a derivation (source is color to apply, destination
- * is the original color, a is alpha value):
- * (1) ((source * a) + (destination * (COLOR_MAX - a))) / COLOR_MAX
- * (2) ((source * a) - (destination * a) + (destination * COLOR_MAX)) / COLOR_MAX
- * (3) destination + (((source - destination) * a) / COLOR_MAX)
- *
- * Update 2020-06-10, check:
- * https://stackoverflow.com/questions/12011081/alpha-blending-2-rgba-colors-in-c
- * Calculate inv_alpha, then makes use of a bit shift, no divisions anymore.
- * (1) isolate alpha value (0 - max) and add 1
- * (2) calculate inverse alpha by taking (max+1) - alpha
- * (3) calculate the new individual channels:
- *      new = (alpha * source) + (inv_alpha * dest)
- * (4) bitshift the result to the right (normalize)
- * Speeds up a little.
- *
- * Update 2021-03-04, adapted for ARGB444 format
- * Update 2023-02-19, rewritten as lambda expression
- */
-
-auto alpha_blend = [](uint16_t *destination, uint16_t *source)
-{
-	uint16_t a_dest = (*destination & 0xf000) >> 12;
-	uint16_t r_dest = (*destination & 0x0f00) >>  8;
-	uint16_t g_dest = (*destination & 0x00f0) >>  4;
-	uint16_t b_dest = (*destination & 0x000f);
-
-	uint16_t a_src = ((*source & 0xf000) >> 12) + 1;
-	uint16_t r_src =  (*source & 0x0f00) >> 8;
-	uint16_t g_src =  (*source & 0x00f0) >> 4;
-	uint16_t b_src =  (*source & 0x000f);
-
-	uint16_t a_src_inv = 17 - a_src;
-
-	//a_dest = (a_dest >= (a_src-1)) ? a_dest : (a_src-1);
-	a_dest = (256-((16-(a_src-1))*(16-a_dest))) >> 4;
-	r_dest = ((a_src * r_src) + (a_src_inv * r_dest)) >> 4;
-	g_dest = ((a_src * g_src) + (a_src_inv * g_dest)) >> 4;
-	b_dest = ((a_src * b_src) + (a_src_inv * b_dest)) >> 4;
-
-	*destination = (a_dest << 12) | (r_dest << 8) | (g_dest << 4) | b_dest;
-};
-
 blitter_ic::blitter_ic()
 {
-	_vram = new uint8_t[VRAM_SIZE];
+	vram = new uint8_t[VRAM_SIZE];
 
 	framebuffer = new uint16_t[PIXELS];
 
@@ -91,8 +36,10 @@ blitter_ic::blitter_ic()
 	 * A palette using RRGGBBII system. R, G and B use two bits and have
 	 * 4 levels each (0.00, 0.33, 0.66 and 1.00 of max). On top of that,
 	 * the intensity level (II) is shared between all channels.
+	 *
 	 * Final color levels are RR * II, GG * II and BB * II.
-	 * II is not linear, see below. This systems results in a nice palette
+	 *
+	 * II is not linear, see below. This system results in a nice palette
 	 * with many dark shades as well to choose from (compared to RGB332).
 	 *
 	 * Inspired by: https://www.bigmessowires.com/2008/07/04/video-palette-setup/
@@ -123,13 +70,13 @@ blitter_ic::~blitter_ic()
 {
 	delete [] palette;
 	delete [] framebuffer;
-	delete [] _vram;
+	delete [] vram;
 }
 
 void blitter_ic::reset()
 {
 	for (int i = 0; i < VRAM_SIZE; i++) {
-		_vram[i] = (i & 0x40) ? 0xfc : 0x00;
+		vram[i] = (i & 0x40) ? 0xfc : 0x00;
 	}
 }
 
@@ -205,7 +152,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 		case 0b101:
 		case 0b110:
 		case 0b111:
-			memory = _vram;
+			memory = vram;
 			memory_mask = VRAM_SIZE_MASK;
 			start_address = src->base_address;
 			break;
@@ -254,15 +201,15 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 						break;
 					case 0b001: // no pixel, bg on, fore off
 					case 0b011: // no pixel, bg on, fore on
-						_vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
+						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
 						break;
 					case 0b100: // pixel, take it
 					case 0b101: // pixel, bg on, fore off
-						_vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
+						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 						break;
 					case 0b110: // pixel, bg off, fore on
 					case 0b111:
-						_vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
+						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
 						break;
 				}
 
@@ -298,9 +245,9 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 
 	for (int y = 0; y < ts->h; y++) {
 		for (int x = 0; x < ts->w; x++) {
-			source.index = _vram[tile_index++ & VRAM_SIZE_MASK];
-			source.color_indices[0] = use_fixed_bg ? ts->color_indices[0] : _vram[bg_color_index++ & VRAM_SIZE_MASK];
-			source.color_indices[1] = use_fixed_fg ? ts->color_indices[1] : _vram[fg_color_index++ & VRAM_SIZE_MASK];
+			source.index = vram[tile_index++ & VRAM_SIZE_MASK];
+			source.color_indices[0] = use_fixed_bg ? ts->color_indices[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
+			source.color_indices[1] = use_fixed_fg ? ts->color_indices[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
 			pixelcount += blit(&source, dst);
 			source.x += (source.w << dw);
 		}
@@ -319,7 +266,7 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 
 	for (uint32_t i=0; i < pixels; i++) {
 		if (pixel_saldo) {
-			_vram[(d->base_address + i) & VRAM_SIZE_MASK] = col;
+			vram[(d->base_address + i) & VRAM_SIZE_MASK] = col;
 			pixel_saldo--;
 		} else {
 			break;
@@ -331,7 +278,7 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 
 uint32_t blitter_ic::pset(int16_t x0, int16_t y0, uint8_t c, uint8_t d)
 {
-	_vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK] = c;
+	vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK] = c;
 	pixel_saldo++;
 	return 1;
 }
@@ -355,7 +302,7 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 		if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 			if (pixel_saldo) {
 				pixel_saldo--;
-				_vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
+				vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 			}
 		}
 
@@ -376,7 +323,7 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 	if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 		if (pixel_saldo) {
 			   pixel_saldo--;
-			   _vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
+			   vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 		}
 	}
 
@@ -539,6 +486,6 @@ void blitter_ic::io_color_indices_write8(uint16_t address, uint8_t value)
 void blitter_ic::update_framebuffer(uint32_t base_address)
 {
 	for (int i = 0; i < PIXELS; i++) {
-		framebuffer[i] = palette[_vram[(base_address + i) & VRAM_SIZE_MASK]];
+		framebuffer[i] = palette[vram[(base_address + i) & VRAM_SIZE_MASK]];
 	}
 }
