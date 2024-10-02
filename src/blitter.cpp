@@ -65,18 +65,32 @@ blitter_ic::blitter_ic()
 		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
 	}
 
+	/*
+	 * Create alpha lookup table
+	 */
 	alpha_lookup_table = new uint8_t[65536];
 
+	/*
+	 * And fill it up with decent values
+	 */
 	for (int i=0; i<65536; i++) {
+		/*
+		 * Extract the two colors from index
+		 */
 		uint8_t col1 = (i & 0xff00) >> 8;
 		uint8_t col2 = (i & 0x00ff);
 
+		/*
+		 * Calculate the "average color" based on 4 bit r, g and b components
+		 */
 		uint8_t r = (((palette[col1] & 0x0f00) >> 8) + ((palette[col2] & 0x0f00) >> 8)) >> 1;
 		uint8_t g = (((palette[col1] & 0x00f0) >> 4) + ((palette[col2] & 0x00f0) >> 4)) >> 1;
 		uint8_t b = (((palette[col1] & 0x000f) >> 0) + ((palette[col2] & 0x000f) >> 0)) >> 1;
 
-		uint16_t color = 0xf000 | (r << 8) | (g << 4) | b;
-
+		/*
+		 * Find best match of this average color in the punch palette.
+		 * Initiate distance to maximum possible. And match to black.
+		 */
 		int32_t distance = 3 * (15 * 15);
 		uint8_t match = 0;
 

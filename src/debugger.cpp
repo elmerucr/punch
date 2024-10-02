@@ -174,7 +174,7 @@ void debugger_t::redraw()
 	// end Bruce
 
 	// water block :-)
-	//blitter->solid_rectangle(30, 167, 200, 179, 0x5e, 0xf, true);
+	blitter->solid_rectangle(30, 167, 200, 179, 0x5e, 0xf, true);
 }
 
 void debugger_t::run()
