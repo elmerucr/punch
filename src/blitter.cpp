@@ -64,10 +64,41 @@ blitter_ic::blitter_ic()
 
 		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
 	}
+
+	alpha_lookup_table = new uint8_t[65536];
+
+	for (int i=0; i<65536; i++) {
+		uint8_t col1 = (i & 0xff00) >> 8;
+		uint8_t col2 = (i & 0x00ff);
+
+		uint8_t r = (((palette[col1] & 0x0f00) >> 8) + ((palette[col2] & 0x0f00) >> 8)) >> 1;
+		uint8_t g = (((palette[col1] & 0x00f0) >> 4) + ((palette[col2] & 0x00f0) >> 4)) >> 1;
+		uint8_t b = (((palette[col1] & 0x000f) >> 0) + ((palette[col2] & 0x000f) >> 0)) >> 1;
+
+		uint16_t color = 0xf000 | (r << 8) | (g << 4) | b;
+
+		int32_t distance = 3 * (15 * 15);
+		uint8_t match = 0;
+
+		uint16_t t;
+
+		for (t=0; t < 256; t++) {
+			int32_t d =
+				(((palette[t] & 0xf00) >> 8) - r) * (((palette[t] & 0xf00) >> 8) - r) +
+				(((palette[t] & 0x0f0) >> 4) - g) * (((palette[t] & 0x0f0) >> 4) - g) +
+				(((palette[t] & 0x00f) >> 0) - b) * (((palette[t] & 0x00f) >> 0) - b) ;
+			if (d < distance) {
+				distance = d;
+				match = t;
+			}
+        }
+		alpha_lookup_table[i] = match;
+	}
 }
 
 blitter_ic::~blitter_ic()
 {
+	delete [] alpha_lookup_table;
 	delete [] palette;
 	delete [] framebuffer;
 	delete [] vram;
@@ -83,15 +114,15 @@ void blitter_ic::reset()
 /*
  * Short indexed version. Returns number of pixels written.
  */
-uint32_t blitter_ic::blit(const uint8_t s, const uint8_t d)
+uint32_t blitter_ic::blit(const uint8_t s, const uint8_t d, bool alpha)
 {
-	return blit(&surface[s & 0b1111], &surface[d & 0b1111]);
+	return blit(&surface[s & 0b1111], &surface[d & 0b1111], alpha);
 }
 
 /*
  * Returns number of pixels written.
  */
-uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
+uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest, bool alpha)
 {
 	uint32_t old_pixel_saldo = pixel_saldo;
 
@@ -195,21 +226,29 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 
 				if (color_modes[color_mode].color_lookup) px = src->color_indices[px];
 
+				uint8_t *pixel = &vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK];
+
 				switch ((src->flags_0 & 0b011) | (px_present ? 0b100 : 0b000)) {
 					case 0b000: // no pixel, bg off, fore off, do nothing
 					case 0b010: // no pixel, bg off, fore on, do nothing
 						break;
 					case 0b001: // no pixel, bg on, fore off
 					case 0b011: // no pixel, bg on, fore on
-						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
+						*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | src->color_indices[0]] : src->color_indices[0];
+						//*pixel = src->color_indices[0];
+						//vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
 						break;
 					case 0b100: // pixel, take it
 					case 0b101: // pixel, bg on, fore off
-						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
+						*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | px] : px;
+						//*pixel = px;
+						//vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 						break;
 					case 0b110: // pixel, bg off, fore on
 					case 0b111:
-						vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
+						//*pixel = src->color_indices[1];
+						*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | src->color_indices[1]] : src->color_indices[1];
+						//vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
 						break;
 				}
 
@@ -221,7 +260,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	return old_pixel_saldo - pixel_saldo;
 }
 
-uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _ts)
+uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _ts, bool alpha)
 {
 	const surface_t *src = &surface[s & 0b1111];
 	surface_t *dst = &surface[d & 0b1111];
@@ -248,7 +287,7 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 			source.index = vram[tile_index++ & VRAM_SIZE_MASK];
 			source.color_indices[0] = use_fixed_bg ? ts->color_indices[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
 			source.color_indices[1] = use_fixed_fg ? ts->color_indices[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
-			pixelcount += blit(&source, dst);
+			pixelcount += blit(&source, dst, alpha);
 			source.x += (source.w << dw);
 		}
 		source.x = ts->x;
@@ -258,7 +297,7 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 	return pixelcount;
 }
 
-uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
+uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest, bool alpha)
 {
 	surface_t *d = &surface[dest & 0xf];
 	uint32_t pixels = d->w * d->h;
@@ -266,7 +305,9 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 
 	for (uint32_t i=0; i < pixels; i++) {
 		if (pixel_saldo) {
-			vram[(d->base_address + i) & VRAM_SIZE_MASK] = col;
+			uint8_t *pixel = &vram[(d->base_address + i) & VRAM_SIZE_MASK];
+			*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | col] : col;
+			//vram[(d->base_address + i) & VRAM_SIZE_MASK] = alpha ? alpha_lookup_table[(vram[(d->base_address + i) & VRAM_SIZE_MASK] << 8) | col] : col;
 			pixel_saldo--;
 		} else {
 			break;
@@ -276,14 +317,16 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 	return old_pixel_saldo - pixel_saldo;
 }
 
-uint32_t blitter_ic::pset(int16_t x0, int16_t y0, uint8_t c, uint8_t d)
+uint32_t blitter_ic::pset(int16_t x0, int16_t y0, uint8_t c, uint8_t d, bool alpha)
 {
-	vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK] = c;
+	uint8_t *pixel = & vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK];
+	*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | c] : c;
+	//vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK] = c;
 	pixel_saldo++;
 	return 1;
 }
 
-uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
+uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d, bool alpha)
 {
 	surface_t *s = &surface[d & 0b1111];
 
@@ -302,7 +345,9 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 		if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 			if (pixel_saldo) {
 				pixel_saldo--;
-				vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
+				uint8_t *pixel = &vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK];
+				*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | c] : c;
+				//vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 			}
 		}
 
@@ -322,27 +367,29 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 	 */
 	if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 		if (pixel_saldo) {
-			   pixel_saldo--;
-			   vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
+			pixel_saldo--;
+			uint8_t *pixel = &vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK];
+			*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | c] : c;
+			//vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 		}
 	}
 
 	return  old_pixel_saldo - pixel_saldo;
 }
 
-uint32_t blitter_ic::rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
+uint32_t blitter_ic::rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d, bool alpha)
 {
 	uint32_t pixels{0};
 
-	pixels += line(x0, y0, x1, y0, c, d);
-	pixels += line(x1, y0, x1, y1, c, d);
-	pixels += line(x1, y1, x0, y1, c, d);
-	pixels += line(x0, y1, x0, y0, c, d);
+	pixels += line(x0, y0, x1, y0, c, d, alpha);
+	pixels += line(x1, y0, x1, y1, c, d, alpha);
+	pixels += line(x1, y1, x0, y1, c, d, alpha);
+	pixels += line(x0, y1, x0, y0, c, d, alpha);
 
 	return pixels;
 }
 
-uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
+uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d, bool alpha)
 {
 	uint32_t pixels{0};
 
@@ -351,7 +398,7 @@ uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t
 	if (y0 > y1) swap(y0, y1);
 
 	for (int16_t y=y0; y<=y1; y++) {
-		pixels += line(x0, y, x1, y, c, d);
+		pixels += line(x0, y, x1, y, c, d, alpha);
 	}
 
 	return pixels;
@@ -392,15 +439,19 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 	switch (address & 0xff) {
 		case 0x01:
 			// control register
-			switch (value) {
-				case 0b00000001: blit(src_surface, dst_surface); break;
-				case 0b00000010: tile_blit(src_surface, dst_surface, tile_surface); break;
-				case 0b00000100: clear_surface(draw_color, dst_surface); break;
-				case 0b00001000: pset(x0, y0, draw_color, dst_surface); break;
-				case 0b00010000: line(x0, y0, x1, y1, draw_color, dst_surface); break;
-				case 0b00100000: rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
-				case 0b01000000: solid_rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
+			{
+			bool alpha = value & 0b10000000 ? true : false;
+
+			switch (value & 0b1111111) {
+				case 0b0000001: blit(src_surface, dst_surface, alpha); break;
+				case 0b0000010: tile_blit(src_surface, dst_surface, tile_surface, alpha); break;
+				case 0b0000100: clear_surface(draw_color, dst_surface, alpha); break;
+				case 0b0001000: pset(x0, y0, draw_color, dst_surface, alpha); break;
+				case 0b0010000: line(x0, y0, x1, y1, draw_color, dst_surface, alpha); break;
+				case 0b0100000: rectangle(x0, y0, x1, y1, draw_color, dst_surface, alpha); break;
+				case 0b1000000: solid_rectangle(x0, y0, x1, y1, draw_color, dst_surface, alpha); break;
 				default: break;
+			}
 			}
 			break;
 		case 0x02: src_surface = value & 0b1111; break;

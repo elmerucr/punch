@@ -126,7 +126,7 @@ void system_t::run()
 			core->sound->run(audio_cycles - sound_cycle_saldo);
 		}
 
-		core->blitter->update_framebuffer(core->get_framebuffer_base_address());
+		core->blitter->update_framebuffer(FRAMEBUFFER_ADDRESS);
 
 		host->update_core_texture(core->blitter->framebuffer);
 

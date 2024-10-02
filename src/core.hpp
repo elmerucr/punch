@@ -50,7 +50,7 @@ private:
 	bool generate_interrupts_load_bin{false};
 	bool generate_interrupts_load_squirrel{false};
 
-	uint32_t framebuffer_base_address{0};
+	//uint32_t framebuffer_base_address{0};
 	uint32_t vram_peek{0};
 public:
 	core_t(system_t *s);
@@ -83,7 +83,7 @@ public:
 	uint8_t io_read8(uint16_t address);
 	void io_write8(uint16_t address, uint8_t value);
 
-	uint32_t get_framebuffer_base_address() { return framebuffer_base_address; }
+	//uint32_t get_framebuffer_base_address() { return framebuffer_base_address; }
 
 	void load_bin();
 	void load_squirrel(const char *p);

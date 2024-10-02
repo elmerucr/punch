@@ -130,7 +130,7 @@ void debugger_t::redraw()
 {
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 	//blitter->clear_surface(PUNCH_BLACK, 0xf);	// no need, everything is redrawn already
-	blitter->tile_blit(0xe, 0xf, 0xd);
+	blitter->tile_blit(0xe, 0xf, 0xd, false);
 
 	// Bruce
 	static int state = 0;
@@ -169,8 +169,12 @@ void debugger_t::redraw()
 		change_direction = true;
 	}
 
-	blitter->blit(0xc, 0xf);
+	// draw with transparency
+	blitter->blit(0xc, 0xf, false);
 	// end Bruce
+
+	// water block :-)
+	//blitter->solid_rectangle(30, 167, 200, 179, 0x5e, 0xf, true);
 }
 
 void debugger_t::run()

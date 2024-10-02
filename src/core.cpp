@@ -156,7 +156,7 @@ void core_t::reset()
 	blitter->surface[0xf].h = MAX_SCANLINES;
 	blitter->surface[0xf].base_address = FRAMEBUFFER_ADDRESS;
 
-	framebuffer_base_address = FRAMEBUFFER_ADDRESS;
+	//framebuffer_base_address = FRAMEBUFFER_ADDRESS;
 
 	commander->reset();
 }
@@ -205,14 +205,14 @@ uint8_t core_t::io_read8(uint16_t address)
 				(generate_interrupts_frame_done    ? 0b00000001 : 0b00000000) |
 				(generate_interrupts_load_bin      ? 0b00000010 : 0b00000000) |
 				(generate_interrupts_load_squirrel ? 0b00001000 : 0b00000000) ;
-		case 0x04:
-			return 0x00;
-		case 0x05:
-			return (framebuffer_base_address & 0xff0000) >> 16;
-		case 0x06:
-			return (framebuffer_base_address & 0x00ff00) >> 8;
-		case 0x07:
-			return framebuffer_base_address & 0xff;
+		// case 0x04:
+		// 	return 0x00;
+		// case 0x05:
+		// 	return (framebuffer_base_address & 0xff0000) >> 16;
+		// case 0x06:
+		// 	return (framebuffer_base_address & 0x00ff00) >> 8;
+		// case 0x07:
+		// 	return framebuffer_base_address & 0xff;
 		case 0x08:
 			return 0x00;
 		case 0x09:
@@ -246,17 +246,17 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 			generate_interrupts_load_bin      = (value & 0b00000010) ? true : false;
 			generate_interrupts_load_squirrel = (value & 0b00001000) ? true : false;
 			break;
-		case 0x04:
-			break;
-		case 0x05:
-			framebuffer_base_address = (framebuffer_base_address & 0x00ffff) | (value << 16);
-			break;
-		case 0x06:
-			framebuffer_base_address = (framebuffer_base_address & 0xff00ff) | (value << 8);
-			break;
-		case 0x07:
-			framebuffer_base_address = (framebuffer_base_address & 0xffff00) | value;
-			break;
+		// case 0x04:
+		// 	break;
+		// case 0x05:
+		// 	framebuffer_base_address = (framebuffer_base_address & 0x00ffff) | (value << 16);
+		// 	break;
+		// case 0x06:
+		// 	framebuffer_base_address = (framebuffer_base_address & 0xff00ff) | (value << 8);
+		// 	break;
+		// case 0x07:
+		// 	framebuffer_base_address = (framebuffer_base_address & 0xffff00) | value;
+		// 	break;
 		case 0x08:
 			// do nothing
 			break;
