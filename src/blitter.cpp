@@ -548,9 +548,9 @@ void blitter_ic::io_color_indices_write8(uint16_t address, uint8_t value)
 	surface[no].color_indices[address & 0xf] = value;
 }
 
-void blitter_ic::update_framebuffer(uint32_t base_address)
+void blitter_ic::update_framebuffer()
 {
 	for (int i = 0; i < PIXELS; i++) {
-		framebuffer[i] = palette[vram[(base_address + i) & VRAM_SIZE_MASK]];
+		framebuffer[i] = palette[vram[(FRAMEBUFFER_ADDRESS + i) & VRAM_SIZE_MASK]];
 	}
 }

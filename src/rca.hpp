@@ -10,7 +10,6 @@
  *
  * 2012-01-21 c version
  * 2013-11-11 c++ version
- *
  */
 
 #ifndef RCA_HPP

@@ -186,8 +186,7 @@ public:
 	void set_pixel_saldo(uint32_t s) { pixel_saldo = s; }
 	uint32_t get_pixel_saldo() { return pixel_saldo; }
 
-	// TODO: remove base_address?
-	void update_framebuffer(uint32_t base_address);
+	void update_framebuffer();
 
 	uint8_t *vram;
 	uint16_t *framebuffer;

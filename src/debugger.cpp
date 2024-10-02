@@ -173,8 +173,16 @@ void debugger_t::redraw()
 	blitter->blit(0xc, 0xf, false);
 	// end Bruce
 
-	// water block :-)
-	blitter->solid_rectangle(30, 167, 200, 179, 0x5e, 0xf, true);
+	// water :-)
+	static uint8_t phase = 0;
+	int amplitude = 4 * sin(phase * (2 * M_PI) / 255);
+
+	for (int i=0; i<80; i++) {
+		int y = amplitude * sin(i * (2 * M_PI / 7));
+		blitter->solid_rectangle(4 * i, 170 - y, (4 * i) + 3, 179, 0x5e, 0xf, true);
+	}
+
+	phase += 2;
 }
 
 void debugger_t::run()
@@ -314,7 +322,7 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "x") == 0) {
 		terminal->printf("\nexit punch (y/n)");
 		redraw();
-		blitter->update_framebuffer(blitter->surface[0xf].base_address);
+		blitter->update_framebuffer();
 		system->host->update_debugger_texture(blitter->framebuffer);
 		system->host->update_screen();
 		if (system->host->events_yes_no()) {
@@ -469,7 +477,7 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
 		redraw();
-		blitter->update_framebuffer(blitter->surface[0xf].base_address);
+		blitter->update_framebuffer();
 		system->host->update_debugger_texture(blitter->framebuffer);
 		system->host->update_screen();
 		if (system->host->events_yes_no()) {
