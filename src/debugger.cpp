@@ -132,57 +132,57 @@ void debugger_t::redraw()
 	//blitter->clear_surface(PUNCH_BLACK, 0xf);	// no need, everything is redrawn already
 	blitter->tile_blit(0xe, 0xf, 0xd, false);
 
-	// Bruce
+	// Bruce Lee
 	static int state = 0;
 	static int wait = 100;
 	static bool right = true;
 	static bool change_direction = true;
 
-	right ? blitter->surface[0xc].flags_1 &= 0b11101111 : blitter->surface[0xc].flags_1 |= 0b00010000;
+	if (true) {
+		right ? blitter->surface[0xc].flags_1 &= 0b11101111 : blitter->surface[0xc].flags_1 |= 0b00010000;
 
-	if (wait < 200) {
-		blitter->surface[0xc].index = 0;
-		state = 0;
-	} else {
-		if (change_direction) {
-			if (bruce_rand.byte() < 128) right = true; else right = false;
-			change_direction = false;
-		}
-
-		if (state > 4) {
-			blitter->surface[0xc].index = 1;
+		if (wait < 200) {
+			blitter->surface[0xc].index = 0;
+			state = 0;
 		} else {
-			blitter->surface[0xc].index = 2;
+			if (change_direction) {
+				if (bruce_rand.byte() < 128) right = true; else right = false;
+				change_direction = false;
+			}
+
+			if (state > 4) {
+				blitter->surface[0xc].index = 1;
+			} else {
+				blitter->surface[0xc].index = 2;
+			}
+
+			blitter->surface[0xc].x += 2 * (right ? 1 : -1);
+			if (blitter->surface[0xc].x > 340) {
+				blitter->surface[0xc].x = -20;
+			} else if (blitter->surface[0xc].x < -20) {
+				blitter->surface[0xc].x = 340;
+			}
+
+			state++; if (state == 8) state = 0;
 		}
-
-		blitter->surface[0xc].x += 2 * (right ? 1 : -1);
-		if (blitter->surface[0xc].x > 340) {
-			blitter->surface[0xc].x = -20;
-		} else if (blitter->surface[0xc].x < -20) {
-			blitter->surface[0xc].x = 340;
+		wait++; if (wait > 300) {
+			wait = 0;
+			change_direction = true;
 		}
-
-		state++; if (state == 8) state = 0;
+		blitter->blit(0xc, 0xf, false);
 	}
-	wait++; if (wait > 300) {
-		wait = 0;
-		change_direction = true;
-	}
-
-	// draw with transparency
-	blitter->blit(0xc, 0xf, false);
-	// end Bruce
+	// end Bruce Lee
 
 	// water :-)
 	static uint8_t phase = 0;
-	int amplitude = 4 * sin(phase * (2 * M_PI) / 255);
 
-	for (int i=0; i<80; i++) {
-		int y = amplitude * sin(i * (2 * M_PI / 7));
-		blitter->solid_rectangle(4 * i, 170 - y, (4 * i) + 3, 179, 0x5e, 0xf, true);
+	if (true) {
+		for (int i=0; i<80; i++) {
+			int y = 8 * sin(((float)(i+phase)/80) * 2 * M_PI);
+			blitter->solid_rectangle(4 * i, 172 - y, (4 * i) + 3, 179, 0x5e, 0xf, true);
+		}
+		phase++; if (phase>80) phase = 0;
 	}
-
-	phase += 2;
 }
 
 void debugger_t::run()

@@ -106,15 +106,15 @@ private:
 	void audio_init();
 	void audio_start();
 	void audio_stop();
-	
+
 	/*
 	 * Video related
 	 */
 	uint8_t video_scaling_max;
 	uint8_t video_scaling;
-	uint8_t video_scanlines_alpha{64};	// 0, 32, 64, 96, 128, 160, 192, 224, 255
-	uint8_t video_hor_blur{0};
-	bool shadowmask_active{true};
+	uint8_t video_scanlines_alpha{96};	// 0, 32, 64, 96, 128, 160, 192, 224, 255
+	uint8_t video_hor_blur{1};
+	bool shadowmask_active{false};
 
 	bool video_fullscreen{false};
 	bool video_linear_filtering{false};
@@ -124,7 +124,7 @@ private:
 	SDL_Texture *core_texture{nullptr};
 	SDL_Texture *debugger_texture{nullptr};
 	SDL_Texture *scanlines_texture{nullptr};
-	
+
 	SDL_Texture *shadowmask_texture{nullptr};
 
 	int window_width;
@@ -137,29 +137,29 @@ private:
 
 	void video_init();
 	void video_stop();
-	
+
 	/*
 	 * events related
 	 */
 	const uint8_t *sdl_keyboard_state;
-	
+
 	char current_dir[512];
 	char *home;
-	
+
 public:
 	host_t(system_t *s);
 	~host_t();
-	
+
 	system_t *system;
-	
+
 	char *sdl_preference_path;
-	
+
 //	/*
 //	 * Audio related
 //	 */
 	inline void queue_audio(void *buffer, unsigned size) { SDL_QueueAudio(audio_device, buffer, size); }
 	inline unsigned int get_queued_audio_size_bytes() { return SDL_GetQueuedAudioSize(audio_device); }
-//	
+//
 	/*
 	 * Video related
 	 */
@@ -174,7 +174,7 @@ public:
 	void video_change_hor_blur();
 	void video_toggle_shadowmask();
 	void video_toggle_linear_filtering();
-//    
+//
 //	// getters setters
 //	uint16_t current_window_width() { return video_window_sizes[current_window_size].x; }
 //	uint16_t current_window_height() { return video_window_sizes[current_window_size].y; }
@@ -182,7 +182,7 @@ public:
 	inline bool vsync_disabled() { return !vsync; }
 	inline uint8_t get_bytes_per_sample() { return audio_bytes_per_sample; }
 	inline double get_bytes_per_ms() { return audio_bytes_per_ms; }
-//	
+//
 //	//inline uint8_t get_scanlines_alpha() { return video_scanlines_alpha; }
 //	//inline void set_scanline_alpha(uint8_t a) { video_scanlines_alpha = a; }
 //	//inline bool is_using_vm_linear_filtering() { return linear_filtering; }
@@ -190,7 +190,7 @@ public:
 //	inline bool is_using_scanlines_linear_filtering() { return scanlines_linear_filtering; }
 //	//inline bool is_fullscreen() { return fullscreen; }
 //	inline void set_hud(hud_t *h) { hud = h; }
-	
+
 	/*
 	 * Events related
 	 */
