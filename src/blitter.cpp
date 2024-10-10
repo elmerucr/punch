@@ -52,8 +52,8 @@ blitter_ic::blitter_ic()
 		uint16_t factor = 0;
 
 		switch (s) {
-			case 0b00: factor = 4; break;
-			case 0b01: factor = 7; break;
+			case 0b00: factor = 5; break;
+			case 0b01: factor = 8; break;
 			case 0b10: factor = 12; break;
 			case 0b11: factor = 15; break;
 		}

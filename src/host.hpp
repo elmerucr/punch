@@ -125,6 +125,8 @@ private:
 	SDL_Texture *debugger_texture{nullptr};
 	SDL_Texture *scanlines_texture{nullptr};
 
+	uint8_t viewer_alpha{0};
+
 	SDL_Texture *shadowmask_texture{nullptr};
 
 	int window_width;
@@ -174,6 +176,16 @@ public:
 	void video_change_hor_blur();
 	void video_toggle_shadowmask();
 	void video_toggle_linear_filtering();
+	void video_toggle_debugger_viewer() {
+		switch (viewer_alpha) {
+			case 0:
+				viewer_alpha = 128; break;
+			case 128:
+				viewer_alpha = 255; break;
+			default:
+				viewer_alpha = 0; break;
+		}
+	}
 //
 //	// getters setters
 //	uint16_t current_window_width() { return video_window_sizes[current_window_size].x; }

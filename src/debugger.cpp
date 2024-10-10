@@ -64,10 +64,11 @@ debugger_t::debugger_t(system_t *s)
 
 	/* character screen in slot 0xd */
 	blitter->surface[0xd].w = MAX_PIXELS_PER_SCANLINE / blitter->surface[0xe].w;
-	blitter->surface[0xd].h = MAX_SCANLINES / blitter->surface[0xe].h;
+	// blitter->surface[0xd].h = MAX_SCANLINES / blitter->surface[0xe].h;
+	blitter->surface[0xd].h = 30;
 	blitter->surface[0xd].base_address = 0x010000;
 	blitter->surface[0xd].x = 0;
-	blitter->surface[0xd].y = 0;
+	blitter->surface[0xd].y = 10;
 	blitter->surface[0xd].flags_0 = 0b00;
 
 	terminal = new terminal_t(system, &blitter->surface[0xd], blitter);
@@ -88,7 +89,7 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xc].w = 8;
 	blitter->surface[0xc].h = 21;
 	blitter->surface[0xc].x = 30;
-	blitter->surface[0xc].y = 159;
+	blitter->surface[0xc].y = 169;
 	blitter->surface[0xc].color_indices[0b00] = 0xc7;
 	blitter->surface[0xc].color_indices[0b01] = 0x54;
 	blitter->surface[0xc].color_indices[0b10] = 0xfb;
@@ -131,6 +132,8 @@ void debugger_t::redraw()
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 	//blitter->clear_surface(PUNCH_BLACK, 0xf);	// no need, everything is redrawn already
 	blitter->tile_blit(0xe, 0xf, 0xd, false);
+	blitter->solid_rectangle(0, 0, 319, 9, fg, 0xf, false);
+	blitter->solid_rectangle(0, 190, 319, 199, fg, 0xf, false);
 
 	// Bruce Lee
 	static int state = 0;
@@ -174,15 +177,15 @@ void debugger_t::redraw()
 	// end Bruce Lee
 
 	// water :-)
-	static uint8_t phase = 0;
+	// static uint8_t phase = 0;
 
-	if (true) {
-		for (int i=0; i<80; i++) {
-			int y = 8 * sin(((float)(i+phase)/80) * 2 * M_PI);
-			blitter->solid_rectangle(4 * i, 172 - y, (4 * i) + 3, 179, 0x5e, 0xf, true);
-		}
-		phase++; if (phase>80) phase = 0;
-	}
+	// if (true) {
+	// 	for (int i=0; i<80; i++) {
+	// 		int y = 8 * sin(((float)(i+phase)/80) * 2 * M_PI);
+	// 		blitter->solid_rectangle(4 * i, 191 - y, (4 * i) + 3, 199, 0x56, 0xf, true);
+	// 	}
+	// 	phase++; if (phase>80) phase = 0;
+	// }
 }
 
 void debugger_t::run()
@@ -497,6 +500,8 @@ void debugger_t::process_command(char *c)
 			system->core->timer->status(text_buffer, i);
 			terminal->printf("%s", text_buffer);
 		}
+	} else if (strcmp(token0, "v") == 0) {
+		system->host->video_toggle_debugger_viewer();
 	} else if (strcmp(token0, "ver") == 0) {
 		print_version();
 	} else {
@@ -567,6 +572,7 @@ void debugger_t::memory_dump(uint16_t address)
 	temp_address = address;
 
 	terminal->bg_color = bg_acc;
+	terminal->fg_color = fg_acc;
 
 	for (int i=0; i<8; i++) {
 		uint8_t temp_byte = system->core->read8(temp_address);
@@ -576,6 +582,7 @@ void debugger_t::memory_dump(uint16_t address)
 	}
 
 	terminal->bg_color = bg;
+	terminal->fg_color = fg;
 
 	address += 8;
 	address &= 0xffff;

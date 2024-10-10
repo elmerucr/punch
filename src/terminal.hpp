@@ -17,35 +17,35 @@ enum output_type {
 class terminal_t {
 public:
 	terminal_t(system_t *s, surface_t *t, blitter_ic *b);
-	
+
 	void clear();
 	void putsymbol_at_cursor(char symbol);
 	void putsymbol(char symbol);
 	int putchar(int character);
 	int puts(const char *text);
 	int printf(const char *format, ...);
-	
+
 	void cursor_left();
 	void cursor_right();
 	void cursor_up();
 	void cursor_down();
 	void backspace();
-	
+
 	void activate_cursor();
 	void deactivate_cursor();
 	void process_cursor_state();
-	
+
 	void add_bottom_row();
 	void add_top_row();
-	
+
 	void get_command(char *c, int length);
-	
+
 	inline int lines_remaining() {
 		return ts->h - (cursor_position / ts->w) - 1;
 	}
-	
-	uint8_t fg_color{0x7f};
-	uint8_t bg_color{0x7c};
+
+	uint8_t fg_color{PUNCH_LIGHTBLUE};
+	uint8_t bg_color{PUNCH_BLUE};
 private:
 	system_t *system;
 	surface_t *ts;
@@ -55,12 +55,12 @@ private:
 	uint8_t  cursor_interval{20};
 	uint8_t  cursor_countdown{0};
 	char     cursor_original_char{0x20};
-	uint8_t  cursor_original_color{0x7f};
-	uint8_t  cursor_original_background_color{0x7c};
+	uint8_t  cursor_original_color{PUNCH_LIGHTBLUE};
+	uint8_t  cursor_original_background_color{PUNCH_BLUE};
 	bool     cursor_blinking{false};
-	
+
 	enum output_type check_output(bool top_down, uint32_t *address, uint32_t *width);
-	
+
 	char	text_buffer[TEXT_BUFFER_SIZE];
 	//char	*command;
 };

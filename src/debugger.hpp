@@ -42,9 +42,9 @@ public:
 	void enter_vram_line(char *buffer);
 	void enter_vram_binary_line(char *buffer);
 	void enter_assembly_line(char *buffer);
-	
+
 	uint32_t disassemble_instruction(uint16_t address);
-	
+
 	void vram_dump(uint32_t address, uint32_t width);
 	void vram_binary_dump(uint32_t address, uint32_t width);
 
@@ -55,15 +55,15 @@ private:
 	/*
 	 * color theme
 	 */
-//	const uint8_t fg = 0x23;
-//	const uint8_t fg_acc = 0x33;
-//	const uint8_t bg = 0x00;
-//	const uint8_t bg_acc = 0x55;
-	
-	const uint8_t fg = 0x7f;
-	const uint8_t fg_acc = 0xbf;
-	const uint8_t bg = 0x7c;
-	const uint8_t bg_acc = 0x7d;
+	const uint8_t fg = PUNCH_LIGHTBLUE;
+	const uint8_t fg_acc = 0xaf;
+	const uint8_t bg = PUNCH_BLUE;
+	const uint8_t bg_acc = 0x5e;
+
+	// const uint8_t fg = 0x7f;
+	// const uint8_t fg_acc = 0xbf;
+	// const uint8_t bg = 0x7c;
+	// const uint8_t bg_acc = 0x7d;
 
 	uint8_t irq_no;
 
@@ -93,7 +93,7 @@ private:
 		0b00000100, 0b00010000,	// ____bb____bb____
 		0b00010100, 0b00010100,	// __bbbb____bbbb__
 		0b01010100, 0b00010101,	// bbbbbb____bbbbbb
-		
+
 		0b00000000, 0b00000000,	// ________________
 		0b00000000, 0b00000000,	// ________________
 		0b00000000, 0b00010101,	// __________bbbbbb

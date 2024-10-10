@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    8
-#define PUNCH_BUILD            20241002
+#define PUNCH_BUILD            20241010
 #define PUNCH_YEAR             2024
 
 /*
@@ -23,7 +23,7 @@
 #define VRAM_SIZE_MASK			(VRAM_SIZE-1)
 #define FPS						60
 #define MAX_PIXELS_PER_SCANLINE	320
-#define MAX_SCANLINES			180
+#define MAX_SCANLINES			200
 #define PIXELS					(MAX_PIXELS_PER_SCANLINE*MAX_SCANLINES)
 #define MAX_PIXELS_PER_FRAME	524288	// 512k pixels = 9.1x total screen pixels
 #define FRAMEBUFFER_ADDRESS		0xf00000
@@ -52,7 +52,7 @@
 #define PUNCH_CYAN			0x7e
 #define PUNCH_PURPLE		0x8e
 #define PUNCH_GREEN			0x72
-#define PUNCH_BLUE			0x1e
+#define PUNCH_BLUE			0x5d
 #define PUNCH_YELLOW		0xf7
 #define PUNCH_ORANGE		0xe2
 #define PUNCH_BROWN			0x91
