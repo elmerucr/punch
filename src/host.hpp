@@ -113,7 +113,7 @@ private:
 	uint8_t video_scaling_max;
 	uint8_t video_scaling;
 	uint8_t video_scanlines_alpha{96};	// 0, 32, 64, 96, 128, 160, 192, 224, 255
-	uint8_t video_hor_blur{1};
+	uint8_t video_hor_blur{2};
 	bool shadowmask_active{false};
 
 	bool video_fullscreen{false};

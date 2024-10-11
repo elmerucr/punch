@@ -23,7 +23,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 
 ### Debug screen
 
-![punch](./docs/20240317_screenshot_debug.png)
+![punch](./docs/20241011_screenshot_debug.png)
 
 ## Memory Map
 
