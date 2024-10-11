@@ -5,12 +5,15 @@
 #include <cstdarg>
 #include <cstring>
 
-terminal_t::terminal_t(system_t *s, surface_t *t, blitter_ic *b)
+terminal_t::terminal_t(system_t *s, surface_t *t, blitter_ic *b, uint8_t fg, uint8_t bg)
 {
 	system = s;
 	ts = t;
 	blitter = b;
 	characters = ts->w * ts->h;
+
+	fg_color = cursor_original_color = fg;
+	bg_color = cursor_original_background_color = bg;
 }
 
 void terminal_t::clear()

@@ -6,7 +6,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 
 * Utilization of the MC6809 CPU using the [MC6809](https://github.com/elmerucr/MC6809) library
 * A total of 16MB of video RAM, 64KB directly accessible by the CPU
-* Screen resolution of 320x180 pixels, refresh rate of 60Hz
+* Screen resolution of 320x200 pixels, refresh rate of 60Hz
 * Blitter chip for fast graphics processing
 * Programmable using either MC6809 assembly or the Squirrel Programming Language
 
@@ -38,16 +38,15 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 		* ```$4/$5```: w width (16 bit unsigned)
 		* ```$6/$7```: h height (16 bit unsigned)
 		* ```$8/$b```: base address of surface data ($8 will always contain ```$00```)
-		* ```$c   ```: flags_0
-		* ```$d   ```: flags_1
-		* ```$e   ```: flags_2
-		* ```$f   ```: index ("sprite pointer")
+		* ```$c```: flags_0
+		* ```$d```: flags_1
+		* ```$e```: flags_2
+		* ```$f```: index ("sprite pointer")
 	* ```$500-$5ff``` blitter surface color tables (16) for 1, 2 and 4 bit color modes
 	* ```$600-$7ff``` reserved area
 	* ```$800-$8ff``` core
 		* ```$800``` status register
 		* ```$801``` control register
-		* ```$804-$807``` framebuffer base address (24 bits, $804 always #$00)
 		* ```$808-$80b``` vram peek base address (24 bits, $808 always #$00)
 	* ```$900-$9ff``` keyboard
 	* ```$a00-$aff``` timer
@@ -94,11 +93,11 @@ Below some more OS specific intructions on how to prepare the build environment.
 
 ### Ubuntu / Debian specific
 
-
+To be done
 
 ### Windows specific
 
-to be done
+To be done
 
 ## Websites and projects of interest
 

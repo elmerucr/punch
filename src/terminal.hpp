@@ -16,7 +16,7 @@ enum output_type {
 
 class terminal_t {
 public:
-	terminal_t(system_t *s, surface_t *t, blitter_ic *b);
+	terminal_t(system_t *s, surface_t *t, blitter_ic *b, uint8_t fg, uint8_t bg);
 
 	void clear();
 	void putsymbol_at_cursor(char symbol);
@@ -44,8 +44,8 @@ public:
 		return ts->h - (cursor_position / ts->w) - 1;
 	}
 
-	uint8_t fg_color{PUNCH_LIGHTBLUE};
-	uint8_t bg_color{PUNCH_BLUE};
+	uint8_t fg_color;
+	uint8_t bg_color;
 private:
 	system_t *system;
 	surface_t *ts;
@@ -55,8 +55,8 @@ private:
 	uint8_t  cursor_interval{20};
 	uint8_t  cursor_countdown{0};
 	char     cursor_original_char{0x20};
-	uint8_t  cursor_original_color{PUNCH_LIGHTBLUE};
-	uint8_t  cursor_original_background_color{PUNCH_BLUE};
+	uint8_t  cursor_original_color;
+	uint8_t  cursor_original_background_color;
 	bool     cursor_blinking{false};
 
 	enum output_type check_output(bool top_down, uint32_t *address, uint32_t *width);

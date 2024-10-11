@@ -71,9 +71,9 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xd].y = 10;
 	blitter->surface[0xd].flags_0 = 0b00;
 
-	terminal = new terminal_t(system, &blitter->surface[0xd], blitter);
-	terminal->fg_color = fg;
-	terminal->bg_color = bg;
+	terminal = new terminal_t(system, &blitter->surface[0xd], blitter, fg, bg);
+	//terminal->fg_color = fg;
+	//terminal->bg_color = bg;
 	terminal->clear();
 	print_version();
 	terminal->putchar('\n');

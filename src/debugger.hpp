@@ -55,6 +55,8 @@ private:
 	/*
 	 * color theme
 	 */
+
+	// C64
 	const uint8_t fg = PUNCH_LIGHTBLUE;
 	const uint8_t fg_acc = 0xaf;
 	const uint8_t bg = PUNCH_BLUE;
@@ -64,6 +66,17 @@ private:
 	// const uint8_t fg_acc = 0xbf;
 	// const uint8_t bg = 0x7c;
 	// const uint8_t bg_acc = 0x7d;
+
+	// const uint8_t fg = 0xfa;
+	// const uint8_t fg_acc = 0xfb;
+	// const uint8_t bg = 0xf8;
+	// const uint8_t bg_acc = 0xf9;
+
+	// green monochrome
+	// const uint8_t fg = 0x32;
+	// const uint8_t fg_acc = 0x33;
+	// const uint8_t bg = 0x20;
+	// const uint8_t bg_acc = 0x21;
 
 	uint8_t irq_no;
 
