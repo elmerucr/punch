@@ -84,6 +84,8 @@ private:
 
 	bool have_prompt{true};
 
+	bool bruce_visible{false};
+
 	const uint8_t bruce_data[2*21*3] = {
 		0b00000101, 0b00000000,	// ____bbbb________
 		0b00010110, 0b00000000,	// __bbbb..________

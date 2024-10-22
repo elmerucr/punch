@@ -32,16 +32,16 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 * ```$000-$0ff``` direct page (default after reset)
 * ```$100-$3ff``` available ram and system stack pointer (768 bytes)
 * ```$0400-$0fff``` input/output area
-	* ```$400-$4ff``` blitter surface descriptors (16 in total, 16 bytes each, below is lowest nibble in address)
-		* ```$0/$1```: x position (16 bit signed)
-		* ```$2/$3```: y position (16 bit signed)
-		* ```$4/$5```: w width (16 bit unsigned)
-		* ```$6/$7```: h height (16 bit unsigned)
-		* ```$8/$b```: base address of surface data ($8 will always contain ```$00```)
-		* ```$c```: flags_0
-		* ```$d```: flags_1
-		* ```$e```: flags_2
-		* ```$f```: index ("sprite pointer")
+	* ```$400-$4ff``` blitter surface descriptors (16 in total, 16 bytes each)
+		* ```$4x0-$4x1```: x position (16 bit signed)
+		* ```$4x2-$4x3```: y position (16 bit signed)
+		* ```$4x4-$4x5```: w width (16 bit unsigned)
+		* ```$4x6-$4x7```: h height (16 bit unsigned)
+		* ```$4x8-$4xb```: base address of surface data ($8 will always contain ```$00```)
+		* ```$4xc```: flags_0
+		* ```$4xd```: flags_1
+		* ```$4xe```: flags_2
+		* ```$4xf```: index ("sprite pointer")
 	* ```$500-$5ff``` blitter surface color tables (16) for 1, 2 and 4 bit color modes
 	* ```$600-$7ff``` reserved area
 	* ```$800-$8ff``` core
@@ -65,10 +65,10 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 		* ```$e03``` destination surface pointer (lowest nibble only)
 		* ```$e04``` tile surface pointer (lowest nibble)
 		* ```$e05``` drawing color
-		* ```$e08/$e09``` x0 for drawing operations (16 bit signed)
-		* ```$e0a/$e0b``` y0 for drawing operations (16 bit signed)
-		* ```$e0c/$e0d``` x1 for drawing operations (16 bit signed)
-		* ```$e0e/$e0f``` y1 for drawing operations (16 bit signed)
+		* ```$e08-$e09``` x0 for drawing operations (16 bit signed)
+		* ```$e0a-$e0b``` y0 for drawing operations (16 bit signed)
+		* ```$e0c-$e0d``` x1 for drawing operations (16 bit signed)
+		* ```$e0e-$e0f``` y1 for drawing operations (16 bit signed)
 	* ```$f00-$fff``` vram peek (see $802/$803 as well)
 * ```$1000-$fbff``` 59kb ram ($fc00 is initial usp)
 * ```$fc00-$ffff``` 1kb kernel + vectors
@@ -76,7 +76,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 ### Addressable by Blitter only
 
 * ```$010000-$ffffff``` available vram (16.320kb) of which:
-* ```$fe0000-$fee0ff``` default framebuffer vram (57.600 bytes)
+* ```$f00000-$f0f9ff``` default framebuffer vram (64.000 bytes)
 
 ## Building with CMake
 

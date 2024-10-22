@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    8
-#define PUNCH_BUILD            20241011
+#define PUNCH_BUILD            20241022
 #define PUNCH_YEAR             2024
 
 /*
@@ -25,7 +25,7 @@
 #define MAX_PIXELS_PER_SCANLINE	320
 #define MAX_SCANLINES			200
 #define PIXELS					(MAX_PIXELS_PER_SCANLINE*MAX_SCANLINES)
-#define MAX_PIXELS_PER_FRAME	524288	// 512k pixels = 9.1x total screen pixels
+#define MAX_PIXELS_PER_FRAME	524288	// 512k pixels = 8.2x total screen pixels
 #define FRAMEBUFFER_ADDRESS		0xf00000
 
 /*
@@ -46,22 +46,22 @@
 /*
  * Colors similar to C64 colors
  */
-#define PUNCH_BLACK			0x00
-#define PUNCH_WHITE			0xff
-#define PUNCH_RED			0xc6
-#define PUNCH_CYAN			0x7e
-#define PUNCH_PURPLE		0x8e
-#define PUNCH_GREEN			0x72
-#define PUNCH_BLUE			0x5d
-#define PUNCH_YELLOW		0xf7
-#define PUNCH_ORANGE		0xe2
-#define PUNCH_BROWN			0x91
-#define PUNCH_LIGHTRED		0xea
-#define PUNCH_DARKGREY		0xa9
-#define PUNCH_GREY			0xab
-#define PUNCH_LIGHTGREEN	0xbb
-#define PUNCH_LIGHTBLUE		0xae
-#define PUNCH_LIGHTGREY		0xfe
+#define PUNCH_BLACK			0b00'00'00'00	// 0x00
+#define PUNCH_WHITE			0b11'11'11'11	// 0xff
+#define PUNCH_RED			0b11'00'01'10	// 0xc6
+#define PUNCH_CYAN			0b01'11'11'10	// 0x7e
+#define PUNCH_PURPLE		0b10'00'11'10	// 0x8e
+#define PUNCH_GREEN			0b01'11'00'10	// 0x72
+#define PUNCH_BLUE			0b01'01'11'01	// 0x5d
+#define PUNCH_YELLOW		0b11'11'01'11	// 0xf7
+#define PUNCH_ORANGE		0b11'10'00'10	// 0xe2
+#define PUNCH_BROWN			0b10'01'00'01	// 0x91
+#define PUNCH_LIGHTRED		0b11'10'10'10	// 0xea
+#define PUNCH_DARKGREY		0b10'10'10'01	// 0xa9
+#define PUNCH_GREY			0b10'10'10'11	// 0xab
+#define PUNCH_LIGHTGREEN	0b10'11'10'11	// 0xbb
+#define PUNCH_LIGHTBLUE		0b10'10'11'10	// 0xae
+#define PUNCH_LIGHTGREY		0b11'11'11'10	// 0xfe
 
 /*
  * C64 colors (VirtualC64) argb4444 format

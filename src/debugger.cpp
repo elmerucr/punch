@@ -141,7 +141,7 @@ void debugger_t::redraw()
 	static bool right = true;
 	static bool change_direction = true;
 
-	if (true) {
+	if (bruce_visible) {
 		right ? blitter->surface[0xc].flags_1 &= 0b11101111 : blitter->surface[0xc].flags_1 |= 0b00010000;
 
 		if (wait < 200) {
@@ -295,6 +295,8 @@ void debugger_t::process_command(char *c)
 				}
 			}
 		}
+	} else if (strcmp(token0, "bruce") == 0) {
+		bruce_visible = !bruce_visible;
 	} else if (strcmp(token0, "cls") == 0) {
 		terminal->clear();
 	} else if (strcmp(token0, "d") == 0) {
