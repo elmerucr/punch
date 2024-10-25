@@ -66,13 +66,10 @@ blitter_ic::blitter_ic()
 	}
 
 	/*
-	 * Create alpha lookup table
+	 * Create alpha lookup table, and fill it up
 	 */
 	alpha_lookup_table = new uint8_t[65536];
 
-	/*
-	 * And fill it up with decent values
-	 */
 	for (int i=0; i<65536; i++) {
 		/*
 		 * Extract the two colors from index
@@ -106,6 +103,7 @@ blitter_ic::blitter_ic()
 				match = t;
 			}
         }
+
 		alpha_lookup_table[i] = match;
 	}
 }

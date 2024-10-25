@@ -19,7 +19,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 
 ### Startup screen
 
-![punch](./docs/20240317_screenshot_startup.png)
+![punch](./docs/20241025_screenshot_startup.gif)
 
 ### Debug screen
 
