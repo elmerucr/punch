@@ -16,8 +16,8 @@
 #define FLAGS0_NOFONT		0b00000000
 #define FLAGS0_TINYFONT		0b01000000
 
-#define	FLAGS1_DBLWIDTH		0b00000001
-#define FLAGS1_DBLHEIGHT	0b00000010
+#define	FLAGS1_DBLWIDTH		0b00000011
+#define FLAGS1_DBLHEIGHT	0b00001100
 #define FLAGS1_HOR_FLIP		0b00010000
 #define FLAGS1_VER_FLIP		0b00100000
 #define	FLAGS1_X_Y_FLIP		0b01000000
@@ -55,9 +55,9 @@ struct surface_t {
 	 * Size, flips and xy flip
 	 *
 	 * 7 6 5 4 3 2 1 0
-	 *   | | |     | |
-	 *   | | |     | +-- Double width (0 = off, 1 = on)
-	 *   | | |     +---- Double height (0 = off, 1 = on)
+	 *   | | | | | | |
+	 *   | | | | | +-+-- Width (00 = 1x, 01 = 2x, 10 = 3x, 11 = 4x)
+	 *   | | | +-+------ Height (00 = 1x, 01 = 2x, 10 = 3x, 11 = 4x)
 	 *   | | +---------- Horizontal flip (0 = off, 1 = on)
 	 *   | +------------ Vertical flip (0 = off, 1 = on)
 	 *   +-------------- XY flip (0 = off, 1 = on)

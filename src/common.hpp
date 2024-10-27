@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    8
-#define PUNCH_BUILD            20241025
+#define PUNCH_BUILD            20241027
 #define PUNCH_YEAR             2024
 
 /*
@@ -25,7 +25,7 @@
 #define MAX_PIXELS_PER_SCANLINE	320
 #define MAX_SCANLINES			200
 #define PIXELS					(MAX_PIXELS_PER_SCANLINE*MAX_SCANLINES)
-#define MAX_PIXELS_PER_FRAME	524288	// 512k pixels = 8.2x total screen pixels
+#define MAX_PIXELS_PER_FRAME	524288	// 512k pixels = 8.2x total number of screen pixels
 
 /*
  * Audio

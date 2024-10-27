@@ -155,8 +155,8 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest, bool alpha)
 	/*
 	 * Calculate potential bitshifts for double width and height
 	 */
-	uint8_t dw = (src->flags_1 & FLAGS1_DBLWIDTH)  ? 1 : 0;
-	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) ? 1 : 0;
+	uint8_t dw = src->flags_1 & FLAGS1_DBLWIDTH;
+	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) >> 2;
 
 	int16_t startx, endx, starty, endy;
 
@@ -239,7 +239,6 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest, bool alpha)
 				// TODO: this looks like a mess
 				px >>= color_modes[color_mode].bits_per_pixel * (color_modes[color_mode].pixels_per_byte - (alt_index % color_modes[color_mode].pixels_per_byte) - 1);
 				px &= color_modes[color_mode].mask;
-//				uint8_t px = memory[(base_address + index + (x >> dw) + (src->w * (y >> dh))) & memory_mask];
 
 				bool px_present = px;
 
@@ -254,20 +253,14 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest, bool alpha)
 					case 0b001: // no pixel, bg on, fore off
 					case 0b011: // no pixel, bg on, fore on
 						*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | src->color_indices[0]] : src->color_indices[0];
-						//*pixel = src->color_indices[0];
-						//vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[0];
 						break;
 					case 0b100: // pixel, take it
 					case 0b101: // pixel, bg on, fore off
 						*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | px] : px;
-						//*pixel = px;
-						//vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = px;
 						break;
 					case 0b110: // pixel, bg off, fore on
 					case 0b111:
-						//*pixel = src->color_indices[1];
 						*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | src->color_indices[1]] : src->color_indices[1];
-						//vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK] = src->color_indices[1];
 						break;
 				}
 
@@ -289,8 +282,8 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 
 	surface_t source = *src;
 
-	uint8_t dw = (src->flags_1 & FLAGS1_DBLWIDTH) ? 1 : 0;
-	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) ? 1 : 0;
+	uint8_t dw = src->flags_1 & FLAGS1_DBLWIDTH;
+	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) >> 2;
 
 	source.x = ts->x;
 	source.y = ts->y;
@@ -309,8 +302,8 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 			pixelcount += blit(&source, dst, alpha);
 			source.x += (source.w << dw);
 		}
-		source.x = ts->x;
-		source.y += (source.h << dh);
+		source.x = ts->x;				// set to start position
+		source.y += (source.h << dh);	// go to next row
 	}
 
 	return pixelcount;
@@ -326,7 +319,6 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest, bool a
 		if (pixel_saldo) {
 			uint8_t *pixel = &vram[(d->base_address + i) & VRAM_SIZE_MASK];
 			*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | col] : col;
-			//vram[(d->base_address + i) & VRAM_SIZE_MASK] = alpha ? alpha_lookup_table[(vram[(d->base_address + i) & VRAM_SIZE_MASK] << 8) | col] : col;
 			pixel_saldo--;
 		} else {
 			break;
@@ -340,7 +332,6 @@ uint32_t blitter_ic::pset(int16_t x0, int16_t y0, uint8_t c, uint8_t d, bool alp
 {
 	uint8_t *pixel = & vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK];
 	*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | c] : c;
-	//vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK] = c;
 	pixel_saldo++;
 	return 1;
 }
@@ -366,7 +357,6 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 				pixel_saldo--;
 				uint8_t *pixel = &vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK];
 				*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | c] : c;
-				//vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 			}
 		}
 
@@ -389,7 +379,6 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 			pixel_saldo--;
 			uint8_t *pixel = &vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK];
 			*pixel = alpha ? alpha_lookup_table[(*pixel << 8) | c] : c;
-			//vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK] = c;
 		}
 	}
 
@@ -520,24 +509,44 @@ void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
 {
 	int8_t no = (address & 0xf0) >> 4;
 
-	switch (address & 0xf) {
-		case 0x0: surface[no].x = (int16_t)((((uint16_t)surface[no].x) & 0x00ff) | (value << 8)); break;
-		case 0x1: surface[no].x = (int16_t)((((uint16_t)surface[no].x) & 0xff00) | value);        break;
-		case 0x2: surface[no].y = (int16_t)((((uint16_t)surface[no].y) & 0x00ff) | (value << 8)); break;
-		case 0x3: surface[no].y = (int16_t)((((uint16_t)surface[no].y) & 0xff00) | value);        break;
-		case 0x4: surface[no].w = (surface[no].w & 0x00ff) | (value << 8); break;
-		case 0x5: surface[no].w = (surface[no].w & 0xff00) | value;        break;
-		case 0x6: surface[no].h = (surface[no].h & 0x00ff) | (value << 8); break;
-		case 0x7: surface[no].h = (surface[no].h & 0xff00) | value;        break;
-//		case 0x8: break;
-		case 0x9: surface[no].base_address = (surface[no].base_address & 0x0000ffff) | (value << 16); break;
-		case 0xa: surface[no].base_address = (surface[no].base_address & 0x00ff00ff) | (value << 8);  break;
-		case 0xb: surface[no].base_address = (surface[no].base_address & 0x00ffff00) | value;         break;
-		case 0xc: surface[no].flags_0 = value & 0b00110011; break;
-		case 0xd: surface[no].flags_1 = value & 0b01110011; break;
-		case 0xe: surface[no].flags_2 = value & 0b00000111; break;
-		case 0xf: surface[no].index = value; break;
-		default:  break;
+	if (no) {
+		switch (address & 0xf) {
+			case 0x0: surface[no].x = (int16_t)((((uint16_t)surface[no].x) & 0x00ff) | (value << 8)); break;
+			case 0x1: surface[no].x = (int16_t)((((uint16_t)surface[no].x) & 0xff00) | value);        break;
+			case 0x2: surface[no].y = (int16_t)((((uint16_t)surface[no].y) & 0x00ff) | (value << 8)); break;
+			case 0x3: surface[no].y = (int16_t)((((uint16_t)surface[no].y) & 0xff00) | value);        break;
+			case 0x4: surface[no].w = (surface[no].w & 0x00ff) | (value << 8); break;
+			case 0x5: surface[no].w = (surface[no].w & 0xff00) | value;        break;
+			case 0x6: surface[no].h = (surface[no].h & 0x00ff) | (value << 8); break;
+			case 0x7: surface[no].h = (surface[no].h & 0xff00) | value;        break;
+	//		case 0x8: break;
+			case 0x9: surface[no].base_address = (surface[no].base_address & 0x0000ffff) | (value << 16); break;
+			case 0xa: surface[no].base_address = (surface[no].base_address & 0x00ff00ff) | (value << 8);  break;
+			case 0xb: surface[no].base_address = (surface[no].base_address & 0x00ffff00) | value;         break;
+			case 0xc: surface[no].flags_0 = value & 0b00110011; break;
+			case 0xd: surface[no].flags_1 = value & 0b01111111; break;
+			case 0xe: surface[no].flags_2 = value & 0b00000111; break;
+			case 0xf: surface[no].index = value; break;
+			default:  break;
+		}
+	} else {
+		// surface 0 is special
+		switch (address & 0xf) {
+			case 0x9:
+				surface[0].base_address = (surface[0].base_address & 0x0000ffff) | (value << 16);
+				break;
+			case 0xa:
+				surface[0].base_address = (surface[0].base_address & 0x00ff00ff) | (value << 8);
+				break;
+			case 0xb:
+				surface[0].base_address = (surface[0].base_address & 0x00ffff00) | value;
+				break;
+			case 0xd:
+				surface[0].flags_1 = (surface[0].flags_1 & 0xf0) | (value & 0xf);
+				surface[0].w = MAX_PIXELS_PER_SCANLINE >> (surface[0].flags_1 & 0b11);
+				surface[0].h = MAX_SCANLINES >> ((surface[0].flags_1 & 0b1100) >> 2);
+				break;
+		}
 	}
 }
 
@@ -555,8 +564,22 @@ void blitter_ic::io_color_indices_write8(uint16_t address, uint8_t value)
 
 void blitter_ic::update_framebuffer()
 {
-	for (int i = 0; i < PIXELS; i++) {
-		//framebuffer[i] = palette[vram[(FRAMEBUFFER_ADDRESS + i) & VRAM_SIZE_MASK]];
-		framebuffer[i] = palette[vram[(surface[dst_surface].base_address + i) & VRAM_SIZE_MASK]];
+	int x_scale = surface[0].flags_1 & 0b11;
+	int y_scale = (surface[0].flags_1 & 0b1100) >> 2;
+
+	for (int y = 0; y < MAX_SCANLINES; y++) {
+		int source_y = y >> y_scale;
+
+		for (int x = 0; x < MAX_PIXELS_PER_SCANLINE; x++) {
+			int source_x = x >> x_scale;
+
+			framebuffer[(MAX_PIXELS_PER_SCANLINE * y ) + x] =
+				palette[
+					vram[
+						(surface[0].base_address +
+						((MAX_PIXELS_PER_SCANLINE >> x_scale) * source_y ) + source_x) & VRAM_SIZE_MASK
+					]
+				];
+		}
 	}
 }
