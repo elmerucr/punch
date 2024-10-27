@@ -121,6 +121,13 @@ void blitter_ic::reset()
 	for (int i = 0; i < VRAM_SIZE; i++) {
 		vram[i] = (i & 0x40) ? 0xfc : 0x00;
 	}
+
+	surface[0].w = MAX_PIXELS_PER_SCANLINE;
+	surface[0].h = MAX_SCANLINES;
+	surface[0].base_address = 0x00f00000;
+	surface[0].flags_0 = 0x00;
+	surface[0].flags_1 = 0x00;
+	surface[0].flags_2 = 0x00;
 }
 
 /*
@@ -549,6 +556,7 @@ void blitter_ic::io_color_indices_write8(uint16_t address, uint8_t value)
 void blitter_ic::update_framebuffer()
 {
 	for (int i = 0; i < PIXELS; i++) {
-		framebuffer[i] = palette[vram[(FRAMEBUFFER_ADDRESS + i) & VRAM_SIZE_MASK]];
+		//framebuffer[i] = palette[vram[(FRAMEBUFFER_ADDRESS + i) & VRAM_SIZE_MASK]];
+		framebuffer[i] = palette[vram[(surface[dst_surface].base_address + i) & VRAM_SIZE_MASK]];
 	}
 }
