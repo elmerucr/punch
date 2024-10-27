@@ -57,11 +57,6 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xe].flags_1 = 0b00000000;
 	blitter->surface[0xe].flags_2 = 0b00000001;
 
-	/* framebuffer surface in slot 0xf */
-	blitter->surface[0xf].base_address = FRAMEBUFFER_ADDRESS;
-	blitter->surface[0xf].w = MAX_PIXELS_PER_SCANLINE;
-	blitter->surface[0xf].h = MAX_PIXELS_PER_SCANLINE;
-
 	/* character screen in slot 0xd */
 	blitter->surface[0xd].w = MAX_PIXELS_PER_SCANLINE / blitter->surface[0xe].w;
 	// blitter->surface[0xd].h = MAX_SCANLINES / blitter->surface[0xe].h;
@@ -131,9 +126,9 @@ void debugger_t::redraw()
 {
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 	//blitter->clear_surface(PUNCH_BLACK, 0xf);	// no need, everything is redrawn already
-	blitter->tile_blit(0xe, 0xf, 0xd, false);
-	blitter->solid_rectangle(0, 0, 319, 9, fg, 0xf, false);
-	blitter->solid_rectangle(0, 190, 319, 199, fg, 0xf, false);
+	blitter->tile_blit(0xe, 0x0, 0xd, false);
+	blitter->solid_rectangle(0, 0, 319, 9, fg, 0x0, false);
+	blitter->solid_rectangle(0, 190, 319, 199, fg, 0x0, false);
 
 	// Bruce Lee
 	static int state = 0;
@@ -172,7 +167,7 @@ void debugger_t::redraw()
 			wait = 0;
 			change_direction = true;
 		}
-		blitter->blit(0xc, 0xf, false);
+		blitter->blit(0xc, 0x0, false);
 	}
 	// end Bruce Lee
 
@@ -182,7 +177,7 @@ void debugger_t::redraw()
 	// if (true) {
 	// 	for (int i=0; i<80; i++) {
 	// 		int y = 8 * sin(((float)(i+phase)/80) * 2 * M_PI);
-	// 		blitter->solid_rectangle(4 * i, 191 - y, (4 * i) + 3, 199, 0x56, 0xf, true);
+	// 		blitter->solid_rectangle(4 * i, 191 - y, (4 * i) + 3, 199, 0x56, 0x0, true);
 	// 	}
 	// 	phase++; if (phase>80) phase = 0;
 	// }

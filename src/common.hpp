@@ -26,7 +26,6 @@
 #define MAX_SCANLINES			200
 #define PIXELS					(MAX_PIXELS_PER_SCANLINE*MAX_SCANLINES)
 #define MAX_PIXELS_PER_FRAME	524288	// 512k pixels = 8.2x total screen pixels
-#define FRAMEBUFFER_ADDRESS		0xf00000
 
 /*
  * Audio

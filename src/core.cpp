@@ -147,16 +147,7 @@ void core_t::reset()
 	blitter->surface[0xe].flags_0 = 0b00000010;
 	blitter->surface[0xe].flags_1 = 0b00000000;
 	blitter->surface[0xe].flags_2 = 0b00000001;
-	// no need for base_address (implied by flags_0)
-
-	/*
-	 * Default: dest screen surface $f
-	 */
-	blitter->surface[0xf].w = MAX_PIXELS_PER_SCANLINE;
-	blitter->surface[0xf].h = MAX_SCANLINES;
-	blitter->surface[0xf].base_address = FRAMEBUFFER_ADDRESS;
-
-	//framebuffer_base_address = FRAMEBUFFER_ADDRESS;
+	// no need for base_address (implied by flags_2)
 
 	commander->reset();
 }
