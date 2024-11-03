@@ -123,9 +123,9 @@ void debugger_t::redraw()
 {
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 	//blitter->clear_surface(PUNCH_BLACK, 0x0);	// no need, everything is redrawn already
-	blitter->tile_blit(0xe, 0x0, 0xd, false);
-	blitter->solid_rectangle(0, 0, 319, 9, fg, 0x0, false);
-	blitter->solid_rectangle(0, 190, 319, 199, fg, 0x0, false);
+	blitter->tile_blit(0xe, 0x0, 0xd);
+	blitter->solid_rectangle(0, 0, 319, 9, fg, 0x0);
+	blitter->solid_rectangle(0, 190, 319, 199, fg, 0x0);
 
 	// Bruce Lee
 	static int state = 0;
@@ -164,20 +164,9 @@ void debugger_t::redraw()
 			wait = 0;
 			change_direction = true;
 		}
-		blitter->blit(0xc, 0x0, false);
+		blitter->blit(0xc, 0x0);
 	}
 	// end Bruce Lee
-
-	// water :-)
-	// static uint8_t phase = 0;
-
-	// if (true) {
-	// 	for (int i=0; i<80; i++) {
-	// 		int y = 8 * sin(((float)(i+phase)/80) * 2 * M_PI);
-	// 		blitter->solid_rectangle(4 * i, 191 - y, (4 * i) + 3, 199, 0x56, 0x0, true);
-	// 	}
-	// 	phase++; if (phase>80) phase = 0;
-	// }
 }
 
 void debugger_t::run()
