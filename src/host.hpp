@@ -168,7 +168,7 @@ public:
 	void update_core_texture(uint16_t *core);
 	void update_debugger_texture(uint16_t *debugger);
 	void update_screen();
-//	void update_title();
+
 	void video_increase_window_size();
 	void video_decrease_window_size();
 	void video_toggle_fullscreen();
@@ -186,22 +186,11 @@ public:
 				viewer_alpha = 0; break;
 		}
 	}
-//
-//	// getters setters
-//	uint16_t current_window_width() { return video_window_sizes[current_window_size].x; }
-//	uint16_t current_window_height() { return video_window_sizes[current_window_size].y; }
+
 	inline bool vsync_enabled() { return vsync; }
 	inline bool vsync_disabled() { return !vsync; }
 	inline uint8_t get_bytes_per_sample() { return audio_bytes_per_sample; }
 	inline double get_bytes_per_ms() { return audio_bytes_per_ms; }
-//
-//	//inline uint8_t get_scanlines_alpha() { return video_scanlines_alpha; }
-//	//inline void set_scanline_alpha(uint8_t a) { video_scanlines_alpha = a; }
-//	//inline bool is_using_vm_linear_filtering() { return linear_filtering; }
-//	//inline bool is_using_hud_linear_filtering() { return hud_linear_filtering; }
-//	inline bool is_using_scanlines_linear_filtering() { return scanlines_linear_filtering; }
-//	//inline bool is_fullscreen() { return fullscreen; }
-//	inline void set_hud(hud_t *h) { hud = h; }
 
 	/*
 	 * Events related

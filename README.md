@@ -104,7 +104,6 @@ To be done
 * [CCS64](http://www.ccs64.com) - A Commodore 64 Emulator by Per Håkan Sundell.
 * [Commander X16](https://www.commanderx16.com) - The Commander X16 is a modern 8-bit computer currently in active development. It is the brainchild of David "the 8 Bit Guy" Murray.
 * [Commander X16 emulator](https://github.com/x16community/x16-emulator) - Software version of Commander X16.
-* [E64](https://github.com/elmerucr/E64)
 * [freeverb](https://github.com/sinshu/freeverb/) - Free, studio-quality reverb SOURCE CODE in the public domain
 * [Hatari](https://hatari.tuxfamily.org) - Hatari is an Atari ST/STE/TT/Falcon emulator.
 * [lib65ce02](https://github.com/elmerucr/lib65ce02) - CSG65CE02 emulator written in C.

@@ -172,7 +172,7 @@ void keyboard_t::process()
 		((system->host->keyboard_state[SCANCODE_RSHIFT] & 0b1) ? SHIFT_PRESSED : 0) |
 		((system->host->keyboard_state[SCANCODE_LCTRL ] & 0b1) ? CTRL_PRESSED  : 0) |
 		((system->host->keyboard_state[SCANCODE_RCTRL ] & 0b1) ? CTRL_PRESSED  : 0) ;
-	
+
 	for (int i=0; i<128; i++) {
 		switch (system->host->keyboard_state[i] & 0b11) {
 			case 0b01:
@@ -198,7 +198,7 @@ void keyboard_t::process()
 	}
 
 	microseconds_remaining = microseconds_per_frame;
-	
+
 	if (key_down) {
 		while (microseconds_remaining) {
 			if (time_to_next < microseconds_remaining) {
@@ -217,9 +217,9 @@ void keyboard_t::process()
 void keyboard_t::push_event(uint8_t event)
 {
 	event_list[head] = event;
-	
+
 	head++;
-	
+
 	if (head == tail) {
 		tail++;
 	}
@@ -250,7 +250,7 @@ uint8_t keyboard_t::io_read8(uint16_t address)
 	if (address & 0x80) {
 		return system->host->keyboard_state[address & 0x7f];
 	}
-	
+
 	switch (address & 0xff) {
 		case 0x00:
 			// status register

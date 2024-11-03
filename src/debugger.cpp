@@ -53,22 +53,19 @@ debugger_t::debugger_t(system_t *s)
 	/* font surface in slot 0xe */
 	blitter->surface[0xe].w = 4;
 	blitter->surface[0xe].h = 6;
-	blitter->surface[0xe].flags_0 = 0b00000011;
-	blitter->surface[0xe].flags_1 = 0b00000000;
-	blitter->surface[0xe].flags_2 = 0b00000001;
+	blitter->surface[0xe].flags_0 = 0b00'00'00'11;	// use background and foreground color, and 1 bit / pixel
+	blitter->surface[0xe].flags_1 = 0b0'0'0'0'00'00;
+	blitter->surface[0xe].flags_2 = 0b00000'001;	// select tiny font 4x6
 
 	/* character screen in slot 0xd */
-	blitter->surface[0xd].w = MAX_PIXELS_PER_SCANLINE / blitter->surface[0xe].w;
-	// blitter->surface[0xd].h = MAX_SCANLINES / blitter->surface[0xe].h;
+	blitter->surface[0xd].w = 80;
 	blitter->surface[0xd].h = 30;
-	blitter->surface[0xd].base_address = 0x010000;
+	blitter->surface[0xd].base_address = 0x00010000;
 	blitter->surface[0xd].x = 0;
 	blitter->surface[0xd].y = 10;
-	blitter->surface[0xd].flags_0 = 0b00;
+	blitter->surface[0xd].flags_0 = 0b00'00'00'00;
 
 	terminal = new terminal_t(system, &blitter->surface[0xd], blitter, fg, bg);
-	//terminal->fg_color = fg;
-	//terminal->bg_color = bg;
 	terminal->clear();
 	print_version();
 	terminal->putchar('\n');
@@ -125,7 +122,7 @@ debugger_t::~debugger_t()
 void debugger_t::redraw()
 {
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
-	//blitter->clear_surface(PUNCH_BLACK, 0xf);	// no need, everything is redrawn already
+	//blitter->clear_surface(PUNCH_BLACK, 0x0);	// no need, everything is redrawn already
 	blitter->tile_blit(0xe, 0x0, 0xd, false);
 	blitter->solid_rectangle(0, 0, 319, 9, fg, 0x0, false);
 	blitter->solid_rectangle(0, 190, 319, 199, fg, 0x0, false);
