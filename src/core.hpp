@@ -18,16 +18,15 @@
 #include "clocks.hpp"
 #include "commander.hpp"
 
-#define BLITTER_SURFACES		0x04
-#define BLITTER_COLOR_TABLES	0x05
-//#define BLITTER_PALETTE			0x06 // + 0x07
-#define CORE_PAGE				0x08
-#define KEYBOARD_PAGE			0x09
+#define CORE_PAGE				0x04
+#define KEYBOARD_PAGE			0x05
+#define SOUND_PAGE				0x06 // + 0x07
+
 #define	TIMER_PAGE				0x0a
 #define COMMANDER_PAGE			0x0b
-#define SOUND_PAGE				0x0c // + 0x0d
+
 #define	BLITTER_PAGE			0x0e
-#define VRAM_PEEK_PAGE			0x0f
+
 #define	ROM_PAGE				0xfc
 
 enum output_states {
@@ -49,8 +48,6 @@ private:
 	bool generate_interrupts_frame_done{false};
 	bool generate_interrupts_load_bin{false};
 	bool generate_interrupts_load_squirrel{false};
-
-	uint32_t vram_peek{0};
 public:
 	core_t(system_t *s);
 	~core_t();

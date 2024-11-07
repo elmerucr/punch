@@ -158,21 +158,24 @@ public:
 	uint8_t io_color_indices_read8(uint16_t address);
 	void io_color_indices_write8(uint16_t address, uint8_t value);
 
-	// uint8_t io_palette_read8(uint16_t address) {
-	// 	if (address & 0b1) {
-	// 		return palette[(address & 0x1ff) >> 1] & 0xff;
-	// 	} else {
-	// 		return palette[(address & 0x1ff) >> 1] >> 8;
-	// 	}
-	// }
+	uint8_t io_palette_read8(uint16_t address) {
+		switch (address & 0b11) {
+			case 0b00: return (palette[(address & 0x3ff) >> 2] & 0xff000000) >> 24;
+			case 0b01: return (palette[(address & 0x3ff) >> 2] & 0x00ff0000) >> 16;
+			case 0b10: return (palette[(address & 0x3ff) >> 2] & 0x0000ff00) >>  8;
+			case 0b11: return (palette[(address & 0x3ff) >> 2] & 0x000000ff) >>  0;
+			default: return 0x00;
+		}
+	}
 
-	// void io_palette_write8(uint16_t address, uint8_t value) {
-	// 	if (address & 0b1) {
-	// 		palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0xff00) | value;
-	// 	} else {
-	// 		palette[(address & 0x1ff) >> 1] = (palette[(address & 0x1ff) >> 1] & 0x00ff) | (value << 8);
-	// 	}
-	// }
+	void io_palette_write8(uint16_t address, uint8_t value) {
+		switch (address & 0b11) {
+			case 0b00: palette[(address & 0x3ff) >> 2] = (palette[(address & 0x3ff) >> 2] & 0x00ffffff) | (value << 24); break;
+			case 0b01: palette[(address & 0x3ff) >> 2] = (palette[(address & 0x3ff) >> 2] & 0xff00ffff) | (value << 16); break;
+			case 0b10: palette[(address & 0x3ff) >> 2] = (palette[(address & 0x3ff) >> 2] & 0xffff00ff) | (value <<  8); break;
+			case 0b11: palette[(address & 0x3ff) >> 2] = (palette[(address & 0x3ff) >> 2] & 0xffffff00) | (value <<  0); break;
+		}
+	}
 
 	/*
 	 * All return number of pixels changed
@@ -191,6 +194,8 @@ public:
 	void update_framebuffer();
 
 	uint8_t *vram;
+	uint32_t vram_peek{0};	// base address for vram peek page
+
 	uint32_t *framebuffer;
 	uint32_t *palette;
 };

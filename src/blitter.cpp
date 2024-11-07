@@ -64,17 +64,19 @@ blitter_ic::blitter_ic()
 		uint32_t factor = 0;
 
 		switch (s) {
-			case 0b00: factor =  85; break;
-			case 0b01: factor = 136; break;
-			case 0b10: factor = 204; break;
-			case 0b11: factor = 255; break;
+			case 0b00: factor =  5; break; // 5
+			case 0b01: factor =  8; break; // 8
+			case 0b10: factor = 12; break;	// 12
+			case 0b11: factor = 15; break;	// 15
 		}
 
-		r = (factor * r) / 3;
-		g = (factor * g) / 3;
-		b = (factor * b) / 3;
+		// TODO: stupid rounding errors need to be resolved here
+		r = 17 * ((factor * r) / 3);
+		g = 17 * ((factor * g) / 3);
+		b = 17 * ((factor * b) / 3);
 
 		palette[i] = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+		//printf("%02x - %08x\n", i, palette[i]);
 	}
 }
 
@@ -392,56 +394,95 @@ uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t
 
 uint8_t blitter_ic::io_read8(uint16_t address)
 {
-	switch (address & 0xff) {
-		case 0x02: return src_surface;
-		case 0x03: return dst_surface;
-		case 0x04: return tile_surface;
-		case 0x05: return draw_color;
+	switch (address & 0x700) {
+		case 0x000:
+			switch (address & 0xff) {
+				case 0x02: return src_surface;
+				case 0x03: return dst_surface;
+				case 0x04: return tile_surface;
+				case 0x05: return draw_color;
 
-		case 0x08: return (((uint16_t)x0) & 0xff00) >> 8;
-		case 0x09: return ((uint16_t)x0) & 0xff;
-		case 0x0a: return (((uint16_t)y0) & 0xff00) >> 8;
-		case 0x0b: return ((uint16_t)y0) & 0xff;
-		case 0x0c: return (((uint16_t)x1) & 0xff00) >> 8;
-		case 0x0d: return ((uint16_t)x1) & 0xff;
-		case 0x0e: return (((uint16_t)y1) & 0xff00) >> 8;
-		case 0x0f: return ((uint16_t)y1) & 0xff;
+				case 0x08: return (((uint16_t)x0) & 0xff00) >> 8;
+				case 0x09: return ((uint16_t)x0) & 0xff;
+				case 0x0a: return (((uint16_t)y0) & 0xff00) >> 8;
+				case 0x0b: return ((uint16_t)y0) & 0xff;
+				case 0x0c: return (((uint16_t)x1) & 0xff00) >> 8;
+				case 0x0d: return ((uint16_t)x1) & 0xff;
+				case 0x0e: return (((uint16_t)y1) & 0xff00) >> 8;
+				case 0x0f: return ((uint16_t)y1) & 0xff;
 
-		default: return 0x00;
+				case 0x10: return 0x00;
+				case 0x11: return (vram_peek & 0x00ff0000) >> 16;
+				case 0x12: return (vram_peek & 0x0000ff00) >>  8;
+				case 0x13: return (vram_peek & 0x000000ff) >>  0;
+
+				default: return 0x00;
+			}
+		case 0x100:
+			return vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK];
+		case 0x200:
+			return io_surfaces_read8(address & 0xff);
+		case 0x300:
+			return io_color_indices_read8(address & 0xff);
+		case 0x400:
+		case 0x500:
+		case 0x600:
+		case 0x700:
+			return io_palette_read8(address & 0x3ff);
+		default:
+			return 0x00;
 	}
 }
 
 void blitter_ic::io_write8(uint16_t address, uint8_t value)
 {
-	switch (address & 0xff) {
-		case 0x01:
-			// control register
-			switch (value) {
-				case 0b0000001: blit(src_surface, dst_surface); break;
-				case 0b0000010: tile_blit(src_surface, dst_surface, tile_surface); break;
-				case 0b0000100: clear_surface(draw_color, dst_surface); break;
-				case 0b0001000: pset(x0, y0, draw_color, dst_surface); break;
-				case 0b0010000: line(x0, y0, x1, y1, draw_color, dst_surface); break;
-				case 0b0100000: rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
-				case 0b1000000: solid_rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
+	switch (address & 0x700) {
+		case 0x000:
+			switch (address & 0xff) {
+				case 0x01:
+					// control register
+					switch (value) {
+						case 0b0000001: blit(src_surface, dst_surface); break;
+						case 0b0000010: tile_blit(src_surface, dst_surface, tile_surface); break;
+						case 0b0000100: clear_surface(draw_color, dst_surface); break;
+						case 0b0001000: pset(x0, y0, draw_color, dst_surface); break;
+						case 0b0010000: line(x0, y0, x1, y1, draw_color, dst_surface); break;
+						case 0b0100000: rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
+						case 0b1000000: solid_rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
+						default: break;
+					}
+					break;
+				case 0x02: src_surface = value & 0b1111; break;
+				case 0x03: dst_surface = value & 0b1111; break;
+				case 0x04: tile_surface = value & 0b1111; break;
+				case 0x05: draw_color = value; break;
+
+				case 0x08: x0 = (int16_t)((((uint16_t)x0) & 0x00ff) | (value << 8)); break;
+				case 0x09: x0 = (int16_t)((((uint16_t)x0) & 0xff00) | value);        break;
+				case 0x0a: y0 = (int16_t)((((uint16_t)y0) & 0x00ff) | (value << 8)); break;
+				case 0x0b: y0 = (int16_t)((((uint16_t)y0) & 0xff00) | value);        break;
+				case 0x0c: x1 = (int16_t)((((uint16_t)x1) & 0x00ff) | (value << 8)); break;
+				case 0x0d: x1 = (int16_t)((((uint16_t)x1) & 0xff00) | value);        break;
+				case 0x0e: y1 = (int16_t)((((uint16_t)y1) & 0x00ff) | (value << 8)); break;
+				case 0x0f: y1 = (int16_t)((((uint16_t)y1) & 0xff00) | value);        break;
+
+				case 0x10: break; // do nothing
+				case 0x11: vram_peek = (vram_peek & 0x0000ffff) | (value << 16); break;
+				case 0x12: vram_peek = (vram_peek & 0x00ff00ff) | (value <<  8); break;
+				case 0x13: vram_peek = (vram_peek & 0x00ffff00) | (value <<  0); break;
+
 				default: break;
 			}
 			break;
-		case 0x02: src_surface = value & 0b1111; break;
-		case 0x03: dst_surface = value & 0b1111; break;
-		case 0x04: tile_surface = value & 0b1111; break;
-		case 0x05: draw_color = value; break;
-
-		case 0x08: x0 = (int16_t)((((uint16_t)x0) & 0x00ff) | (value << 8)); break;
-		case 0x09: x0 = (int16_t)((((uint16_t)x0) & 0xff00) | value);        break;
-		case 0x0a: y0 = (int16_t)((((uint16_t)y0) & 0x00ff) | (value << 8)); break;
-		case 0x0b: y0 = (int16_t)((((uint16_t)y0) & 0xff00) | value);        break;
-		case 0x0c: x1 = (int16_t)((((uint16_t)x1) & 0x00ff) | (value << 8)); break;
-		case 0x0d: x1 = (int16_t)((((uint16_t)x1) & 0xff00) | value);        break;
-		case 0x0e: y1 = (int16_t)((((uint16_t)y1) & 0x00ff) | (value << 8)); break;
-		case 0x0f: y1 = (int16_t)((((uint16_t)y1) & 0xff00) | value);        break;
-
-		default: break;
+		case 0x100: vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK] = value; break;
+		case 0x200: io_surfaces_write8(address & 0xff, value); break;
+		case 0x300: io_color_indices_write8(address & 0xff, value); break;
+		case 0x400:
+		case 0x500:
+		case 0x600:
+		case 0x700:
+			io_palette_write8(address & 0x3ff, value);
+			break;
 	}
 }
 

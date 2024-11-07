@@ -53,13 +53,6 @@ uint8_t core_t::read8(uint16_t address)
 	uint8_t page = (address & 0xff00) >> 8;
 
 	switch (page) {
-		case BLITTER_SURFACES:
-			return blitter->io_surfaces_read8(address);
-		case BLITTER_COLOR_TABLES:
-			return blitter->io_color_indices_read8(address);
-		// case BLITTER_PALETTE:
-		// case BLITTER_PALETTE+1:
-		// 	return blitter->io_palette_read8(address);
 		case CORE_PAGE:
 			return io_read8(address);
 		case KEYBOARD_PAGE:
@@ -72,9 +65,15 @@ uint8_t core_t::read8(uint16_t address)
 		case SOUND_PAGE+1:
 			return sound->io_read_byte(address & 0x1ff);
 		case BLITTER_PAGE:
-			return blitter->io_read8(address & 0xff);
-		case VRAM_PEEK_PAGE:
-			return blitter->vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK];
+		case BLITTER_PAGE+1:	// vram peek
+		case BLITTER_PAGE+2:	// surfaces
+		case BLITTER_PAGE+3:	// color tables
+		case BLITTER_PAGE+4:
+		case BLITTER_PAGE+5:
+		case BLITTER_PAGE+6:
+		case BLITTER_PAGE+7:
+			// TODO: hack
+			return blitter->io_read8((address - 0xe00) & 0x7ff);
 		case ROM_PAGE:
 		case ROM_PAGE+1:
 		case ROM_PAGE+2:
@@ -89,16 +88,6 @@ void core_t::write8(uint16_t address, uint8_t value) {
 	uint8_t page = (address & 0xff00) >> 8;
 
 	switch (page) {
-		case BLITTER_SURFACES:
-			blitter->io_surfaces_write8(address, value);
-			break;
-		case BLITTER_COLOR_TABLES:
-			blitter->io_color_indices_write8(address, value);
-			break;
-		// case BLITTER_PALETTE:
-		// case BLITTER_PALETTE+1:
-		// 	blitter->io_palette_write8(address, value);
-		// 	break;
 		case CORE_PAGE:
 			io_write8(address, value);
 			break;
@@ -116,10 +105,15 @@ void core_t::write8(uint16_t address, uint8_t value) {
 			sound->io_write_byte(address & 0x1ff, value);
 			break;
 		case BLITTER_PAGE:
-			blitter->io_write8(address & 0xff, value);
-			break;
-		case VRAM_PEEK_PAGE:
-			blitter->vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK] = value;
+		case BLITTER_PAGE+1:	// vram peek
+		case BLITTER_PAGE+2:	// surfaces
+		case BLITTER_PAGE+3:	// color tables
+		case BLITTER_PAGE+4:
+		case BLITTER_PAGE+5:
+		case BLITTER_PAGE+6:
+		case BLITTER_PAGE+7:
+			// TODO: hack
+			blitter->io_write8((address - 0xe00) & 0x7ff, value);
 			break;
 		default:
 			blitter->vram[address] = value;
@@ -150,8 +144,8 @@ void core_t::reset()
 	// no need for base_address (implied by flags_2)
 
 	// some little check if deadbeef looks SCRAMBLED meaning host is little endian
-	uint32_t *e = (uint32_t *)&blitter->vram[0x1000];
-	*e = 0xdeadbeef;
+	uint32_t *e = (uint32_t *)&blitter->vram[0x2000];
+	*e = 0xefbeadde;
 
 	commander->reset();
 }
@@ -200,14 +194,6 @@ uint8_t core_t::io_read8(uint16_t address)
 				(generate_interrupts_frame_done    ? 0b00000001 : 0b00000000) |
 				(generate_interrupts_load_bin      ? 0b00000010 : 0b00000000) |
 				(generate_interrupts_load_squirrel ? 0b00001000 : 0b00000000) ;
-		case 0x08:
-			return 0x00;
-		case 0x09:
-			return (vram_peek & 0xff0000) >> 16;
-		case 0x0a:
-			return (vram_peek & 0x00ff00) >> 8;
-		case 0x0b:
-			return vram_peek & 0x0000ff;
 		default:
 			return 0;
 	}
@@ -232,18 +218,6 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 			generate_interrupts_frame_done    = (value & 0b00000001) ? true : false;
 			generate_interrupts_load_bin      = (value & 0b00000010) ? true : false;
 			generate_interrupts_load_squirrel = (value & 0b00001000) ? true : false;
-			break;
-		case 0x08:
-			// do nothing
-			break;
-		case 0x09:
-			vram_peek = (vram_peek & 0x0000ffff) | (value << 16);
-			break;
-		case 0x0a:
-			vram_peek = (vram_peek & 0x00ff00ff) | (value << 8);
-			break;
-		case 0x0b:
-			vram_peek = (vram_peek & 0x00ffff00) | value;
 			break;
 		default:
 			break;

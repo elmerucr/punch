@@ -43,7 +43,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 		* ```$4xe```: flags_2
 		* ```$4xf```: index ("sprite pointer")
 	* ```$500-$5ff``` blitter surface color tables (16) for 1, 2 and 4 bit color modes
-	* ```$600-$7ff``` reserved area
+	* ```$600-$7ff``` sound
 	* ```$800-$8ff``` core
 		* ```$800``` status register
 		* ```$801``` control register
@@ -51,7 +51,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 	* ```$900-$9ff``` keyboard
 	* ```$a00-$aff``` timer
 	* ```$b00-$bff``` commander (scripting engine)
-	* ```$c00-$dff``` sound
+	* ```$c00-$dff``` reserved area
 	* ```$e00-$eff``` blitter
 		* ```$e00``` status register (unused)
 		* ```$e01``` control register
