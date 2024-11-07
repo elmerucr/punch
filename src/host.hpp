@@ -165,8 +165,8 @@ public:
 	/*
 	 * Video related
 	 */
-	void update_core_texture(uint16_t *core);
-	void update_debugger_texture(uint16_t *debugger);
+	void update_core_texture(uint32_t *core);
+	void update_debugger_texture(uint32_t *debugger);
 	void update_screen();
 
 	void video_increase_window_size();

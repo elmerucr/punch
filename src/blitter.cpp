@@ -12,11 +12,23 @@
 
 blitter_ic::blitter_ic()
 {
+	/*
+	 * Determine endianness
+	 */
+	uint32_t n1 = 1;
+	if (*((uint8_t *)&n1)) {
+		printf("[Blitter] Host system is little endian\n");
+		little_endian = true;
+	} else {
+		printf("[Blitter] Host system is big endian\n");
+		little_endian = false;
+	}
+
 	vram = new uint8_t[VRAM_SIZE];
 
-	framebuffer = new uint16_t[PIXELS];
+	framebuffer = new uint32_t[PIXELS];
 
-	palette = new uint16_t[256];
+	palette = new uint32_t[256];
 
 //	/*
 //	 * std RGB332 palette
@@ -45,24 +57,24 @@ blitter_ic::blitter_ic()
 	 * Inspired by: https://www.bigmessowires.com/2008/07/04/video-palette-setup/
 	 */
 	for (int i = 0; i < 256; i++) {
-		uint16_t r = (i & 0b11000000) >> 6;
-		uint16_t g = (i & 0b00110000) >> 4;
-		uint16_t b = (i & 0b00001100) >> 2;
-		uint16_t s = (i & 0b00000011) >> 0;
-		uint16_t factor = 0;
+		uint32_t r = (i & 0b11000000) >> 6;
+		uint32_t g = (i & 0b00110000) >> 4;
+		uint32_t b = (i & 0b00001100) >> 2;
+		uint32_t s = (i & 0b00000011) >> 0;
+		uint32_t factor = 0;
 
 		switch (s) {
-			case 0b00: factor = 5; break;
-			case 0b01: factor = 8; break;
-			case 0b10: factor = 12; break;
-			case 0b11: factor = 15; break;
+			case 0b00: factor =  85; break;
+			case 0b01: factor = 136; break;
+			case 0b10: factor = 204; break;
+			case 0b11: factor = 255; break;
 		}
 
 		r = (factor * r) / 3;
 		g = (factor * g) / 3;
 		b = (factor * b) / 3;
 
-		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
+		palette[i] = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
 	}
 }
 

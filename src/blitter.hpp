@@ -100,6 +100,8 @@ struct surface_t {
 
 class blitter_ic {
 private:
+	bool little_endian;
+
 	// blitter registers
 	uint8_t src_surface{0};
 	uint8_t dst_surface{0};
@@ -189,8 +191,8 @@ public:
 	void update_framebuffer();
 
 	uint8_t *vram;
-	uint16_t *framebuffer;
-	uint16_t *palette;
+	uint32_t *framebuffer;
+	uint32_t *palette;
 };
 
 #endif

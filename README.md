@@ -58,9 +58,10 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 			* write ```0b00000001```: blit source to destination surface
 			* write ```0b00000010```: tile blit source/dest/tile
 			* write ```0b00000100```: clear destination surface with drawing color
-			* write ```0b00001000```: line
-			* write ```0b00010000```: rectangle
-			* write ```0b00100000```: solid rectangle
+			* write ```0b00001000```: pset
+			* write ```0b00010000```: line
+			* write ```0b00100000```: rectangle
+			* write ```0b01000000```: solid rectangle
 		* ```$e02``` source surface pointer (lowest nibble only)
 		* ```$e03``` destination surface pointer (lowest nibble only)
 		* ```$e04``` tile surface pointer (lowest nibble)
@@ -69,7 +70,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 		* ```$e0a-$e0b``` y0 for drawing operations (16 bit signed)
 		* ```$e0c-$e0d``` x1 for drawing operations (16 bit signed)
 		* ```$e0e-$e0f``` y1 for drawing operations (16 bit signed)
-	* ```$f00-$fff``` vram peek (see $802/$803 as well)
+	* ```$f00-$fff``` vram peek
 * ```$1000-$fbff``` 59kb ram ($fc00 is initial usp)
 * ```$fc00-$ffff``` 1kb kernel + vectors
 
@@ -110,7 +111,7 @@ To be done
 * [MC6809](https://github.com/elmerucr/mC6809) - MC6809 cpu emulator written in C++.
 * [Mega65](http://mega65.org) - The 21st century realization of the C65 heritage.
 * [Moira](https://github.com/dirkwhoffmann/Moira) - Motorola 68000 cpu emulator written in C++ by Dirk W. Hoffmann.
-* [reSID](http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/resid/index.html) - ReSID is a Commodore 6581 or 8580 Sound Interface Device emulator by Dag Lem.
+* [reSID](http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/resid/index.html) - ReSID is a Commodore 6581 and 8580 Sound Interface Device emulator by Dag Lem.
 * [SDL Simple DirectMedia Layer](https://www.libsdl.org) - A cross-platform development library by Sam Lantinga designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware.
 * [Squirrel](http://squirrel-lang.org) - Squirrel is a high level imperative, object-oriented programming language, designed to be a light-weight scripting language that fits in the size, memory bandwidth, and real-time requirements of applications like video games.
 * [stb](https://github.com/nothings/stb) - single-file public domain (or MIT licensed) libraries for C/C++
