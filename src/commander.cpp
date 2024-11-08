@@ -103,44 +103,44 @@ function breakhere(number)
 
 function pset(x0, y0, color, surface)
 {
-	poke16(0xe08, x0)
-	poke16(0xe0a, y0)
-	poke(0xe05, color)
-	poke(0xe03, surface)
-	poke(0xe01, 0x08)
+	poke16(0x808, x0)
+	poke16(0x80a, y0)
+	poke(0x805, color)
+	poke(0x803, surface)
+	poke(0x801, 0x08)
 }
 
 function line(x0, y0, x1, y1, color, surface)
 {
-	poke16(0xe08, x0)
-	poke16(0xe0a, y0)
-	poke16(0xe0c, x1)
-	poke16(0xe0e, y1)
-	poke(0xe05, color)
-	poke(0xe03, surface)
-	poke(0xe01, 0x10)
+	poke16(0x808, x0)
+	poke16(0x80a, y0)
+	poke16(0x80c, x1)
+	poke16(0x80e, y1)
+	poke(0x805, color)
+	poke(0x803, surface)
+	poke(0x801, 0x10)
 }
 
 function rectangle(x0, y0, x1, y1, color, surface)
 {
-	poke16(0xe08, x0)
-	poke16(0xe0a, y0)
-	poke16(0xe0c, x1)
-	poke16(0xe0e, y1)
-	poke(0xe05, color)
-	poke(0xe03, surface)
-	poke(0xe01, 0x20)
+	poke16(0x808, x0)
+	poke16(0x80a, y0)
+	poke16(0x80c, x1)
+	poke16(0x80e, y1)
+	poke(0x805, color)
+	poke(0x803, surface)
+	poke(0x801, 0x20)
 }
 
 function solid_rectangle(x0, y0, x1, y1, color, surface)
 {
-	poke16(0xe08, x0)
-	poke16(0xe0a, y0)
-	poke16(0xe0c, x1)
-	poke16(0xe0e, y1)
-	poke(0xe05, color)
-	poke(0xe03, surface)
-	poke(0xe01, 0x40)
+	poke16(0x808, x0)
+	poke16(0x80a, y0)
+	poke16(0x80c, x1)
+	poke16(0x80e, y1)
+	poke(0x805, color)
+	poke(0x803, surface)
+	poke(0x801, 0x40)
 }
 
 midi <- [
