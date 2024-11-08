@@ -53,14 +53,19 @@ uint8_t core_t::read8(uint16_t address)
 	uint8_t page = (address & 0xff00) >> 8;
 
 	switch (page) {
-		case CORE_PAGE:
-			return io_read8(address);
+		case COMBINED_PAGE:
+			switch (address & 0x00e0) {
+				case CORE_SUB_PAGE:
+					return io_read8(address);
+				case TIMER_SUB_PAGE:
+					return timer->io_read_byte(address & 0x1f);
+				case COMMANDER_SUB_PAGE:
+					return commander->io_read8(address & 0x1f);
+				default:
+					return 0x00;
+			}
 		case KEYBOARD_PAGE:
 			return system->keyboard->io_read8(address);
-		case TIMER_PAGE:
-			return timer->io_read_byte(address & 0xff);
-		case COMMANDER_PAGE:
-			return commander->io_read8(address & 0xff);
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
 			return sound->io_read_byte(address & 0x1ff);
@@ -72,8 +77,7 @@ uint8_t core_t::read8(uint16_t address)
 		case BLITTER_PAGE+5:
 		case BLITTER_PAGE+6:
 		case BLITTER_PAGE+7:
-			// TODO: hack
-			return blitter->io_read8((address - 0xe00) & 0x7ff);
+			return blitter->io_read8(address & 0x7ff);
 		case ROM_PAGE:
 		case ROM_PAGE+1:
 		case ROM_PAGE+2:
@@ -88,17 +92,23 @@ void core_t::write8(uint16_t address, uint8_t value) {
 	uint8_t page = (address & 0xff00) >> 8;
 
 	switch (page) {
-		case CORE_PAGE:
-			io_write8(address, value);
-			break;
+		case COMBINED_PAGE:
+			switch (address & 0x00e0) {
+				case CORE_SUB_PAGE:
+					io_write8(address, value);
+					break;
+				case TIMER_SUB_PAGE:
+					timer->io_write_byte(address & 0x1f, value);
+					break;
+				case COMMANDER_SUB_PAGE:
+					commander->io_write8(address & 0x1f, value);
+					break;
+				default:
+					// do nothing
+					break;
+			}
 		case KEYBOARD_PAGE:
 			system->keyboard->io_write8(address, value);
-			break;
-		case TIMER_PAGE:
-			timer->io_write_byte(address & 0xff, value);
-			break;
-		case COMMANDER_PAGE:
-			commander->io_write8(address & 0xff, value);
 			break;
 		case SOUND_PAGE:
 		case SOUND_PAGE+1:
@@ -112,8 +122,7 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case BLITTER_PAGE+5:
 		case BLITTER_PAGE+6:
 		case BLITTER_PAGE+7:
-			// TODO: hack
-			blitter->io_write8((address - 0xe00) & 0x7ff, value);
+			blitter->io_write8(address & 0x7ff, value);
 			break;
 		default:
 			blitter->vram[address] = value;
@@ -144,7 +153,7 @@ void core_t::reset()
 	// no need for base_address (implied by flags_2)
 
 	// some little check if deadbeef looks SCRAMBLED meaning host is little endian
-	uint32_t *e = (uint32_t *)&blitter->vram[0x2000];
+	uint32_t *e = (uint32_t *)&blitter->vram[0x1000];
 	*e = 0xefbeadde;
 
 	commander->reset();
@@ -181,7 +190,7 @@ enum output_states core_t::run(bool debug)
 
 uint8_t core_t::io_read8(uint16_t address)
 {
-	switch (address & 0x0f) {
+	switch (address & 0x1f) {
 		case 0x00:
 			// status register
 			return
@@ -201,7 +210,7 @@ uint8_t core_t::io_read8(uint16_t address)
 
 void core_t::io_write8(uint16_t address, uint8_t value)
 {
-	switch (address & 0x0f) {
+	switch (address & 0x1f) {
 		case 0x00:
 			if ((value & 0b00000001) && (!irq_line_frame_done)) {
 				irq_line_frame_done = true;
@@ -220,6 +229,7 @@ void core_t::io_write8(uint16_t address, uint8_t value)
 			generate_interrupts_load_squirrel = (value & 0b00001000) ? true : false;
 			break;
 		default:
+			// do nothing
 			break;
 	}
 }

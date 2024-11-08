@@ -268,12 +268,13 @@ void commander_t::reset()
 
 uint8_t commander_t::io_read8(uint16_t address)
 {
+	// empty
 	return 0x00;
 }
 
 void commander_t::io_write8(uint16_t address, uint8_t value)
 {
-	switch (address & 0xff) {
+	switch (address & 0x1f) {
 		case 0x00:
 			// status register squirrel
 			break;

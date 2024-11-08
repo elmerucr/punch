@@ -18,15 +18,13 @@
 #include "clocks.hpp"
 #include "commander.hpp"
 
-#define CORE_PAGE				0x04
+#define COMBINED_PAGE			0x04
+#define CORE_SUB_PAGE				0x00
+#define TIMER_SUB_PAGE				0x20
+#define COMMANDER_SUB_PAGE			0x40
 #define KEYBOARD_PAGE			0x05
-#define SOUND_PAGE				0x06 // + 0x07
-
-#define	TIMER_PAGE				0x0a
-#define COMMANDER_PAGE			0x0b
-
-#define	BLITTER_PAGE			0x0e
-
+#define SOUND_PAGE				0x06 // and 0x07
+#define	BLITTER_PAGE			0x08
 #define	ROM_PAGE				0xfc
 
 enum output_states {
