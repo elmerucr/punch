@@ -27,62 +27,10 @@ blitter_ic::blitter_ic()
 	vram = new uint8_t[VRAM_SIZE];
 
 	framebuffer = new uint32_t[PIXELS];
-
-	palette = new uint32_t[256];
-
-//	/*
-//	 * std RGB332 palette
-//	 */
-//	for (int i = 0; i < 256; i++) {
-//		uint16_t r = (i & 0b11100000) >> 5;
-//		uint16_t g = (i & 0b00011100) >> 2;
-//		uint16_t b = (i & 0b00000011) >> 0;
-//		r = (15 * r) / 7;
-//		g = (15 * g) / 7;
-//		b = (15 * b) / 3;
-//		//printf("No:%03i r:%02i g:%02i b:%02i\n", i, r, g, b);
-//		palette[i] = 0b1111000000000000 | (r << 8) | (g << 4) | (b << 0);
-//	}
-
-	/*
-	 * A palette using RRGGBBII system. R, G and B use two bits and have
-	 * 4 levels each (0.00, 0.33, 0.66 and 1.00 of max). On top of that,
-	 * the intensity level (II) is shared between all channels.
-	 *
-	 * Final color levels are RR * II, GG * II and BB * II.
-	 *
-	 * II is not linear, see below. This system results in a nice palette
-	 * with many dark shades as well to choose from (compared to RGB332).
-	 *
-	 * Inspired by: https://www.bigmessowires.com/2008/07/04/video-palette-setup/
-	 */
-	for (int i = 0; i < 256; i++) {
-		uint32_t r = (i & 0b11000000) >> 6;
-		uint32_t g = (i & 0b00110000) >> 4;
-		uint32_t b = (i & 0b00001100) >> 2;
-		uint32_t s = (i & 0b00000011) >> 0;
-		uint32_t factor = 0;
-
-		switch (s) {
-			case 0b00: factor =  5; break; // 5
-			case 0b01: factor =  8; break; // 8
-			case 0b10: factor = 12; break;	// 12
-			case 0b11: factor = 15; break;	// 15
-		}
-
-		// TODO: stupid rounding errors need to be resolved here
-		r = 17 * ((factor * r) / 3);
-		g = 17 * ((factor * g) / 3);
-		b = 17 * ((factor * b) / 3);
-
-		palette[i] = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-		//printf("%02x - %08x\n", i, palette[i]);
-	}
 }
 
 blitter_ic::~blitter_ic()
 {
-	delete [] palette;
 	delete [] framebuffer;
 	delete [] vram;
 }
