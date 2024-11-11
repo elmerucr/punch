@@ -152,9 +152,9 @@ void core_t::reset()
 	blitter->surface[0xe].flags_2 = 0b00000001;
 	// no need for base_address (implied by flags_2)
 
+	// TODO: remove this later
 	// some little check if deadbeef looks SCRAMBLED meaning host is little endian
-	uint32_t *e = (uint32_t *)&blitter->vram[0x1000];
-	*e = 0xefbeadde;
+	blitter->vram32[0x400] = 0xefbeadde;
 
 	commander->reset();
 }
