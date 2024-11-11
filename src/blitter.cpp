@@ -12,19 +12,8 @@
 
 blitter_ic::blitter_ic()
 {
-	/*
-	 * Determine endianness
-	 */
-	uint32_t n1 = 1;
-	if (*((uint8_t *)&n1)) {
-		printf("[Blitter] Host system is little endian\n");
-		little_endian = true;
-	} else {
-		printf("[Blitter] Host system is big endian\n");
-		little_endian = false;
-	}
-
-	vram = new uint8_t[VRAM_SIZE];
+	vram32 = new uint32_t[VRAM32_SIZE];
+	vram = (uint8_t *)vram32;
 
 	framebuffer = new uint32_t[PIXELS];
 }
@@ -32,7 +21,7 @@ blitter_ic::blitter_ic()
 blitter_ic::~blitter_ic()
 {
 	delete [] framebuffer;
-	delete [] vram;
+	delete [] vram32;
 }
 
 void blitter_ic::reset()

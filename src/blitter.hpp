@@ -9,6 +9,7 @@
 #define BLITTER_HPP
 
 #include <cstdint>
+#include <cstddef>
 #include "common.hpp"
 #include "font_4x6.hpp"
 #include "font_cbm_8x8.hpp"
@@ -21,6 +22,24 @@
 #define FLAGS1_HOR_FLIP		0b00010000
 #define FLAGS1_VER_FLIP		0b00100000
 #define	FLAGS1_X_Y_FLIP		0b01000000
+
+class vram_t {
+private:
+	uint32_t *mem;
+	uint8_t *mem8;
+	uint32_t scramble{0b00};
+public:
+	vram_t() {
+		mem = new uint32_t[0x400000];	// 16mb of bytes
+		mem8 = (uint8_t *)mem;
+		uint32_t n1 = 1; if (*((uint8_t *)&n1)) scramble = 0b11;	// discover endianness
+	}
+	~vram_t() { delete [] mem; }
+	uint32_t read32(uint32_t address) { return mem[(address & 0xffffff) >> 2]; }
+	void write32(uint32_t address, uint32_t value) { mem[(address & 0xffffff) >> 2] = value; }
+	uint8_t read8(uint32_t address) { return mem[(address & 0xffffff) ^ scramble]; }
+	void write8(uint32_t address, uint8_t value) { mem[(address & 0xffffff) ^ scramble] = value; }
+};
 
 /*
  * for both pixels and tiles!!!
@@ -100,9 +119,9 @@ struct surface_t {
 
 class blitter_ic {
 private:
-	bool little_endian;
-
-	// blitter registers
+	/*
+	 * Blitter registers
+	 */
 	uint8_t src_surface{0};
 	uint8_t dst_surface{0};
 	uint8_t tile_surface{0};
@@ -111,6 +130,7 @@ private:
 	int16_t y0{0};
 	int16_t x1{0};
 	int16_t y1{0};
+	uint32_t vram_peek{0};	// base address for vram peek page
 
 	/*
 	 * To restrain max no of pixels per frame
@@ -193,8 +213,9 @@ public:
 
 	void update_framebuffer();
 
+	uint32_t *vram32;
 	uint8_t *vram;
-	uint32_t vram_peek{0};	// base address for vram peek page
+	vram_t ram;
 
 	uint32_t *framebuffer;
 
