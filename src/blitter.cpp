@@ -12,16 +12,12 @@
 
 blitter_ic::blitter_ic()
 {
-	vram32 = new uint32_t[VRAM32_SIZE];
-	vram = (uint8_t *)vram32;
-
-	framebuffer = new uint32_t[PIXELS];
+	vram = new uint8_t[VRAM_SIZE];
 }
 
 blitter_ic::~blitter_ic()
 {
-	delete [] framebuffer;
-	delete [] vram32;
+	delete [] vram;
 }
 
 void blitter_ic::reset()
@@ -30,10 +26,48 @@ void blitter_ic::reset()
 		vram[i] = (i & 0x40) ? 0xfc : 0x00;
 	}
 
+	/*
+	 * A palette using RRGGBBII system. R, G and B use two bits and have
+	 * 4 levels each (0.00, 0.33, 0.66 and 1.00 of max). On top of that,
+	 * the intensity level (II) is shared between all channels.
+	 *
+	 * Final color levels are RR * II, GG * II and BB * II.
+	 *
+	 * II is not linear, see below. This system results in a nice palette
+	 * with many dark shades as well to choose from (compared to RGB332).
+	 *
+	 * Inspired by: https://www.bigmessowires.com/2008/07/04/video-palette-setup/
+	 */
+	for (int i = 0; i < 256; i++) {
+		uint32_t r = (i & 0b11000000) >> 6;
+		uint32_t g = (i & 0b00110000) >> 4;
+		uint32_t b = (i & 0b00001100) >> 2;
+		uint32_t s = (i & 0b00000011) >> 0;
+		uint32_t factor = 0;
+
+		switch (s) {
+			case 0b00: factor =  5; break;
+			case 0b01: factor =  8; break;
+			case 0b10: factor = 12; break;
+			case 0b11: factor = 15; break;
+		}
+
+		// TODO: Unfortunately, rounding here is key to the colors that
+		// can be seen. Maybe optimize this somehow?
+		r = 17 * ((factor * r) / 3);
+		g = 17 * ((factor * g) / 3);
+		b = 17 * ((factor * b) / 3);
+
+		vram[0xc00 + (i << 2) + 0] = 0xff;
+		vram[0xc00 + (i << 2) + 1] = r;
+		vram[0xc00 + (i << 2) + 2] = g;
+		vram[0xc00 + (i << 2) + 3] = b;
+	}
+
 	surface[0].w = MAX_PIXELS_PER_SCANLINE;
 	surface[0].h = MAX_SCANLINES;
 	surface[0].base_address = 0x00f00000;
-	surface[0].flags_0 = 0x00;
+	surface[0].flags_0 = 0x40;
 	surface[0].flags_1 = 0x00;
 	surface[0].flags_2 = 0x00;
 }
@@ -98,10 +132,9 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	/*
 	 * Pixel selector from vram or font + offset + mask selector
 	 */
-	uint8_t *memory{nullptr};
-	uint32_t memory_mask{0};
-	uint32_t start_address{0};
-	uint32_t index = (src->index * src->w * src->h);
+	uint8_t *memory;		// memory is start of an array to 8 bit color numbers
+	uint32_t memory_mask;	// mask used when referring to this memory
+	uint32_t start_address;
 
 	switch (src->flags_2 & 0b00000111) {
 		case 0b000:
@@ -116,13 +149,21 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 			break;
 		case 0b001:
 			memory = font_4x6.data;
-			memory_mask = 0x3ff;
+			memory_mask = font_4x6.mask;
+			start_address = 0;
 			break;
 		case 0b100:
 			memory = font_cbm_8x8.data;
-			memory_mask = 0x7ff;
+			memory_mask = font_cbm_8x8.mask;
+			start_address = 0;
 			break;
 	}
+
+	/*
+	 * Based on source index (sort of a sprite pointer), we find an
+	 * offset to start address
+	 */
+	uint32_t offset = (src->index * src->w * src->h);
 
 	uint8_t color_mode = (src->flags_0 & 0b00110000) >> 4;
 
@@ -139,36 +180,65 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				if (src->flags_1 & FLAGS1_X_Y_FLIP) swap(dest_x, dest_y);
 
 				/*
-				 * Color selection
+				 * Write something here...
 				 */
-				uint32_t alt_index = index + (x >> dw) + (src->w * (y >> dh));	// index can't change during the for loops!
-				uint8_t px = memory[(start_address + (alt_index / color_modes[color_mode].pixels_per_byte)) & memory_mask];
+				uint32_t adj_offset = offset + (x >> dw) + (src->w * (y >> dh));	// offset can't change during the for loops!
 
-				// TODO: this looks like a mess
-				px >>= color_modes[color_mode].bits_per_pixel * (color_modes[color_mode].pixels_per_byte - (alt_index % color_modes[color_mode].pixels_per_byte) - 1);
+				/*
+				 * Color selection, first step
+				 */
+				uint8_t px = memory[(start_address + (adj_offset / color_modes[color_mode].pixels_per_byte)) & memory_mask];
+
+				/*
+				 * Depending on no of bits per pixel, there will be a bitshift
+				 * to the right on the extracted byte.
+				 */
+				px >>= color_modes[color_mode].bits_per_pixel * (color_modes[color_mode].pixels_per_byte - (adj_offset % color_modes[color_mode].pixels_per_byte) - 1);
+
+				/*
+				 * And use the correct mask.
+				 */
 				px &= color_modes[color_mode].mask;
 
-				bool px_present = px;
+				/*
+				 * Now is a good time to check if the pixel must be drawn,
+				 * so any value above zero. This is because the value of
+				 * px could be changed.
+				 */
+				bool draw_pixel = px;
 
-				if (color_modes[color_mode].color_lookup) px = src->color_indices[px];
+				/*
+				 * Apply another level of indirection for 1, 2 and 4 bpp,
+				 * if needed, update value of px.
+				 * This happens when color_lookup == true
+				 *
+				 * For 8 bit, px stays the same
+				 */
+				if (color_modes[color_mode].color_lookup) {
+					px = src->color_indices[px];
+				}
 
-				uint8_t *pixel = &vram[(dest->base_address + ((dest_y + src->y) * dest->w) + dest_x + src->x) & VRAM_SIZE_MASK];
+				/*
+				 * Find dst address where result must be stored
+				 */
+				uint32_t dst = (dest->base_address + ((((dest_y + src->y) * dest->w) + dest_x + src->x) << 2)) & VRAM_SIZE_MASK;
 
-				switch ((src->flags_0 & 0b011) | (px_present ? 0b100 : 0b000)) {
-					case 0b000: // no pixel, bg off, fore off, do nothing
-					case 0b010: // no pixel, bg off, fore on, do nothing
+				switch ((src->flags_0 & 0b011) | (draw_pixel ? 0b100 : 0b000)) {
+					case 0b000: // no pixel, fore off, bg off
+					case 0b010: // no pixel, fore on,  bg off
+						// do nothing
 						break;
-					case 0b001: // no pixel, bg on, fore off
-					case 0b011: // no pixel, bg on, fore on
-						*pixel = src->color_indices[0];
+					case 0b001: // no pixel, fore off, bg on
+					case 0b011: // no pixel, fore on,  bg on
+						blend(0xc00 + (src->color_indices[0] << 2), dst);
 						break;
-					case 0b100: // pixel, take it
-					case 0b101: // pixel, bg on, fore off
-						*pixel = px;
+					case 0b100: // pixel, fore off, bg off
+					case 0b101: // pixel, fore off, bg on
+						blend(0xc00 + (px << 2), dst);
 						break;
-					case 0b110: // pixel, bg off, fore on
-					case 0b111:
-						*pixel = src->color_indices[1];
+					case 0b110:	// pixel, fore on, bg off
+					case 0b111:	// pixel, fore on, bg on
+						blend(0xc00 + (src->color_indices[1] << 2), dst);
 						break;
 				}
 
@@ -225,8 +295,7 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 
 	for (uint32_t i=0; i < pixels; i++) {
 		if (pixel_saldo) {
-			uint8_t *pixel = &vram[(d->base_address + i) & VRAM_SIZE_MASK];
-			*pixel = col;
+			blend(0xc00+(col<<2),(d->base_address + (i << 2)) & VRAM_SIZE_MASK);
 			pixel_saldo--;
 		} else {
 			break;
@@ -238,10 +307,13 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 
 uint32_t blitter_ic::pset(int16_t x0, int16_t y0, uint8_t c, uint8_t d)
 {
-	uint8_t *pixel = & vram[(surface[d & 0b1111].base_address + (y0 * surface[d & 0b1111].w) + x0) & VRAM_SIZE_MASK];
-	*pixel = c;
-	pixel_saldo++;
-	return 1;
+	if (pixel_saldo) {
+		blend(0xc00 + (c << 2), (surface[d & 0b1111].base_address + (((y0 * surface[d & 0b1111].w) + x0) << 2)) & VRAM_SIZE_MASK);
+		pixel_saldo--;
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
@@ -262,9 +334,8 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 	while (x0 != x1 || y0 != y1) {
 		if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 			if (pixel_saldo) {
+				blend(0xc00 + (c << 2), (s->base_address + (((y0 * s->w) + x0) << 2)) & VRAM_SIZE_MASK);
 				pixel_saldo--;
-				uint8_t *pixel = &vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK];
-				*pixel = c;
 			}
 		}
 
@@ -284,9 +355,8 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 	 */
 	if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 		if (pixel_saldo) {
+			blend(0xc00 + (c << 2), (s->base_address + (((y0 * s->w) + x0) << 2)) & VRAM_SIZE_MASK);
 			pixel_saldo--;
-			uint8_t *pixel = &vram[(s->base_address + (y0 * s->w) + x0) & VRAM_SIZE_MASK];
-			*pixel = c;
 		}
 	}
 
@@ -319,15 +389,6 @@ uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t
 
 	return pixels;
 }
-
-//uint32_t blitter_ic::flood_fill(int16_t x0, int16_t y0, uint8_t c, uint8_t d)
-//{
-//	uint32_t pixels{0};
-//	surface_t *s = &surface[d & 0b1111];
-//
-//	uint8_t target_color = (s->base_page << 8) | (
-//	return pixels;
-//}
 
 uint8_t blitter_ic::io_read8(uint16_t address)
 {
@@ -365,7 +426,7 @@ uint8_t blitter_ic::io_read8(uint16_t address)
 		case 0x500:
 		case 0x600:
 		case 0x700:
-			return io_palette_read8(address & 0x3ff);
+			return vram[address];
 		default:
 			return 0x00;
 	}
@@ -411,14 +472,20 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 				default: break;
 			}
 			break;
-		case 0x100: vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK] = value; break;
-		case 0x200: io_surfaces_write8(address & 0xff, value); break;
-		case 0x300: io_color_indices_write8(address & 0xff, value); break;
+		case 0x100:
+			vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK] = value;
+			break;
+		case 0x200:
+			io_surfaces_write8(address & 0xff, value);
+			break;
+		case 0x300:
+			io_color_indices_write8(address & 0xff, value);
+			break;
 		case 0x400:
 		case 0x500:
 		case 0x600:
 		case 0x700:
-			io_palette_write8(address & 0x3ff, value);
+			vram[address] = value;
 			break;
 	}
 }
@@ -466,29 +533,15 @@ void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
 			case 0x9: surface[no].base_address = (surface[no].base_address & 0x0000ffff) | (value << 16); break;
 			case 0xa: surface[no].base_address = (surface[no].base_address & 0x00ff00ff) | (value << 8);  break;
 			case 0xb: surface[no].base_address = (surface[no].base_address & 0x00ffff00) | value;         break;
-			case 0xc: surface[no].flags_0 = value & 0b00110011; break;
+			case 0xc:
+				surface[no].flags_0 = value & 0b01110011;
+				// proper check for 32bit = 0b0100--- only!
+				if (surface[no].flags_0 & 0b01000000) surface[no].flags_0 &= 0b11001111;
+				break;
 			case 0xd: surface[no].flags_1 = value & 0b01111111; break;
 			case 0xe: surface[no].flags_2 = value & 0b00000111; break;
 			case 0xf: surface[no].index = value; break;
 			default:  break;
-		}
-	} else {
-		// surface 0 is special
-		switch (address & 0xf) {
-			case 0x9:
-				surface[0].base_address = (surface[0].base_address & 0x0000ffff) | (value << 16);
-				break;
-			case 0xa:
-				surface[0].base_address = (surface[0].base_address & 0x00ff00ff) | (value << 8);
-				break;
-			case 0xb:
-				surface[0].base_address = (surface[0].base_address & 0x00ffff00) | value;
-				break;
-			case 0xd:
-				surface[0].flags_1 = (surface[0].flags_1 & 0xf0) | (value & 0xf);
-				surface[0].w = MAX_PIXELS_PER_SCANLINE >> (surface[0].flags_1 & 0b11);
-				surface[0].h = MAX_SCANLINES >> ((surface[0].flags_1 & 0b1100) >> 2);
-				break;
 		}
 	}
 }
@@ -503,26 +556,4 @@ void blitter_ic::io_color_indices_write8(uint16_t address, uint8_t value)
 {
 	uint8_t no = (address & 0xf0) >> 4;
 	surface[no].color_indices[address & 0xf] = value;
-}
-
-void blitter_ic::update_framebuffer()
-{
-	int x_scale = surface[0].flags_1 & 0b11;
-	int y_scale = (surface[0].flags_1 & 0b1100) >> 2;
-
-	for (int y = 0; y < MAX_SCANLINES; y++) {
-		int source_y = y >> y_scale;
-
-		for (int x = 0; x < MAX_PIXELS_PER_SCANLINE; x++) {
-			int source_x = x >> x_scale;
-
-			framebuffer[(MAX_PIXELS_PER_SCANLINE * y ) + x] =
-				palette[
-					vram[
-						(surface[0].base_address +
-						((MAX_PIXELS_PER_SCANLINE >> x_scale) * source_y ) + source_x) & VRAM_SIZE_MASK
-					]
-				];
-		}
-	}
 }

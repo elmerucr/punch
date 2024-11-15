@@ -18,6 +18,7 @@
 class font_4x6_t {
 public:
 	uint8_t data[0x400]; // slightly larger then 768 bytes to make masking possible
+	uint32_t mask{0x3ff};
 
 	font_4x6_t() {
 		for (int i=0; i<0x300; i++) {

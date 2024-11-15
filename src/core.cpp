@@ -73,11 +73,11 @@ uint8_t core_t::read8(uint16_t address)
 		case BLITTER_PAGE+1:	// vram peek
 		case BLITTER_PAGE+2:	// surfaces
 		case BLITTER_PAGE+3:	// color tables
-		case BLITTER_PAGE+4:
+		case BLITTER_PAGE+4:	// palette in vram...
 		case BLITTER_PAGE+5:
 		case BLITTER_PAGE+6:
 		case BLITTER_PAGE+7:
-			return blitter->io_read8(address & 0x7ff);
+			return blitter->io_read8(address);
 		case ROM_PAGE:
 		case ROM_PAGE+1:
 		case ROM_PAGE+2:
@@ -122,7 +122,7 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case BLITTER_PAGE+5:
 		case BLITTER_PAGE+6:
 		case BLITTER_PAGE+7:
-			blitter->io_write8(address & 0x7ff, value);
+			blitter->io_write8(address, value);
 			break;
 		default:
 			blitter->vram[address] = value;
@@ -154,7 +154,7 @@ void core_t::reset()
 
 	// TODO: remove this later
 	// some little check if deadbeef looks SCRAMBLED meaning host is little endian
-	blitter->vram32[0x400] = 0xefbeadde;
+	*(uint32_t *)&blitter->vram[0x1000] = 0xefbeadde;
 
 	commander->reset();
 }

@@ -308,8 +308,8 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "x") == 0) {
 		terminal->printf("\nexit punch (y/n)");
 		redraw();
-		blitter->update_framebuffer();
-		system->host->update_debugger_texture(blitter->framebuffer);
+		//blitter->update_framebuffer();
+		system->host->update_debugger_texture((uint32_t *)&blitter->vram[0xf00000]);
 		system->host->update_screen();
 		if (system->host->events_yes_no()) {
 			system->running = false;
@@ -463,8 +463,8 @@ void debugger_t::process_command(char *c)
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
 		redraw();
-		blitter->update_framebuffer();
-		system->host->update_debugger_texture(blitter->framebuffer);
+		//blitter->update_framebuffer();
+		system->host->update_debugger_texture((uint32_t *)&blitter->vram[0xf00000]);
 		system->host->update_screen();
 		if (system->host->events_yes_no()) {
 			system->core->reset();

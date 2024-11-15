@@ -116,8 +116,8 @@ void system_t::run()
 			case DEBUG_MODE:
 				debugger->run();
 				debugger->redraw();
-				debugger->blitter->update_framebuffer();
-				host->update_debugger_texture(debugger->blitter->framebuffer);
+				//debugger->blitter->update_framebuffer();
+				host->update_debugger_texture((uint32_t *)&debugger->blitter->vram[0xf00000]);
 				break;
 		}
 
@@ -126,9 +126,9 @@ void system_t::run()
 			core->sound->run(audio_cycles - sound_cycle_saldo);
 		}
 
-		core->blitter->update_framebuffer();
+		//core->blitter->update_framebuffer();
 
-		host->update_core_texture(core->blitter->framebuffer);
+		host->update_core_texture((uint32_t *)&core->blitter->vram[0xf00000]);
 
 		//printf("%s", stats->summary());
 

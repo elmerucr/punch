@@ -205,6 +205,9 @@ void host_t::video_init()
 		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
 	}
 
+	/*
+	 * Used for clearing the renderer. Dark grey.
+	 */
 	SDL_SetRenderDrawColor(video_renderer, 18, 18, 18, 255);
 
 	SDL_RendererInfo current_renderer;
@@ -324,7 +327,7 @@ void host_t::create_core_texture(bool linear_filtering)
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
 
-	core_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB8888,
+	core_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB32,
 				    SDL_TEXTUREACCESS_STREAMING,
 				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_ADD);
@@ -340,7 +343,7 @@ void host_t::create_debugger_texture(bool linear_filtering)
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
 
-	debugger_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB8888,
+	debugger_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB32,
 				    SDL_TEXTUREACCESS_STREAMING,
 				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
 	SDL_SetTextureBlendMode(debugger_texture, SDL_BLENDMODE_ADD);
@@ -361,7 +364,7 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	}
 
-	scanlines_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB8888,
+	scanlines_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB32,
 										  SDL_TEXTUREACCESS_STATIC,
 										  MAX_PIXELS_PER_SCANLINE, 3 * MAX_SCANLINES);
 
@@ -371,7 +374,7 @@ void host_t::create_scanlines_texture(bool linear_filtering)
 		for (int j=0; j < MAX_PIXELS_PER_SCANLINE; j++) {
 			uint32_t color;
 			if ((i % 3) == 0 || (i % 3) == 2) {
-				color = 0xff000000;
+				color = 0x000000ff;
 			} else {
 				color = 0x00000000;
 			}
@@ -394,12 +397,12 @@ void host_t::create_shadowmask_texture()
 	uint32_t buffer[3 * MAX_PIXELS_PER_SCANLINE];
 
 	for (int i=0; i < 3 * MAX_PIXELS_PER_SCANLINE; i++) {
-		if (i % 3 == 0) buffer[i] = 0x33ff0000;
-		if (i % 3 == 1) buffer[i] = 0x3300ff00;
-		if (i % 3 == 2) buffer[i] = 0x330000ff;
+		if (i % 3 == 0) buffer[i] = 0x0000ff33;
+		if (i % 3 == 1) buffer[i] = 0x00ff0033;
+		if (i % 3 == 2) buffer[i] = 0xff000033;
 	}
 
-	shadowmask_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 3 * MAX_PIXELS_PER_SCANLINE, 1);
+	shadowmask_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STATIC, 3 * MAX_PIXELS_PER_SCANLINE, 1);
 	SDL_SetTextureBlendMode(shadowmask_texture, SDL_BLENDMODE_MUL);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	SDL_UpdateTexture(shadowmask_texture, NULL, buffer, 3 * MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
