@@ -160,11 +160,19 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	}
 
 	/*
-	 * Based on source index (like a sprite pointer), we find an
-	 * offset to start address
+	 * Based on source index (like a sprite pointer), find an offset to
+	 * start address.
 	 */
 	uint32_t offset = (src->index * src->w * src->h);
 
+	/*
+	 * Get color mode of src.
+	 * 0b000 =  1 bit
+	 * 0b001 =  2 bit
+	 * 0b010 =  4 bit
+	 * 0b011 =  8 bit
+	 * 0b100 = 32 bit
+	 */
 	uint8_t color_mode = (src->flags_0 & 0b01110000) >> 4;
 
 	for (int y = starty; y < endy; y++) {
@@ -180,26 +188,29 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				if (src->flags_1 & FLAGS1_X_Y_FLIP) swap(dest_x, dest_y);
 
 				/*
-				 * Write something here...
+				 * Adjust offset to current values of x and y.
 				 */
 				uint32_t adj_offset = offset + (x >> dw) + (src->w * (y >> dh));	// offset can't change during the for loops!
 
-				/*
-				 * Color selection, first step
-				 */
-				uint8_t color_index;
-				color_index = memory[(start_address + (adj_offset / color_modes[color_mode].pixels_per_byte)) & memory_mask];
+				uint8_t color_index{0};
 
-				/*
-				 * Depending on no of bits per pixel, there will be a bitshift
-				 * to the right on the extracted byte.
-				 */
-				color_index >>= color_modes[color_mode].bits_per_pixel * (color_modes[color_mode].pixels_per_byte - (adj_offset % color_modes[color_mode].pixels_per_byte) - 1);
+				if (color_mode < 0b100) {
+					/*
+					* Color selection, first step
+					*/
+					color_index = memory[(start_address + (adj_offset / color_modes[color_mode].pixels_per_byte)) & memory_mask];
 
-				/*
-				 * And use the correct mask.
-				 */
-				color_index &= color_modes[color_mode].mask;
+					/*
+					* Depending on no of bits per pixel, there will be a bitshift
+					* to the right on the extracted byte.
+					*/
+					color_index >>= color_modes[color_mode].bits_per_pixel * (color_modes[color_mode].pixels_per_byte - (adj_offset % color_modes[color_mode].pixels_per_byte) - 1);
+
+					/*
+					* And use the correct mask.
+					*/
+					color_index &= color_modes[color_mode].mask;
+				}
 
 				/*
 				 * Now is a good time to check if the pixel must be drawn,
@@ -208,15 +219,17 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				 */
 				bool draw_pixel = color_index;
 
-				/*
-				 * Apply another level of indirection for 1, 2 and 4 bpp,
-				 * if needed, update value of px.
-				 * This happens when color_lookup == true
-				 *
-				 * For 8 bit, px stays the same
-				 */
-				if (color_modes[color_mode].color_lookup) {
-					color_index = src->color_indices[color_index];
+				if (color_mode < 0b100) {
+					/*
+					* Apply another level of indirection for 1, 2 and 4 bpp,
+					* if needed, update value of color_index.
+					* This happens when color_lookup == true
+					*
+					* For 8 bit, color_index stays the same
+					*/
+					if (color_modes[color_mode].color_lookup) {
+						color_index = src->color_indices[color_index];
+					}
 				}
 
 				/*
@@ -224,23 +237,29 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				 */
 				uint32_t dst = (dest->base_address + ((((dest_y + src->y) * dest->w) + dest_x + src->x) << 2)) & VRAM_SIZE_MASK;
 
-				switch ((src->flags_0 & 0b011) | (draw_pixel ? 0b100 : 0b000)) {
-					case 0b000: // no pixel, fore off, bg off
-					case 0b010: // no pixel, fore on,  bg off
-						// do nothing
-						break;
-					case 0b001: // no pixel, fore off, bg on
-					case 0b011: // no pixel, fore on,  bg on
-						blend(0xc00 + (src->color_indices[0] << 2), dst);
-						break;
-					case 0b100: // pixel, fore off, bg off
-					case 0b101: // pixel, fore off, bg on
-						blend(0xc00 + (color_index << 2), dst);
-						break;
-					case 0b110:	// pixel, fore on, bg off
-					case 0b111:	// pixel, fore on, bg on
-						blend(0xc00 + (src->color_indices[1] << 2), dst);
-						break;
+				if (color_mode < 0b100) {
+					switch ((src->flags_0 & 0b011) | (draw_pixel ? 0b100 : 0b000)) {
+						case 0b000: // no pixel, fore off, bg off
+						case 0b010: // no pixel, fore on,  bg off
+							// do nothing
+							break;
+						case 0b001: // no pixel, fore off, bg on
+						case 0b011: // no pixel, fore on,  bg on
+							blend(0xc00 + (src->color_indices[0] << 2), dst);
+							break;
+						case 0b100: // pixel, fore off, bg off
+						case 0b101: // pixel, fore off, bg on
+							blend(0xc00 + (color_index << 2), dst);
+							break;
+						case 0b110:	// pixel, fore on, bg off
+						case 0b111:	// pixel, fore on, bg on
+							blend(0xc00 + (src->color_indices[1] << 2), dst);
+							break;
+					}
+				} else {
+					// 32 bit color
+					// TODO: What if data comes from font rom? Which by the way is always 1 bit...
+					blend((start_address + (adj_offset << 2)) & VRAM_SIZE_MASK, dst);
 				}
 
 				pixel_saldo--;
