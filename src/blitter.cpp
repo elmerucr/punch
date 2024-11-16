@@ -95,7 +95,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	auto swap = [](int16_t &a, int16_t &b) { int16_t c = a; a = b; b = c; };
 
 	/*
-	 * Calculate potential bitshifts for double width and height
+	 * Calculate bitshifts for double width and height.
 	 */
 	uint8_t dw = src->flags_1 & FLAGS1_DBLWIDTH;
 	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) >> 2;
@@ -160,14 +160,12 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 	}
 
 	/*
-	 * Based on source index (sort of a sprite pointer), we find an
+	 * Based on source index (like a sprite pointer), we find an
 	 * offset to start address
 	 */
 	uint32_t offset = (src->index * src->w * src->h);
 
-	uint8_t color_mode = (src->flags_0 & 0b00110000) >> 4;
-
-	int16_t dest_x, dest_y;
+	uint8_t color_mode = (src->flags_0 & 0b01110000) >> 4;
 
 	for (int y = starty; y < endy; y++) {
 		for (int x = startx; x < endx; x++) {
@@ -175,6 +173,8 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				/*
 				 * Adjust placement locations if needed
 				 */
+				int16_t dest_x, dest_y;
+
 				if (src->flags_1 & FLAGS1_HOR_FLIP) dest_x = (src->w << dw) - 1 - x; else dest_x = x;
 				if (src->flags_1 & FLAGS1_VER_FLIP) dest_y = (src->h << dh) - 1 - y; else dest_y = y;
 				if (src->flags_1 & FLAGS1_X_Y_FLIP) swap(dest_x, dest_y);
@@ -187,25 +187,26 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				/*
 				 * Color selection, first step
 				 */
-				uint8_t px = memory[(start_address + (adj_offset / color_modes[color_mode].pixels_per_byte)) & memory_mask];
+				uint8_t color_index;
+				color_index = memory[(start_address + (adj_offset / color_modes[color_mode].pixels_per_byte)) & memory_mask];
 
 				/*
 				 * Depending on no of bits per pixel, there will be a bitshift
 				 * to the right on the extracted byte.
 				 */
-				px >>= color_modes[color_mode].bits_per_pixel * (color_modes[color_mode].pixels_per_byte - (adj_offset % color_modes[color_mode].pixels_per_byte) - 1);
+				color_index >>= color_modes[color_mode].bits_per_pixel * (color_modes[color_mode].pixels_per_byte - (adj_offset % color_modes[color_mode].pixels_per_byte) - 1);
 
 				/*
 				 * And use the correct mask.
 				 */
-				px &= color_modes[color_mode].mask;
+				color_index &= color_modes[color_mode].mask;
 
 				/*
 				 * Now is a good time to check if the pixel must be drawn,
 				 * so any value above zero. This is because the value of
-				 * px could be changed.
+				 * color_index could be changed later on.
 				 */
-				bool draw_pixel = px;
+				bool draw_pixel = color_index;
 
 				/*
 				 * Apply another level of indirection for 1, 2 and 4 bpp,
@@ -215,7 +216,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				 * For 8 bit, px stays the same
 				 */
 				if (color_modes[color_mode].color_lookup) {
-					px = src->color_indices[px];
+					color_index = src->color_indices[color_index];
 				}
 
 				/*
@@ -234,7 +235,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 						break;
 					case 0b100: // pixel, fore off, bg off
 					case 0b101: // pixel, fore off, bg on
-						blend(0xc00 + (px << 2), dst);
+						blend(0xc00 + (color_index << 2), dst);
 						break;
 					case 0b110:	// pixel, fore on, bg off
 					case 0b111:	// pixel, fore on, bg on
