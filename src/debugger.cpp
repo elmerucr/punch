@@ -82,9 +82,9 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xc].h = 21;
 	blitter->surface[0xc].x = 30;
 	blitter->surface[0xc].y = 169;
-	blitter->surface[0xc].color_indices[0b00] = 0xc7;
-	blitter->surface[0xc].color_indices[0b01] = 0x54;
-	blitter->surface[0xc].color_indices[0b10] = 0xfb;
+	blitter->surface[0xc].color_table[0b00] = 0xc7;
+	blitter->surface[0xc].color_table[0b01] = 0x54;
+	blitter->surface[0xc].color_table[0b10] = 0xfb;
 
 	for (int i=0; i<(2*21*3); i++) {
 		blitter->vram[blitter->surface[0xc].base_address + i] = bruce_data[i];

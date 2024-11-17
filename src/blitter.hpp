@@ -86,12 +86,15 @@ struct surface_t {
 	 */
 	uint8_t flags_2{0};
 
+	/*
+	 * Index is a pointer to a specific tile/sprite/character
+	 */
 	uint8_t index{0};
 
 	/*
 	 * Default 16 colors at init, resemble c64
 	 */
-	uint8_t color_indices[16] = {
+	uint8_t color_table[16] = {
 		PUNCH_BLACK, PUNCH_WHITE, PUNCH_RED, PUNCH_CYAN,
 		PUNCH_PURPLE, PUNCH_GREEN, PUNCH_BLUE, PUNCH_YELLOW,
 		PUNCH_ORANGE, PUNCH_BROWN, PUNCH_LIGHTRED, PUNCH_DARKGREY,
@@ -129,19 +132,23 @@ private:
 	font_4x6_t font_4x6;
 	font_cbm_8x8_t font_cbm_8x8;
 
-	struct color_mode_t {
+	struct indexed_color_mode_t {
 		uint8_t bits_per_pixel;
 		uint8_t pixels_per_byte;
 		uint8_t mask;
-		bool color_lookup;
 	};
 
-	const struct color_mode_t color_modes[4] = {
-		{ 1, 8, 0b00000001, true  },
-		{ 2, 4, 0b00000011, true  },
-		{ 4, 2, 0b00001111, true  },
-		{ 8, 1, 0b11111111, false }
+	const struct indexed_color_mode_t indexed_color_modes[4] = {
+		{ 1, 8, 0b00000001 },
+		{ 2, 4, 0b00000011 },
+		{ 4, 2, 0b00001111 },
+		{ 8, 1, 0b11111111 }
 	};
+
+	/*
+	 * The palette is directly stored in main vram
+	 */
+	const uint32_t palette_addr = 0xc00;
 
 public:
 	blitter_ic();
@@ -157,8 +164,8 @@ public:
 	uint8_t io_surfaces_read8(uint16_t address);
 	void io_surfaces_write8(uint16_t address, uint8_t value);
 
-	uint8_t io_color_indices_read8(uint16_t address);
-	void io_color_indices_write8(uint16_t address, uint8_t value);
+	uint8_t io_color_table_read8(uint16_t address);
+	void io_color_table_write8(uint16_t address, uint8_t value);
 
 	inline void blend(uint32_t s, uint32_t d)
 	{
@@ -195,8 +202,6 @@ public:
 	uint32_t get_pixel_saldo() { return pixel_saldo; }
 
 	uint8_t *vram;
-
-	//uint32_t *framebuffer;
 };
 
 #endif
