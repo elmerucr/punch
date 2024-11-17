@@ -117,7 +117,7 @@ void system_t::run()
 				debugger->run();
 				debugger->redraw();
 				//debugger->blitter->update_framebuffer();
-				host->update_debugger_texture((uint32_t *)&debugger->blitter->vram[0xf00000]);
+				host->update_debugger_texture((uint32_t *)&debugger->blitter->vram[FRAMEBUFFER_ADDRESS]);
 				break;
 		}
 
@@ -128,7 +128,7 @@ void system_t::run()
 
 		//core->blitter->update_framebuffer();
 
-		host->update_core_texture((uint32_t *)&core->blitter->vram[0xf00000]);
+		host->update_core_texture((uint32_t *)&core->blitter->vram[FRAMEBUFFER_ADDRESS]);
 
 		//printf("%s", stats->summary());
 

@@ -66,7 +66,7 @@ void blitter_ic::reset()
 
 	surface[0].w = MAX_PIXELS_PER_SCANLINE;
 	surface[0].h = MAX_SCANLINES;
-	surface[0].base_address = 0x00f00000;
+	surface[0].base_address = FRAMEBUFFER_ADDRESS;
 	surface[0].flags_0 = 0x40;
 	surface[0].flags_1 = 0x00;
 	surface[0].flags_2 = 0x00;
@@ -313,7 +313,7 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 	return pixelcount;
 }
 
-uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
+uint32_t blitter_ic::clear_surface(const uint8_t dest)
 {
 	surface_t *d = &surface[dest & 0xf];
 	uint32_t pixels = d->w * d->h;
@@ -321,7 +321,7 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 
 	for (uint32_t i=0; i < pixels; i++) {
 		if (pixel_saldo) {
-			blend(palette_addr+(col<<2),(d->base_address + (i << 2)) & VRAM_SIZE_MASK);
+			blend(draw_color_addr, (d->base_address + (i << 2)) & VRAM_SIZE_MASK);
 			pixel_saldo--;
 		} else {
 			break;
@@ -331,17 +331,17 @@ uint32_t blitter_ic::clear_surface(const uint8_t col, const uint8_t dest)
 	return old_pixel_saldo - pixel_saldo;
 }
 
-uint32_t blitter_ic::pset(int16_t x0, int16_t y0, uint8_t c, uint8_t d)
+uint32_t blitter_ic::pset(int16_t x0, int16_t y0, uint8_t d)
 {
 	if (pixel_saldo) {
-		blend(palette_addr + (c << 2), (surface[d & 0b1111].base_address + (((y0 * surface[d & 0b1111].w) + x0) << 2)) & VRAM_SIZE_MASK);
+		blend(draw_color_addr, (surface[d & 0b1111].base_address + (((y0 * surface[d & 0b1111].w) + x0) << 2)) & VRAM_SIZE_MASK);
 		pixel_saldo--;
 		return 1;
 	}
 	return 0;
 }
 
-uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
+uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t d)
 {
 	surface_t *s = &surface[d & 0b1111];
 
@@ -359,7 +359,7 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 	while (x0 != x1 || y0 != y1) {
 		if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 			if (pixel_saldo) {
-				blend(palette_addr + (c << 2), (s->base_address + (((y0 * s->w) + x0) << 2)) & VRAM_SIZE_MASK);
+				blend(draw_color_addr, (s->base_address + (((y0 * s->w) + x0) << 2)) & VRAM_SIZE_MASK);
 				pixel_saldo--;
 			}
 		}
@@ -380,7 +380,7 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 	 */
 	if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 		if (pixel_saldo) {
-			blend(palette_addr + (c << 2), (s->base_address + (((y0 * s->w) + x0) << 2)) & VRAM_SIZE_MASK);
+			blend(draw_color_addr, (s->base_address + (((y0 * s->w) + x0) << 2)) & VRAM_SIZE_MASK);
 			pixel_saldo--;
 		}
 	}
@@ -388,19 +388,19 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 	return  old_pixel_saldo - pixel_saldo;
 }
 
-uint32_t blitter_ic::rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
+uint32_t blitter_ic::rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t d)
 {
 	uint32_t pixels{0};
 
-	pixels += line(x0, y0, x1, y0, c, d);
-	pixels += line(x1, y0, x1, y1, c, d);
-	pixels += line(x1, y1, x0, y1, c, d);
-	pixels += line(x0, y1, x0, y0, c, d);
+	pixels += line(x0, y0, x1, y0, d);
+	pixels += line(x1, y0, x1, y1, d);
+	pixels += line(x1, y1, x0, y1, d);
+	pixels += line(x0, y1, x0, y0, d);
 
 	return pixels;
 }
 
-uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d)
+uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t d)
 {
 	uint32_t pixels{0};
 
@@ -409,7 +409,7 @@ uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t
 	if (y0 > y1) swap(y0, y1);
 
 	for (int16_t y=y0; y<=y1; y++) {
-		pixels += line(x0, y, x1, y, c, d);
+		pixels += line(x0, y, x1, y, d);
 	}
 
 	return pixels;
@@ -467,19 +467,24 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 					switch (value) {
 						case 0b0000001: blit(src_surface, dst_surface); break;
 						case 0b0000010: tile_blit(src_surface, dst_surface, tile_surface); break;
-						case 0b0000100: clear_surface(draw_color, dst_surface); break;
-						case 0b0001000: pset(x0, y0, draw_color, dst_surface); break;
-						case 0b0010000: line(x0, y0, x1, y1, draw_color, dst_surface); break;
-						case 0b0100000: rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
-						case 0b1000000: solid_rectangle(x0, y0, x1, y1, draw_color, dst_surface); break;
+						case 0b0000100: clear_surface(dst_surface); break;
+						case 0b0001000: pset(x0, y0, dst_surface); break;
+						case 0b0010000: line(x0, y0, x1, y1, dst_surface); break;
+						case 0b0100000: rectangle(x0, y0, x1, y1, dst_surface); break;
+						case 0b1000000: solid_rectangle(x0, y0, x1, y1, dst_surface); break;
 						default: break;
 					}
 					break;
 				case 0x02: src_surface = value & 0b1111; break;
 				case 0x03: dst_surface = value & 0b1111; break;
 				case 0x04: tile_surface = value & 0b1111; break;
-				case 0x05: draw_color = value; break;
-
+				case 0x05:
+					draw_color = value;
+					vram[draw_color_addr + 0] = vram[palette_addr + (value << 2) + 0];
+					vram[draw_color_addr + 1] = vram[palette_addr + (value << 2) + 1];
+					vram[draw_color_addr + 2] = vram[palette_addr + (value << 2) + 2];
+					vram[draw_color_addr + 3] = vram[palette_addr + (value << 2) + 3];
+					break;
 				case 0x08: x0 = (int16_t)((((uint16_t)x0) & 0x00ff) | (value << 8)); break;
 				case 0x09: x0 = (int16_t)((((uint16_t)x0) & 0xff00) | value);        break;
 				case 0x0a: y0 = (int16_t)((((uint16_t)y0) & 0x00ff) | (value << 8)); break;

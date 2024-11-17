@@ -77,7 +77,8 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 ### Addressable by Blitter only
 
 * ```$010000-$ffffff``` available vram (16.320kb) of which:
-* ```$f00000-$f0f9ff``` default framebuffer vram (64.000 bytes)
+* ```$f00000-$f3e7ff``` default framebuffer vram (256.000 bytes)
+* ```$f3e800```         draw color, 32 bit, stored in vram
 
 ## Building with CMake
 

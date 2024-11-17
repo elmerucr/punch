@@ -149,6 +149,7 @@ private:
 	 * The palette is directly stored in main vram
 	 */
 	const uint32_t palette_addr = 0xc00;
+	const uint32_t draw_color_addr = 0xf3e800;
 
 public:
 	blitter_ic();
@@ -192,11 +193,11 @@ public:
 	 */
 	uint32_t blit(const uint8_t s, const uint8_t d);
 	uint32_t tile_blit(const uint8_t s, const uint8_t d, const uint8_t _ts);
-	uint32_t clear_surface(const uint8_t col, const uint8_t dest);
-	uint32_t pset(int16_t x0, int16_t y0, uint8_t c, uint8_t d);
-	uint32_t line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
-	uint32_t rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
-	uint32_t solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c, uint8_t d);
+	uint32_t clear_surface(const uint8_t dest);
+	uint32_t pset(int16_t x0, int16_t y0, uint8_t d);
+	uint32_t line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t d);
+	uint32_t rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t d);
+	uint32_t solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t d);
 
 	void set_pixel_saldo(uint32_t s) { pixel_saldo = s; }
 	uint32_t get_pixel_saldo() { return pixel_saldo; }

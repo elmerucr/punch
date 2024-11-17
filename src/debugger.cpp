@@ -124,8 +124,9 @@ void debugger_t::redraw()
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 	//blitter->clear_surface(PUNCH_BLACK, 0x0);	// no need, everything is redrawn already
 	blitter->tile_blit(0xe, 0x0, 0xd);
-	blitter->solid_rectangle(0, 0, 319, 9, fg, 0x0);
-	blitter->solid_rectangle(0, 190, 319, 199, fg, 0x0);
+	blitter->io_write8(0x05, fg);	// set drawing color
+	blitter->solid_rectangle(0, 0, 319, 9, 0x0);
+	blitter->solid_rectangle(0, 190, 319, 199, 0x0);
 
 	// Bruce Lee
 	static int state = 0;
@@ -309,7 +310,7 @@ void debugger_t::process_command(char *c)
 		terminal->printf("\nexit punch (y/n)");
 		redraw();
 		//blitter->update_framebuffer();
-		system->host->update_debugger_texture((uint32_t *)&blitter->vram[0xf00000]);
+		system->host->update_debugger_texture((uint32_t *)&blitter->vram[FRAMEBUFFER_ADDRESS]);
 		system->host->update_screen();
 		if (system->host->events_yes_no()) {
 			system->running = false;
@@ -464,7 +465,7 @@ void debugger_t::process_command(char *c)
 		terminal->printf("\nreset punch (y/n)");
 		redraw();
 		//blitter->update_framebuffer();
-		system->host->update_debugger_texture((uint32_t *)&blitter->vram[0xf00000]);
+		system->host->update_debugger_texture((uint32_t *)&blitter->vram[FRAMEBUFFER_ADDRESS]);
 		system->host->update_screen();
 		if (system->host->events_yes_no()) {
 			system->core->reset();
