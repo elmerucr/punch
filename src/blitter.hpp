@@ -46,7 +46,6 @@ struct surface_t {
 	 *   | | |     +---- Use foreground color (0 = off, 1 = on)
 	 *   +-+-+---------- Bits per pixel (0b000 = 1, 0b001 = 2, 0b010 = 4, 0b011 = 8, 0b100 = 32)
 	 *
-	 *
 	 * bits 2, 3, 6 and 7: Reserved
 	 */
 	uint8_t flags_0{0};
@@ -92,7 +91,7 @@ struct surface_t {
 	uint8_t index{0};
 
 	/*
-	 * Default 16 colors at init, resemble c64
+	 * Default 16 colors for 1, 2 and 4 bit modes at init, resemble c64
 	 */
 	uint8_t color_table[16] = {
 		PUNCH_BLACK, PUNCH_WHITE, PUNCH_RED, PUNCH_CYAN,
@@ -149,6 +148,7 @@ private:
 	 * The palette is directly stored in main vram
 	 */
 	const uint32_t palette_addr = 0xc00;
+
 	const uint32_t draw_color_addr = 0xf3e800;
 
 public:

@@ -278,19 +278,24 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 
 uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _ts)
 {
-	const surface_t *src = &surface[s & 0b1111];
+	/*
+	 * Make src a copy of s to work with (editable)
+	 */
+	surface_t src = surface[s & 0b1111];
+
+	/*
+	 * dst and ts can be pointers, don't need edits
+	 */
 	surface_t *dst = &surface[d & 0b1111];
 	const surface_t *ts = &surface[_ts & 0b1111];
 
 	uint32_t pixelcount = 0;
 
-	surface_t source = *src;
+	uint8_t dw = src.flags_1 & FLAGS1_DBLWIDTH;
+	uint8_t dh = (src.flags_1 & FLAGS1_DBLHEIGHT) >> 2;
 
-	uint8_t dw = src->flags_1 & FLAGS1_DBLWIDTH;
-	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) >> 2;
-
-	source.x = ts->x;
-	source.y = ts->y;
+	src.x = ts->x;
+	src.y = ts->y;
 	uint32_t tile_index = ts->base_address;
 	uint32_t fg_color_index = tile_index + (ts->w * ts->h);
 	uint32_t bg_color_index = tile_index + (2 * ts->w * ts->h);
@@ -300,16 +305,15 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 
 	for (int y = 0; y < ts->h; y++) {
 		for (int x = 0; x < ts->w; x++) {
-			source.index = vram[tile_index++ & VRAM_SIZE_MASK];
-			source.color_table[0] = use_fixed_bg ? ts->color_table[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
-			source.color_table[1] = use_fixed_fg ? ts->color_table[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
-			pixelcount += blit(&source, dst);
-			source.x += (source.w << dw);
+			src.index = vram[tile_index++ & VRAM_SIZE_MASK];
+			src.color_table[0] = use_fixed_bg ? ts->color_table[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
+			src.color_table[1] = use_fixed_fg ? ts->color_table[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
+			pixelcount += blit(&src, dst);
+			src.x += (src.w << dw);
 		}
-		source.x = ts->x;				// set to start position
-		source.y += (source.h << dh);	// go to next row
+		src.x = ts->x;			// set to start position
+		src.y += (src.h << dh);	// go to next row
 	}
-
 	return pixelcount;
 }
 
@@ -327,7 +331,6 @@ uint32_t blitter_ic::clear_surface(const uint8_t dest)
 			break;
 		}
 	}
-
 	return old_pixel_saldo - pixel_saldo;
 }
 

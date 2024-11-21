@@ -118,6 +118,7 @@ To be done
 * [stb](https://github.com/nothings/stb) - single-file public domain (or MIT licensed) libraries for C/C++
 * [TIC-80](https://tic80.com) - TIC-80 is a free and open source fantasy computer for making, playing and sharing tiny games.
 * [vAmiga](https://dirkwhoffmann.github.io/vAmiga/) - An Amiga 500, 1000, or 2000 on your Apple Macintosh by Dirk W. Hoffmann.
+* [vasm](http://sun.hasenbraten.de/vasm/) - A portable and retargetable assembler.
 * [VICE](http://vice-emu.sourceforge.net) - The Versatile Commodore Emulator.
 * [VirtualC64](https://dirkwhoffmann.github.io/virtualc64/) - A Commodore 64 on your Apple Macintosh by Dirk W. Hoffmann.
 * [visual6502](http://www.visual6502.org) - Visual Transistor-level Simulation of the 6502 CPU and other chips.
