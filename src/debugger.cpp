@@ -122,7 +122,7 @@ debugger_t::~debugger_t()
 void debugger_t::redraw()
 {
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
-	//blitter->clear_surface(PUNCH_BLACK, 0x0);	// no need, everything is redrawn already
+	//blitter->clear_surface(0x0);	// no need, everything is redrawn already
 	blitter->tile_blit(0xe, 0x0, 0xd);
 	blitter->io_write8(0x05, fg);	// set drawing color
 	blitter->solid_rectangle(0, 0, 319, 9, 0x0);
