@@ -393,7 +393,7 @@ uint32_t blitter_ic::solid_rectangle(int16_t x0, int16_t y0, int16_t x1, int16_t
 
 uint8_t blitter_ic::io_read8(uint16_t address)
 {
-	switch (address & 0x700) {
+	switch (address & 0x300) {
 		case 0x000:
 			switch (address & 0xff) {
 				case 0x02: return src_surface;
@@ -421,13 +421,6 @@ uint8_t blitter_ic::io_read8(uint16_t address)
 			return vram[(vram_peek + (address & 0xff)) & VRAM_SIZE_MASK];
 		case 0x200:
 			return io_surfaces_read8(address & 0xff);
-		case 0x300:
-			return io_color_table_read8(address & 0xff);
-		case 0x400:
-		case 0x500:
-		case 0x600:
-		case 0x700:
-			return vram[address];
 		default:
 			return 0x00;
 	}
@@ -435,7 +428,7 @@ uint8_t blitter_ic::io_read8(uint16_t address)
 
 void blitter_ic::io_write8(uint16_t address, uint8_t value)
 {
-	switch (address & 0x700) {
+	switch (address & 0x300) {
 		case 0x000:
 			switch (address & 0xff) {
 				case 0x01:
@@ -484,14 +477,7 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 		case 0x200:
 			io_surfaces_write8(address & 0xff, value);
 			break;
-		case 0x300:
-			io_color_table_write8(address & 0xff, value);
-			break;
-		case 0x400:
-		case 0x500:
-		case 0x600:
-		case 0x700:
-			vram[address] = value;
+		default:
 			break;
 	}
 }
@@ -554,12 +540,12 @@ void blitter_ic::io_surfaces_write8(uint16_t address, uint8_t value)
 
 uint8_t blitter_ic::io_color_table_read8(uint16_t address)
 {
-	uint8_t no = (address & 0xf0) >> 4;
-	return surface[no].color_table[address & 0xf];
+	uint8_t no = (address & 0x0f00) >> 8;
+	return surface[no].color_table[address & 0xff];
 }
 
 void blitter_ic::io_color_table_write8(uint16_t address, uint8_t value)
 {
-	uint8_t no = (address & 0xf0) >> 4;
-	surface[no].color_table[address & 0xf] = value;
+	uint8_t no = (address & 0x0f00) >> 8;
+	surface[no].color_table[address & 0xff] = value;
 }

@@ -18,14 +18,16 @@
 #include "clocks.hpp"
 #include "commander.hpp"
 
-#define COMBINED_PAGE		0x04
-#define CORE_SUB_PAGE		0x00
-#define TIMER_SUB_PAGE		0x20
-#define COMMANDER_SUB_PAGE	0x40
-#define KEYBOARD_PAGE		0x05
-#define SOUND_PAGE			0x06 // and 0x07
-#define	BLITTER_PAGE		0x08
-#define	ROM_PAGE			0xfc
+#define COMBINED_PAGE			0x04
+#define CORE_SUB_PAGE				0x00
+#define TIMER_SUB_PAGE				0x20
+#define COMMANDER_SUB_PAGE			0x40
+#define KEYBOARD_PAGE			0x05
+#define SOUND_PAGE				0x06 // and 0x07
+#define	BLITTER_PAGE			0x08 // and 0x09, 0x0a, 0x0b
+// 0x0c - 0x0f  palette in vram
+#define BLITTER_COLOR_TABLES	0x10
+#define	ROM_PAGE				0xfc
 
 enum output_states {
 	NORMAL,

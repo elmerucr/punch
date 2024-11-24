@@ -73,11 +73,24 @@ uint8_t core_t::read8(uint16_t address)
 		case BLITTER_PAGE+1:	// vram peek
 		case BLITTER_PAGE+2:	// surfaces
 		case BLITTER_PAGE+3:	// color tables
-		case BLITTER_PAGE+4:	// palette in vram...
-		case BLITTER_PAGE+5:
-		case BLITTER_PAGE+6:
-		case BLITTER_PAGE+7:
 			return blitter->io_read8(address);
+		case BLITTER_COLOR_TABLES:
+		case BLITTER_COLOR_TABLES+1:
+		case BLITTER_COLOR_TABLES+2:
+		case BLITTER_COLOR_TABLES+3:
+		case BLITTER_COLOR_TABLES+4:
+		case BLITTER_COLOR_TABLES+5:
+		case BLITTER_COLOR_TABLES+6:
+		case BLITTER_COLOR_TABLES+7:
+		case BLITTER_COLOR_TABLES+8:
+		case BLITTER_COLOR_TABLES+9:
+		case BLITTER_COLOR_TABLES+10:
+		case BLITTER_COLOR_TABLES+11:
+		case BLITTER_COLOR_TABLES+12:
+		case BLITTER_COLOR_TABLES+13:
+		case BLITTER_COLOR_TABLES+14:
+		case BLITTER_COLOR_TABLES+15:
+			return blitter->io_color_table_read8(address);
 		case ROM_PAGE:
 		case ROM_PAGE+1:
 		case ROM_PAGE+2:
@@ -118,11 +131,25 @@ void core_t::write8(uint16_t address, uint8_t value) {
 		case BLITTER_PAGE+1:	// vram peek
 		case BLITTER_PAGE+2:	// surfaces
 		case BLITTER_PAGE+3:	// color tables
-		case BLITTER_PAGE+4:
-		case BLITTER_PAGE+5:
-		case BLITTER_PAGE+6:
-		case BLITTER_PAGE+7:
 			blitter->io_write8(address, value);
+			break;
+		case BLITTER_COLOR_TABLES:
+		case BLITTER_COLOR_TABLES+1:
+		case BLITTER_COLOR_TABLES+2:
+		case BLITTER_COLOR_TABLES+3:
+		case BLITTER_COLOR_TABLES+4:
+		case BLITTER_COLOR_TABLES+5:
+		case BLITTER_COLOR_TABLES+6:
+		case BLITTER_COLOR_TABLES+7:
+		case BLITTER_COLOR_TABLES+8:
+		case BLITTER_COLOR_TABLES+9:
+		case BLITTER_COLOR_TABLES+10:
+		case BLITTER_COLOR_TABLES+11:
+		case BLITTER_COLOR_TABLES+12:
+		case BLITTER_COLOR_TABLES+13:
+		case BLITTER_COLOR_TABLES+14:
+		case BLITTER_COLOR_TABLES+15:
+			blitter->io_color_table_write8(address, value);
 			break;
 		default:
 			blitter->vram[address] = value;

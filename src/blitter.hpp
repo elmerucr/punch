@@ -44,8 +44,8 @@ struct surface_t {
 	 * 7 6 5 4 3 2 1 0
 	 *   | | |     | |
 	 *   | | |     | |
-	 *   | | |     | +-- Use background color (0 = off, 1 = on)
-	 *   | | |     +---- Use foreground color (0 = off, 1 = on)
+	 *   | | |     | +-- Use fixed background color (0 = off, 1 = on)
+	 *   | | |     +---- Use fixed foreground color (0 = off, 1 = on)
 	 *   +-+-+---------- Bits per pixel (0b000 = 1, 0b001 = 2, 0b010 = 4, 0b011 = 8, 0b100 = 32)
 	 *
 	 * bits 2, 3, 6 and 7: Reserved
@@ -85,6 +85,7 @@ struct surface_t {
 	 *
 	 * bits 3, 4, 5, 6, 7: reserved
 	 */
+
 	uint8_t flags_2{0};
 
 	/*
