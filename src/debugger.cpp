@@ -53,7 +53,7 @@ debugger_t::debugger_t(system_t *s)
 	/* font surface in slot 0xe */
 	blitter->surface[0xe].w = 4;
 	blitter->surface[0xe].h = 6;
-	blitter->surface[0xe].flags_0 = 0b00'00'00'11;	// use background and foreground color, and 1 bit / pixel
+	blitter->surface[0xe].flags_0 = 0b00'00'00'00;	// use background and foreground color, and 1 bit / pixel
 	blitter->surface[0xe].flags_1 = 0b0'0'0'0'00'00;
 	blitter->surface[0xe].flags_2 = 0b00000'001;	// select tiny font 4x6
 
@@ -82,13 +82,26 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xc].h = 21;
 	blitter->surface[0xc].x = 30;
 	blitter->surface[0xc].y = 169;
-	blitter->surface[0xc].color_table[0b00] = 0xc7;
-	blitter->surface[0xc].color_table[0b01] = 0x54;
-	blitter->surface[0xc].color_table[0b10] = 0xfb;
+	blitter->surface[0xc].color_table[0x00] = 0x00;
+	blitter->surface[0xc].color_table[0x01] = 0x54;
+	blitter->surface[0xc].color_table[0x02] = 0xfb;
 
 	for (int i=0; i<(2*21*3); i++) {
 		blitter->vram[blitter->surface[0xc].base_address + i] = bruce_data[i];
 	}
+
+	/*
+	 * Setting up display of a palette
+	 */
+	blitter->surface[0xf].index = 0;
+	blitter->surface[0xf].base_address = 0x1000;
+	blitter->surface[0xf].flags_0 = 0b01000000;	// 32 bit color
+	blitter->surface[0xf].flags_1 = 0b00000111; // 8x both directions
+	blitter->surface[0xf].flags_2 = 0b00000000;
+	blitter->surface[0xf].w = 16;
+	blitter->surface[0xf].h = 48;
+	blitter->surface[0xf].x = 176;
+	blitter->surface[0xf].y = 94;
 }
 
 void debugger_t::print_version()
@@ -122,11 +135,27 @@ debugger_t::~debugger_t()
 void debugger_t::redraw()
 {
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
-	//blitter->clear_surface(0x0);	// no need, everything is redrawn already
+
+	blitter->io_write8(0x05, cc);	// set clear color
+	blitter->clear_surface(0x0);	// no need, everything is redrawn already
+
 	blitter->tile_blit(0xe, 0x0, 0xd);
 	blitter->io_write8(0x05, fg);	// set drawing color
 	blitter->solid_rectangle(0, 0, 319, 9, 0x0);
 	blitter->solid_rectangle(0, 190, 319, 199, 0x0);
+
+	// Update and draw palette
+	if (palette_visible) {
+		for (int y=0; y<48; y++) {
+			for (int x=0; x<16; x++) {
+				blitter->vram[0x1000 + (16 * 4 * y) + (4 * x) + 0] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * x) + 0];
+				blitter->vram[0x1000 + (16 * 4 * y) + (4 * x) + 1] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * x) + 1];
+				blitter->vram[0x1000 + (16 * 4 * y) + (4 * x) + 2] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * x) + 2];
+				blitter->vram[0x1000 + (16 * 4 * y) + (4 * x) + 3] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * x) + 3];
+			}
+		}
+		blitter->blit(0xf, 0x0);
+	}
 
 	// Bruce Lee
 	static int state = 0;
@@ -445,22 +474,7 @@ void debugger_t::process_command(char *c)
 		system->core->run(true);
 		status();
 	} else if (strcmp(token0, "pal") == 0) {
-		terminal->printf("\n    0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f");
-		for (int i=0; i<256; i++) {
-			if ((i % 16) == 0) {
-				terminal->bg_color = bg;
-				terminal->printf("\n ");
-				if (((i & 0xf0) >> 4) < 10) {
-					terminal->putsymbol(0x30 + ((i & 0xf0) >> 4));
-				} else {
-					terminal->putsymbol(0x57 + ((i & 0xf0) >> 4));
-				}
-				terminal->putchar(' ');
-			}
-			terminal->bg_color = i;
-			terminal->printf("   ");
-		}
-		terminal->bg_color = bg;
+		palette_visible = !palette_visible;
 	} else if (strcmp(token0, "reset") == 0) {
 		terminal->printf("\nreset punch (y/n)");
 		redraw();

@@ -59,8 +59,10 @@ private:
 	// C64
 	const uint8_t fg = PUNCH_LIGHTBLUE;
 	const uint8_t fg_acc = 0xaf;
-	const uint8_t bg = PUNCH_BLUE;
+	//const uint8_t bg = PUNCH_BLUE;
+	const uint8_t bg = 0x00;
 	const uint8_t bg_acc = 0x5e;
+	const uint8_t cc = PUNCH_BLUE;
 
 	// const uint8_t fg = 0x7f;
 	// const uint8_t fg_acc = 0xbf;
@@ -85,6 +87,8 @@ private:
 	bool have_prompt{true};
 
 	bool bruce_visible{false};
+
+	bool palette_visible{false};
 
 	const uint8_t bruce_data[2*21*3] = {
 		0b00000101, 0b00000000,	// ____bbbb________

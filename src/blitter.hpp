@@ -36,6 +36,8 @@ struct surface_t {
 
 	uint32_t base_address{0};
 
+	// TODO: fg bg color stuff gone?
+
 	/*
 	 * Properties related to flags_0 (as encoded inside machine)
 	 *
@@ -56,8 +58,8 @@ struct surface_t {
 	 *
 	 * 7 6 5 4 3 2 1 0
 	 *   | | | | | | |
-	 *   | | | | | +-+-- Width (00 = 1x, 01 = 2x, 10 = 3x, 11 = 4x)
-	 *   | | | +-+------ Height (00 = 1x, 01 = 2x, 10 = 3x, 11 = 4x)
+	 *   | | | | | +-+-- Width (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
+	 *   | | | +-+------ Height (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
 	 *   | | +---------- Horizontal flip (0 = off, 1 = on)
 	 *   | +------------ Vertical flip (0 = off, 1 = on)
 	 *   +-------------- XY flip (0 = off, 1 = on)
@@ -91,14 +93,15 @@ struct surface_t {
 	uint8_t index{0};
 
 	/*
-	 * Default 16 colors for 1, 2 and 4 bit modes at init, resemble c64
+	 * Default color_table for 1, 2, 4 and 8 bit modes at init
+	 *
+	 * 1 bit uses slots 0 and 1
+	 * 2 bit uses slots 0, 1, 2 and 3
+	 * 4 bit uses slots 0, ..., 15
+	 * 8 bit uses all
+	 *
 	 */
-	uint8_t color_table[16] = {
-		PUNCH_BLACK, PUNCH_WHITE, PUNCH_RED, PUNCH_CYAN,
-		PUNCH_PURPLE, PUNCH_GREEN, PUNCH_BLUE, PUNCH_YELLOW,
-		PUNCH_ORANGE, PUNCH_BROWN, PUNCH_LIGHTRED, PUNCH_DARKGREY,
-		PUNCH_GREY, PUNCH_LIGHTGREEN, PUNCH_LIGHTBLUE, PUNCH_LIGHTGREY
-	};
+	uint8_t color_table[256];
 };
 
 class blitter_ic {

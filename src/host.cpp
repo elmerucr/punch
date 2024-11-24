@@ -303,7 +303,7 @@ void host_t::update_screen()
 
 	if (system->current_mode == DEBUG_MODE) {
 		//const SDL_Rect viewer = { (4*8*MAX_PIXELS_PER_SCANLINE)/5, 0, (8*MAX_PIXELS_PER_SCANLINE)/5, (9*8*MAX_PIXELS_PER_SCANLINE)/(5*16) };
-		const SDL_Rect viewer = { (182*8*MAX_PIXELS_PER_SCANLINE)/MAX_PIXELS_PER_SCANLINE, (20*8*MAX_SCANLINES)/MAX_SCANLINES, (2*8*MAX_PIXELS_PER_SCANLINE)/5, (2*8*MAX_SCANLINES)/5 };
+		const SDL_Rect viewer = { (176*8*MAX_PIXELS_PER_SCANLINE)/MAX_PIXELS_PER_SCANLINE, (12*8*MAX_SCANLINES)/MAX_SCANLINES, (2*8*MAX_PIXELS_PER_SCANLINE)/5, (2*8*MAX_SCANLINES)/5 };
 		SDL_SetTextureAlphaMod(core_texture, viewer_alpha);
 		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_BLEND);
 		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);

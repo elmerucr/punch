@@ -154,7 +154,7 @@ void core_t::reset()
 
 	// TODO: remove this later
 	// some little check if deadbeef looks SCRAMBLED meaning host is little endian
-	*(uint32_t *)&blitter->vram[0x1000] = 0xefbeadde;
+	*(uint32_t *)&blitter->vram[0x2000] = 0xefbeadde;
 
 	commander->reset();
 }

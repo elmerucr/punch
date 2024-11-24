@@ -179,8 +179,6 @@ public:
 	void video_toggle_debugger_viewer() {
 		switch (viewer_alpha) {
 			case 0:
-				viewer_alpha = 128; break;
-			case 128:
 				viewer_alpha = 255; break;
 			default:
 				viewer_alpha = 0; break;

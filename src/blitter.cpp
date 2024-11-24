@@ -64,6 +64,14 @@ void blitter_ic::reset()
 		vram[palette_addr + (i << 2) + 3] = b;
 	}
 
+	vram[palette_addr] = 0x00; // first color is transparent (empty) 0x00000000
+
+	for (int i=0; i<256; i++) {
+		for (int j=0; j<16; j++) {
+			surface[j].color_table[i] = i;
+		}
+	}
+
 	surface[0].w = MAX_PIXELS_PER_SCANLINE;
 	surface[0].h = MAX_SCANLINES;
 	surface[0].base_address = FRAMEBUFFER_ADDRESS;
@@ -196,47 +204,20 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				/*
 				 * Index where pixel source information can be found
 				 */
-				uint8_t index{0};
-
-				/*
-				 * Will hold bit pattern 0b100 is pixel must be drawn,
-				 * otherwise 0b000
-				 */
-				uint8_t draw_pixel{0b000};
+				uint8_t color_index{0};
 
 				if (color_mode < 0b100) {
-					/*
-					* Color selection, first step
-					*/
-					index = memory[(start_address + (adjusted_offset / indexed_color_modes[color_mode].pixels_per_byte)) & memory_mask];
+					// Color selection, first step
+					color_index = memory[(start_address + (adjusted_offset / indexed_color_modes[color_mode].pixels_per_byte)) & memory_mask];
 
-					/*
-					* Depending on number of bits per pixel, there will
-					* be a bitshift to the right on the extracted byte
-					*/
-					index >>= indexed_color_modes[color_mode].bits_per_pixel * (indexed_color_modes[color_mode].pixels_per_byte - (adjusted_offset % indexed_color_modes[color_mode].pixels_per_byte) - 1);
+					// Depending on number of bits per pixel, there will do a bitshift
+					color_index >>= indexed_color_modes[color_mode].bits_per_pixel * (indexed_color_modes[color_mode].pixels_per_byte - (adjusted_offset % indexed_color_modes[color_mode].pixels_per_byte) - 1);
 
-					/*
-					* And use the correct mask
-					*/
-					index &= indexed_color_modes[color_mode].mask;
+					// And use the correct mask
+					color_index &= indexed_color_modes[color_mode].mask;
 
-					/*
-					 * Now is a good time to check if the pixel must be drawn,
-					 * so any value above zero. This is because the value of
-					 * color_index could be changed later on.
-					 */
-					if (index) draw_pixel = 0b100;
-
-					/*
-					 * Apply another level of indirection for 1, 2 and 4 bpp,
-					 * if so, update value of color_index.
-					 *
-					 * For 8 bit, index stays the same
-					 */
-					if (color_mode <= 0b10) {
-							index = src->color_table[index];
-					}
+					// Lookup final color in table
+					color_index = src->color_table[color_index];
 				}
 
 				/*
@@ -245,28 +226,10 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 				uint32_t dst = (dest->base_address + ((((dest_y + src->y) * dest->w) + dest_x + src->x) << 2)) & VRAM_SIZE_MASK;
 
 				if (color_mode <= 0b11) {
-					switch ((src->flags_0 & 0b011) | draw_pixel) {
-						case 0b000: // no pixel, fore off, bg off
-						case 0b010: // no pixel, fore on,  bg off
-							// do nothing
-							break;
-						case 0b001: // no pixel, fore off, bg on
-						case 0b011: // no pixel, fore on,  bg on
-							blend(palette_addr + (src->color_table[0] << 2), dst);
-							break;
-						case 0b100: // pixel, fore off, bg off
-						case 0b101: // pixel, fore off, bg on
-							blend(palette_addr + (index << 2), dst);
-							break;
-						case 0b110:	// pixel, fore on, bg off
-						case 0b111:	// pixel, fore on, bg on
-							blend(palette_addr + (src->color_table[1] << 2), dst);
-							break;
-					}
+					// 1, 2, 4 and 8 bit color
+					blend(palette_addr + (color_index << 2), dst);
 				} else {
-					/*
-					 * 32 bit color
-					 */
+					// 32 bit color
 					blend((start_address + (adjusted_offset << 2)) & VRAM_SIZE_MASK, dst);
 				}
 				pixel_saldo--;
@@ -278,24 +241,25 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 
 uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _ts)
 {
-	/*
-	 * Make src a copy of s to work with (editable)
-	 */
-	surface_t src = surface[s & 0b1111];
-
-	/*
-	 * dst and ts can be pointers, don't need edits
-	 */
+	surface_t *src = &surface[s & 0b1111];
 	surface_t *dst = &surface[d & 0b1111];
 	const surface_t *ts = &surface[_ts & 0b1111];
 
 	uint32_t pixelcount = 0;
 
-	uint8_t dw = src.flags_1 & FLAGS1_DBLWIDTH;
-	uint8_t dh = (src.flags_1 & FLAGS1_DBLHEIGHT) >> 2;
+	uint8_t dw = src->flags_1 & FLAGS1_DBLWIDTH;
+	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) >> 2;
 
-	src.x = ts->x;
-	src.y = ts->y;
+	// save for restoration later on
+	int16_t old_x = src->x;
+	int16_t old_y = src->y;
+	uint8_t old_index = src->index;
+	uint8_t old_ct_0 = src->color_table[0];
+	uint8_t old_ct_1 = src->color_table[1];
+	//
+
+	src->x = ts->x;
+	src->y = ts->y;
 	uint32_t tile_index = ts->base_address;
 	uint32_t fg_color_index = tile_index + (ts->w * ts->h);
 	uint32_t bg_color_index = tile_index + (2 * ts->w * ts->h);
@@ -305,15 +269,24 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 
 	for (int y = 0; y < ts->h; y++) {
 		for (int x = 0; x < ts->w; x++) {
-			src.index = vram[tile_index++ & VRAM_SIZE_MASK];
-			src.color_table[0] = use_fixed_bg ? ts->color_table[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
-			src.color_table[1] = use_fixed_fg ? ts->color_table[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
-			pixelcount += blit(&src, dst);
-			src.x += (src.w << dw);
+			src->index = vram[tile_index++ & VRAM_SIZE_MASK];
+			src->color_table[0] = use_fixed_bg ? ts->color_table[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
+			src->color_table[1] = use_fixed_fg ? ts->color_table[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
+			pixelcount += blit(src, dst);
+			src->x += (src->w << dw);
 		}
-		src.x = ts->x;			// set to start position
-		src.y += (src.h << dh);	// go to next row
+		src->x = ts->x;			// set to start position
+		src->y += (src->h << dh);	// go to next row
 	}
+
+	// time to restore
+	src->x = old_x;
+	src->y = old_y;
+	src->index = old_index;
+	src->color_table[0] = old_ct_0;
+	src->color_table[1] = old_ct_1;
+	//
+
 	return pixelcount;
 }
 

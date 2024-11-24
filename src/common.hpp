@@ -13,7 +13,7 @@
  */
 #define PUNCH_MAJOR_VERSION    0
 #define PUNCH_MINOR_VERSION    8
-#define PUNCH_BUILD            20241121
+#define PUNCH_BUILD            20241124
 #define PUNCH_YEAR             2024
 
 /*
@@ -46,7 +46,7 @@
 /*
  * Colors similar to C64 colors
  */
-#define PUNCH_BLACK			0b00'00'00'00	// 0x00
+#define PUNCH_BLACK			0b00'00'00'01	// 0x01 (don't use 0x00, that one's transparent)
 #define PUNCH_WHITE			0b11'11'11'11	// 0xff
 #define PUNCH_RED			0b11'00'01'10	// 0xc6
 #define PUNCH_CYAN			0b01'11'11'10	// 0x7e
@@ -66,22 +66,22 @@
 /*
  * C64 colors (VirtualC64) argb4444 format
  */
-#define C64_ARGB444_BLACK       0xf000
-#define C64_ARGB444_WHITE       0xffff
-#define C64_ARGB444_RED         0xf733
-#define C64_ARGB444_CYAN        0xf8cc
-#define C64_ARGB444_PURPLE      0xf849
-#define C64_ARGB444_GREEN       0xf6a5
-#define C64_ARGB444_BLUE        0xf339
-#define C64_ARGB444_YELLOW      0xfee8
-#define C64_ARGB444_ORANGE      0xf853
-#define C64_ARGB444_BROWN       0xf531
-#define C64_ARGB444_LIGHTRED    0xfb77
-#define C64_ARGB444_DARKGREY    0xf444
-#define C64_ARGB444_GREY        0xf777
-#define C64_ARGB444_LIGHTGREEN  0xfbfa
-#define C64_ARGB444_LIGHTBLUE   0xf67d
-#define C64_ARGB444_LIGHTGREY   0xfaaa
+// #define C64_ARGB444_BLACK       0xf000
+// #define C64_ARGB444_WHITE       0xffff
+// #define C64_ARGB444_RED         0xf733
+// #define C64_ARGB444_CYAN        0xf8cc
+// #define C64_ARGB444_PURPLE      0xf849
+// #define C64_ARGB444_GREEN       0xf6a5
+// #define C64_ARGB444_BLUE        0xf339
+// #define C64_ARGB444_YELLOW      0xfee8
+// #define C64_ARGB444_ORANGE      0xf853
+// #define C64_ARGB444_BROWN       0xf531
+// #define C64_ARGB444_LIGHTRED    0xfb77
+// #define C64_ARGB444_DARKGREY    0xf444
+// #define C64_ARGB444_GREY        0xf777
+// #define C64_ARGB444_LIGHTGREEN  0xfbfa
+// #define C64_ARGB444_LIGHTBLUE   0xf67d
+// #define C64_ARGB444_LIGHTGREY   0xfaaa
 
 
 /*
