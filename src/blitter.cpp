@@ -254,8 +254,8 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 	int16_t old_x = src->x;
 	int16_t old_y = src->y;
 	uint8_t old_index = src->index;
-	uint8_t old_ct_0 = src->color_table[0];
-	uint8_t old_ct_1 = src->color_table[1];
+	uint8_t old_color_table_0 = src->color_table[0];
+	uint8_t old_color_table_1 = src->color_table[1];
 	//
 
 	src->x = ts->x;
@@ -264,27 +264,27 @@ uint32_t blitter_ic::tile_blit(const uint8_t s, const uint8_t d, const uint8_t _
 	uint32_t fg_color_index = tile_index + (ts->w * ts->h);
 	uint32_t bg_color_index = tile_index + (2 * ts->w * ts->h);
 
-	bool use_fixed_bg = ts->flags_0 & 0b01 ? true : false;
-	bool use_fixed_fg = ts->flags_0 & 0b10 ? true : false;
+	bool fixed_bg_color = ts->flags_0 & 0b01 ? true : false;
+	bool fixed_fg_color = ts->flags_0 & 0b10 ? true : false;
 
 	for (int y = 0; y < ts->h; y++) {
 		for (int x = 0; x < ts->w; x++) {
 			src->index = vram[tile_index++ & VRAM_SIZE_MASK];
-			src->color_table[0] = use_fixed_bg ? ts->color_table[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
-			src->color_table[1] = use_fixed_fg ? ts->color_table[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
+			src->color_table[0] = fixed_bg_color ? ts->color_table[0] : vram[bg_color_index++ & VRAM_SIZE_MASK];
+			src->color_table[1] = fixed_fg_color ? ts->color_table[1] : vram[fg_color_index++ & VRAM_SIZE_MASK];
 			pixelcount += blit(src, dst);
 			src->x += (src->w << dw);
 		}
-		src->x = ts->x;			// set to start position
+		src->x = ts->x;				// set to start position
 		src->y += (src->h << dh);	// go to next row
 	}
 
-	// time to restore
+	// Restore src
 	src->x = old_x;
 	src->y = old_y;
 	src->index = old_index;
-	src->color_table[0] = old_ct_0;
-	src->color_table[1] = old_ct_1;
+	src->color_table[0] = old_color_table_0;
+	src->color_table[1] = old_color_table_1;
 	//
 
 	return pixelcount;
@@ -415,6 +415,8 @@ uint8_t blitter_ic::io_read8(uint16_t address)
 				case 0x12: return (vram_peek & 0x0000ff00) >>  8;
 				case 0x13: return (vram_peek & 0x000000ff) >>  0;
 
+				case 0x18: return gamma;
+
 				default: return 0x00;
 			}
 		case 0x100:
@@ -467,6 +469,8 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 				case 0x11: vram_peek = (vram_peek & 0x0000ffff) | (value << 16); break;
 				case 0x12: vram_peek = (vram_peek & 0x00ff00ff) | (value <<  8); break;
 				case 0x13: vram_peek = (vram_peek & 0x00ffff00) | (value <<  0); break;
+
+				case 0x18: gamma = value;
 
 				default: break;
 			}

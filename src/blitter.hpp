@@ -44,8 +44,8 @@ struct surface_t {
 	 * 7 6 5 4 3 2 1 0
 	 *   | | |     | |
 	 *   | | |     | |
-	 *   | | |     | +-- Use fixed background color (0 = off, 1 = on)
-	 *   | | |     +---- Use fixed foreground color (0 = off, 1 = on)
+	 *   | | |     | +-- Tile_blit only: Use fixed background color (0 = off, 1 = on)
+	 *   | | |     +---- Tile_blit only: Use fixed foreground color (0 = off, 1 = on)
 	 *   +-+-+---------- Bits per pixel (0b000 = 1, 0b001 = 2, 0b010 = 4, 0b011 = 8, 0b100 = 32)
 	 *
 	 * bits 2, 3, 6 and 7: Reserved
@@ -85,7 +85,6 @@ struct surface_t {
 	 *
 	 * bits 3, 4, 5, 6, 7: reserved
 	 */
-
 	uint8_t flags_2{0};
 
 	/*
@@ -118,6 +117,7 @@ private:
 	int16_t y0{0};
 	int16_t x1{0};
 	int16_t y1{0};
+	uint8_t gamma{255};
 	uint32_t vram_peek{0};	// base address for vram peek page
 
 	/*
@@ -184,9 +184,13 @@ public:
 		 * If there is an alpha value > 0, do the work, otherwise skip
 		 */
 		if (vram[s+0]) {
-			vram[d+1] = ((vram[s+0] * (vram[s+1] - vram[d+1])) + vram[s+1] + (vram[d+1] << 8)) >> 8;
-			vram[d+2] = ((vram[s+0] * (vram[s+2] - vram[d+2])) + vram[s+2] + (vram[d+2] << 8)) >> 8;
-			vram[d+3] = ((vram[s+0] * (vram[s+3] - vram[d+3])) + vram[s+3] + (vram[d+3] << 8)) >> 8;
+			uint8_t r = ((gamma * vram[s+1]) + vram[s+1]) >> 8;
+			uint8_t g = ((gamma * vram[s+2]) + vram[s+2]) >> 8;
+			uint8_t b = ((gamma * vram[s+3]) + vram[s+3]) >> 8;
+
+			vram[d+1] = ((vram[s+0] * (r - vram[d+1])) + r + (vram[d+1] << 8)) >> 8;
+			vram[d+2] = ((vram[s+0] * (g - vram[d+2])) + g + (vram[d+2] << 8)) >> 8;
+			vram[d+3] = ((vram[s+0] * (b - vram[d+3])) + b + (vram[d+3] << 8)) >> 8;
 			vram[d+0] = 0xff;	// result is always alpha full
 			//vram[d+0] = (65536 - ((256 - vram[s+0]) * (256 - vram[d+0]))) >> 8;
 		}

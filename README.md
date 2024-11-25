@@ -29,6 +29,8 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 
 ### Addressable by MC6809 and Blitter
 
+*work in progress*
+
 * ```$000-$0ff``` direct page (default after reset)
 * ```$100-$3ff``` available ram and system stack pointer (768 bytes)
 * ```$0400-$0fff``` input/output area
@@ -47,7 +49,6 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 	* ```$800-$8ff``` core
 		* ```$800``` status register
 		* ```$801``` control register
-		* ```$808-$80b``` vram peek base address (24 bits, $808 always #$00)
 	* ```$900-$9ff``` keyboard
 	* ```$a00-$aff``` timer
 	* ```$b00-$bff``` commander (scripting engine)
@@ -70,6 +71,8 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 		* ```$e0a-$e0b``` y0 for drawing operations (16 bit signed)
 		* ```$e0c-$e0d``` x1 for drawing operations (16 bit signed)
 		* ```$e0e-$e0f``` y1 for drawing operations (16 bit signed)
+		* ```$e10-$e13``` vram peek base address (24 bits, $e10 always #$00)
+		* ```$e18``` added alpha value during blits
 	* ```$f00-$fff``` vram peek
 * ```$1000-$fbff``` 59kb ram ($fc00 is initial usp)
 * ```$fc00-$ffff``` 1kb kernel + vectors
