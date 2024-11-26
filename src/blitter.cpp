@@ -415,7 +415,10 @@ uint8_t blitter_ic::io_read8(uint16_t address)
 				case 0x12: return (vram_peek & 0x0000ff00) >>  8;
 				case 0x13: return (vram_peek & 0x000000ff) >>  0;
 
-				case 0x18: return gamma;
+				case 0x18: return alpha;
+				case 0x19: return gamma_red;
+				case 0x1a: return gamma_green;
+				case 0x1b: return gamma_blue;
 
 				default: return 0x00;
 			}
@@ -470,7 +473,10 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 				case 0x12: vram_peek = (vram_peek & 0x00ff00ff) | (value <<  8); break;
 				case 0x13: vram_peek = (vram_peek & 0x00ffff00) | (value <<  0); break;
 
-				case 0x18: gamma = value;
+				case 0x18: alpha = value; break;
+				case 0x19: gamma_red = value; break;
+				case 0x1a: gamma_green = value; break;
+				case 0x1b: gamma_blue = value; break;
 
 				default: break;
 			}

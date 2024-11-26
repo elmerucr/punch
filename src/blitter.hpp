@@ -117,7 +117,10 @@ private:
 	int16_t y0{0};
 	int16_t x1{0};
 	int16_t y1{0};
-	uint8_t gamma{255};
+	uint8_t alpha{255};
+	uint8_t gamma_red{255};
+	uint8_t gamma_green{255};
+	uint8_t gamma_blue{255};
 	uint32_t vram_peek{0};	// base address for vram peek page
 
 	/*
@@ -184,13 +187,14 @@ public:
 		 * If there is an alpha value > 0, do the work, otherwise skip
 		 */
 		if (vram[s+0]) {
-			uint8_t r = ((gamma * vram[s+1]) + vram[s+1]) >> 8;
-			uint8_t g = ((gamma * vram[s+2]) + vram[s+2]) >> 8;
-			uint8_t b = ((gamma * vram[s+3]) + vram[s+3]) >> 8;
+			uint8_t a = ((alpha * vram[s+0]) + vram[s+0]) >> 8;
+			uint8_t r = ((gamma_red * vram[s+1]) + vram[s+1]) >> 8;
+			uint8_t g = ((gamma_green * vram[s+2]) + vram[s+2]) >> 8;
+			uint8_t b = ((gamma_blue * vram[s+3]) + vram[s+3]) >> 8;
 
-			vram[d+1] = ((vram[s+0] * (r - vram[d+1])) + r + (vram[d+1] << 8)) >> 8;
-			vram[d+2] = ((vram[s+0] * (g - vram[d+2])) + g + (vram[d+2] << 8)) >> 8;
-			vram[d+3] = ((vram[s+0] * (b - vram[d+3])) + b + (vram[d+3] << 8)) >> 8;
+			vram[d+1] = ((a * (r - vram[d+1])) + r + (vram[d+1] << 8)) >> 8;
+			vram[d+2] = ((a * (g - vram[d+2])) + g + (vram[d+2] << 8)) >> 8;
+			vram[d+3] = ((a * (b - vram[d+3])) + b + (vram[d+3] << 8)) >> 8;
 			vram[d+0] = 0xff;	// result is always alpha full
 			//vram[d+0] = (65536 - ((256 - vram[s+0]) * (256 - vram[d+0]))) >> 8;
 		}
