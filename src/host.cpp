@@ -16,6 +16,16 @@
 
 host_t::host_t(system_t *s)
 {
+	core_buffer = new uint32_t[2 * PIXELS];
+	for (int i=0; i<2*PIXELS; i++) {
+		core_buffer[i] = 0;
+	}
+
+	debugger_buffer = new uint32_t[2 * PIXELS];
+	for (int i=0; i<2*PIXELS; i++) {
+		debugger_buffer[i] = 0;
+	}
+
 	system = s;
 
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -62,6 +72,9 @@ host_t::host_t(system_t *s)
 
 host_t::~host_t()
 {
+	delete [] debugger_buffer;
+	delete [] core_buffer;
+
 	video_stop();
 	audio_stop();
 	SDL_Quit();
@@ -183,7 +196,6 @@ void host_t::video_init()
 	video_window = SDL_CreateWindow("punch", SDL_WINDOWPOS_CENTERED,
 				  SDL_WINDOWPOS_CENTERED,
 				  video_scaling * MAX_PIXELS_PER_SCANLINE,
-				  //video_scaling * ((10 * MAX_SCANLINES) / 9),
 				  video_scaling * MAX_SCANLINES,
 				  SDL_WINDOW_SHOWN |
 				  SDL_WINDOW_ALLOW_HIGHDPI);
@@ -223,19 +235,10 @@ void host_t::video_init()
 	/*
 	 * Create two textures that are able to refresh very frequently
 	 */
+	create_core_texture();
+	create_debugger_texture();
 
-	create_core_texture(video_linear_filtering);
-	create_debugger_texture(video_linear_filtering);
-
-	/*
-	 * Scanlines: A static texture that mimics scanlines
-	 */
-	scanlines_texture = nullptr;
-	create_scanlines_texture(true);
-
-	create_shadowmask_texture();
-
-	SDL_RenderSetLogicalSize(video_renderer, 8*MAX_PIXELS_PER_SCANLINE, 8*MAX_SCANLINES);	// keeps right aspect ratio
+	SDL_RenderSetLogicalSize(video_renderer, 2 * MAX_PIXELS_PER_SCANLINE, 2 * MAX_SCANLINES);	// keeps right aspect ratio
 
 	/*
 	 * Make sure mouse cursor isn't visible
@@ -245,9 +248,6 @@ void host_t::video_init()
 
 void host_t::video_stop()
 {
-	SDL_DestroyTexture(shadowmask_texture);
-
-	SDL_DestroyTexture(scanlines_texture);
 	SDL_DestroyTexture(debugger_texture);
 	SDL_DestroyTexture(core_texture);
 	SDL_DestroyRenderer(video_renderer);
@@ -256,55 +256,68 @@ void host_t::video_stop()
 
 void host_t::update_core_texture(uint32_t *core)
 {
-	SDL_UpdateTexture(core_texture, NULL, core, MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
+	for (int y=0; y<MAX_SCANLINES; y++) {
+		for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
+			core_buffer[(MAX_PIXELS_PER_SCANLINE * (y << 1)) + x] = *core;
+			core++;
+		}
+	}
+	SDL_UpdateTexture(core_texture, NULL, core_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
 }
 
 void host_t::update_debugger_texture(uint32_t *debugger)
 {
-	SDL_UpdateTexture(debugger_texture, NULL, debugger, MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
+	for (int y=0; y<MAX_SCANLINES; y++) {
+		for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
+			debugger_buffer[(MAX_PIXELS_PER_SCANLINE * (y << 1)) + x] = *debugger;
+			debugger++;
+		}
+	}
+	SDL_UpdateTexture(debugger_texture, NULL, debugger_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
 }
 
 void host_t::update_screen()
 {
 	SDL_Rect placement;
-	placement.w = 8*MAX_PIXELS_PER_SCANLINE;
-	placement.h = 8*MAX_SCANLINES;
-	placement.x = -video_hor_blur;
-	placement.y = 0;
+	placement.w = 2 * MAX_PIXELS_PER_SCANLINE;
+	placement.h = 2 * MAX_SCANLINES;
+	placement.x = 0;
+	placement.y = -1;
 
 	SDL_RenderClear(video_renderer);
 
 	switch (system->current_mode) {
 		case DEBUG_MODE:
-			SDL_SetTextureAlphaMod(debugger_texture, 85);
+			//SDL_SetTextureBlendMode(debugger_texture, SDL_BLENDMODE_ADD);
+			if (scanlines) {
+				SDL_SetTextureAlphaMod(debugger_texture, 85);
+				SDL_RenderCopy(video_renderer, debugger_texture, NULL, &placement);
+			}
+			placement.y = 0;
+			SDL_SetTextureAlphaMod(debugger_texture, 255);
 			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &placement);
-			placement.x = 0;
-			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &placement);
-			placement.x = video_hor_blur;
+			placement.y = 1;
+			SDL_SetTextureAlphaMod(debugger_texture, scanlines ? 85 : 255);
 			SDL_RenderCopy(video_renderer, debugger_texture, NULL, &placement);
 			break;
 		case RUN_MODE:
-			SDL_SetTextureAlphaMod(core_texture, 85);
-			SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_ADD);
+			//SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_ADD);
+			if (scanlines) {
+				SDL_SetTextureAlphaMod(core_texture, 85);
+				SDL_RenderCopy(video_renderer, core_texture, NULL, &placement);
+			}
+			placement.y = 0;
+			SDL_SetTextureAlphaMod(core_texture, 255);
 			SDL_RenderCopy(video_renderer, core_texture, NULL, &placement);
-			placement.x = 0;
-			SDL_RenderCopy(video_renderer, core_texture, NULL, &placement);
-			placement.x = video_hor_blur;
+			placement.y = 1;
+			SDL_SetTextureAlphaMod(core_texture, scanlines ? 85 : 255);
 			SDL_RenderCopy(video_renderer, core_texture, NULL, &placement);
 			break;
 	}
 
-	SDL_SetTextureAlphaMod(scanlines_texture, video_scanlines_alpha);
-	SDL_RenderCopy(video_renderer, scanlines_texture, NULL, NULL);
-
-	if (shadowmask_active) {
-		SDL_RenderCopy(video_renderer, shadowmask_texture, NULL, NULL);
-	}
-
-	if (system->current_mode == DEBUG_MODE) {
-		//const SDL_Rect viewer = { (4*8*MAX_PIXELS_PER_SCANLINE)/5, 0, (8*MAX_PIXELS_PER_SCANLINE)/5, (9*8*MAX_PIXELS_PER_SCANLINE)/(5*16) };
-		const SDL_Rect viewer = { (176*8*MAX_PIXELS_PER_SCANLINE)/MAX_PIXELS_PER_SCANLINE, (12*8*MAX_SCANLINES)/MAX_SCANLINES, (2*8*MAX_PIXELS_PER_SCANLINE)/5, (2*8*MAX_SCANLINES)/5 };
-		SDL_SetTextureAlphaMod(core_texture, viewer_alpha);
+	if ((system->current_mode == DEBUG_MODE) && viewer_visible) {
+		SDL_Rect viewer = { (176*MAX_PIXELS_PER_SCANLINE)/MAX_PIXELS_PER_SCANLINE, (12*MAX_SCANLINES)/MAX_SCANLINES, (2*MAX_PIXELS_PER_SCANLINE)/5, (2*MAX_SCANLINES)/5 };
+		SDL_SetTextureAlphaMod(core_texture, 255);
 		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_BLEND);
 		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
 	}
@@ -317,95 +330,26 @@ void host_t::update_screen()
  * https://en.wikipedia.org/wiki/List_of_8-bit_computer_hardware_graphics
  */
 
-void host_t::create_core_texture(bool linear_filtering)
+void host_t::create_core_texture()
 {
 	if (core_texture) SDL_DestroyTexture(core_texture);
 
-	if (linear_filtering) {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-	} else {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	}
-
 	core_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB32,
 				    SDL_TEXTUREACCESS_STREAMING,
-				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
+				    MAX_PIXELS_PER_SCANLINE, 2 * MAX_SCANLINES);
+
 	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_ADD);
 }
 
-void host_t::create_debugger_texture(bool linear_filtering)
+void host_t::create_debugger_texture()
 {
 	if (debugger_texture) SDL_DestroyTexture(debugger_texture);
 
-	if (linear_filtering) {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-	} else {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	}
-
 	debugger_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB32,
 				    SDL_TEXTUREACCESS_STREAMING,
-				    MAX_PIXELS_PER_SCANLINE, MAX_SCANLINES);
+				    MAX_PIXELS_PER_SCANLINE, 2 * MAX_SCANLINES);
+
 	SDL_SetTextureBlendMode(debugger_texture, SDL_BLENDMODE_ADD);
-}
-
-void host_t::create_scanlines_texture(bool linear_filtering)
-{
-	uint32_t *scanline_buffer = new uint32_t[3 * MAX_PIXELS_PER_SCANLINE * MAX_SCANLINES];
-
-	if (scanlines_texture) {
-		SDL_DestroyTexture(scanlines_texture);
-		scanlines_texture = nullptr;
-	}
-
-	if (linear_filtering) {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-	} else {
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	}
-
-	scanlines_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB32,
-										  SDL_TEXTUREACCESS_STATIC,
-										  MAX_PIXELS_PER_SCANLINE, 3 * MAX_SCANLINES);
-
-	SDL_SetTextureBlendMode(scanlines_texture, SDL_BLENDMODE_BLEND);
-
-	for (int i=0; i < 3*MAX_SCANLINES; i++) {
-		for (int j=0; j < MAX_PIXELS_PER_SCANLINE; j++) {
-			uint32_t color;
-			if ((i % 3) == 0 || (i % 3) == 2) {
-				color = 0x000000ff;
-			} else {
-				color = 0x00000000;
-			}
-			scanline_buffer[(i * MAX_PIXELS_PER_SCANLINE) + j] = color;
-		}
-	}
-
-	SDL_UpdateTexture(scanlines_texture, NULL, scanline_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
-
-	delete [] scanline_buffer;
-}
-
-void host_t::create_shadowmask_texture()
-{
-	if (shadowmask_texture) {
-		SDL_DestroyTexture(shadowmask_texture);
-		shadowmask_texture = nullptr;
-	}
-
-	uint32_t buffer[3 * MAX_PIXELS_PER_SCANLINE];
-
-	for (int i=0; i < 3 * MAX_PIXELS_PER_SCANLINE; i++) {
-		if (i % 3 == 0) buffer[i] = 0x0000ff33;
-		if (i % 3 == 1) buffer[i] = 0x00ff0033;
-		if (i % 3 == 2) buffer[i] = 0xff000033;
-	}
-
-	shadowmask_texture = SDL_CreateTexture(video_renderer, SDL_PIXELFORMAT_ARGB32, SDL_TEXTUREACCESS_STATIC, 3 * MAX_PIXELS_PER_SCANLINE, 1);
-	SDL_SetTextureBlendMode(shadowmask_texture, SDL_BLENDMODE_MUL);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-	SDL_UpdateTexture(shadowmask_texture, NULL, buffer, 3 * MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
 }
 
 enum events_output_state host_t::events_process_events()
@@ -425,14 +369,8 @@ enum events_output_state host_t::events_process_events()
 				if ((event.key.keysym.sym == SDLK_f) && alt_pressed) {
 					events_wait_until_key_released(SDLK_f);
 					video_toggle_fullscreen();
-				} else if ((event.key.keysym.sym == SDLK_a) && alt_pressed ) {
-					video_toggle_shadowmask();
 				} else if ((event.key.keysym.sym == SDLK_s) && alt_pressed ) {
-					video_change_scanlines_intensity();
-				} else if ((event.key.keysym.sym == SDLK_b) && alt_pressed) {
-					video_toggle_linear_filtering();
-				} else if ((event.key.keysym.sym == SDLK_d) && alt_pressed) {
-					video_change_hor_blur();
+					video_toggle_scanlines();
 				} else if ((event.key.keysym.sym == SDLK_r) && alt_pressed) {
 					events_wait_until_key_released(SDLK_r);
 					system->core->reset();
@@ -620,40 +558,9 @@ void host_t::video_toggle_fullscreen()
 	}
 }
 
-void host_t::video_change_scanlines_intensity()
+void host_t::video_toggle_scanlines()
 {
-	if (video_scanlines_alpha < 32) {
-		video_scanlines_alpha = 32;
-	} else if (video_scanlines_alpha < 64) {
-		video_scanlines_alpha = 64;
-	} else if (video_scanlines_alpha < 96) {
-		video_scanlines_alpha = 96;
-	} else if (video_scanlines_alpha < 128) {
-		video_scanlines_alpha = 128;
-	} else if (video_scanlines_alpha < 160) {
-		video_scanlines_alpha = 160;
-	} else if (video_scanlines_alpha < 192) {
-		video_scanlines_alpha = 192;
-	} else if (video_scanlines_alpha < 224) {
-		video_scanlines_alpha = 224;
-	} else if (video_scanlines_alpha < 255) {
-		video_scanlines_alpha = 255;
-	} else {
-		video_scanlines_alpha = 0;
-	}
-}
-
-void host_t::video_toggle_linear_filtering()
-{
-	video_linear_filtering = !video_linear_filtering;
-	create_core_texture(video_linear_filtering);
-	create_debugger_texture(video_linear_filtering);
-	//create_scanlines_texture(video_linear_filtering);
-}
-
-void host_t::video_toggle_shadowmask()
-{
-	shadowmask_active = !shadowmask_active;
+	scanlines = !scanlines;
 }
 
 void host_t::video_increase_window_size()
@@ -678,11 +585,4 @@ void host_t::video_decrease_window_size()
 		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 		printf("[SDL] Video scaling: %i\n", video_scaling);
 	}
-}
-
-
-void host_t::video_change_hor_blur()
-{
-	video_hor_blur++;
-	if (video_hor_blur == 8) video_hor_blur = 0;
 }

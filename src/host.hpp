@@ -112,30 +112,26 @@ private:
 	 */
 	uint8_t video_scaling_max;
 	uint8_t video_scaling;
-	uint8_t video_scanlines_alpha{96};	// 0, 32, 64, 96, 128, 160, 192, 224, 255
-	uint8_t video_hor_blur{2};
-	bool shadowmask_active{false};
+	bool scanlines{true};
 
 	bool video_fullscreen{false};
-	bool video_linear_filtering{false};
 	SDL_Window *video_window;
 	SDL_Renderer *video_renderer;
 	bool vsync;
+
+	uint32_t *core_buffer{nullptr};
 	SDL_Texture *core_texture{nullptr};
+
+	uint32_t *debugger_buffer{nullptr};
 	SDL_Texture *debugger_texture{nullptr};
-	SDL_Texture *scanlines_texture{nullptr};
 
-	uint8_t viewer_alpha{0};
-
-	SDL_Texture *shadowmask_texture{nullptr};
+	bool viewer_visible{false};
 
 	int window_width;
 	int window_height;
 
-	void create_core_texture(bool linear_filtering);
-	void create_debugger_texture(bool linear_filtering);
-	void create_scanlines_texture(bool linear_filtering);
-	void create_shadowmask_texture();
+	void create_core_texture();
+	void create_debugger_texture();
 
 	void video_init();
 	void video_stop();
@@ -172,17 +168,9 @@ public:
 	void video_increase_window_size();
 	void video_decrease_window_size();
 	void video_toggle_fullscreen();
-	void video_change_scanlines_intensity();
-	void video_change_hor_blur();
-	void video_toggle_shadowmask();
-	void video_toggle_linear_filtering();
+	void video_toggle_scanlines();
 	void video_toggle_debugger_viewer() {
-		switch (viewer_alpha) {
-			case 0:
-				viewer_alpha = 255; break;
-			default:
-				viewer_alpha = 0; break;
-		}
+		viewer_visible = !viewer_visible;
 	}
 
 	inline bool vsync_enabled() { return vsync; }
