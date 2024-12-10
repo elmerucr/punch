@@ -11,10 +11,10 @@
 /*
  * Version information
  */
-#define PUNCH_MAJOR_VERSION    0
-#define PUNCH_MINOR_VERSION    8
-#define PUNCH_BUILD            20241208
-#define PUNCH_YEAR             2024
+#define PUNCH_MAJOR_VERSION 0
+#define PUNCH_MINOR_VERSION	9
+#define PUNCH_BUILD			20241210
+#define PUNCH_YEAR			2024
 
 /*
  * Video

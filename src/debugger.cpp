@@ -185,7 +185,7 @@ void debugger_t::redraw()
 			if (blitter->surface[0xc].x > 308) {
 				blitter->surface[0xc].x = -20;
 			} else if (blitter->surface[0xc].x < -20) {
-				blitter->surface[0xc].x = 340;
+				blitter->surface[0xc].x = 308;
 			}
 
 			state++; if (state == 8) state = 0;

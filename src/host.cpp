@@ -271,93 +271,107 @@ void host_t::update_core_texture(uint32_t *core)
 	uint8_t *core_8_next = core_8 + (MAX_PIXELS_PER_SCANLINE << 2);
 	uint8_t *core_buffer_8 = (uint8_t *)core_buffer;
 
-	for (int y=0; y<(MAX_SCANLINES - 1); y++) {
-		for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
+	if (scanlines) {
+		for (int y=0; y<(MAX_SCANLINES - 1); y++) {
+			for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
 
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 0] = *core_8;
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 1] = *(core_8 + 1);
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 2] = *(core_8 + 2);
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 3] = *(core_8 + 3);
-			// odd line
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 0] = 160;
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 1] = ((*(core_8 + 1)) >> 1) + ((*(core_8_next + 1)) >> 1);
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 2] = ((*(core_8 + 2)) >> 1) + ((*(core_8_next + 2)) >> 1);
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 3] = ((*(core_8 + 3)) >> 1) + ((*(core_8_next + 3)) >> 1);
+				core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 0] = *core_8;
+				core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 1] = *(core_8 + 1);
+				core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 2] = *(core_8 + 2);
+				core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 3] = *(core_8 + 3);
+				// odd line
+				core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 0] = 160;
+				core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 1] = ((*(core_8 + 1)) >> 1) + ((*(core_8_next + 1)) >> 1);
+				core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 2] = ((*(core_8 + 2)) >> 1) + ((*(core_8_next + 2)) >> 1);
+				core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 3] = ((*(core_8 + 3)) >> 1) + ((*(core_8_next + 3)) >> 1);
+
+				core_8 += 4;
+				core_8_next += 4;
+			}
+		}
+
+		for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 0] = *core_8;
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 1] = *(core_8 + 1);
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 2] = *(core_8 + 2);
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 3] = *(core_8 + 3);
+
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 0] = 160;
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 1] = (*(core_8 + 2)) >> 1;
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 2] = (*(core_8 + 2)) >> 1;
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 3] = (*(core_8 + 3)) >> 1;
 
 			core_8 += 4;
 			core_8_next += 4;
 		}
+	} else {
+	// simple "fake" scanlines uses alpha value for each second line
+	// // This way, the viewer in debug has transparency values...
+	// // Unless, of course, SDL_BLENDMODE_NONE will be used :-)
+		for (int y=0; y<MAX_SCANLINES; y++) {
+			for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
+				core_buffer[(MAX_PIXELS_PER_SCANLINE * (y << 1)) + x] = *core;
+				core_buffer[(MAX_PIXELS_PER_SCANLINE * ((y << 1) + 1)) + x] = *core;
+				//*(uint8_t *)&core_buffer[(MAX_PIXELS_PER_SCANLINE * ((y << 1) + 1)) + x] = 160;	// 160 is an alpha value
+				core++;
+			}
+		}
 	}
-
-	// for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
-	// 	debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 0] = *debugger_8;
-	// 	debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 1] = *(debugger_8 + 1);
-	// 	debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 2] = *(debugger_8 + 2);
-	// 	debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 3] = *(debugger_8 + 3);
-
-	// 	debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 0] = 160;
-	// 	debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 1] = (*(debugger_8 + 2)) >> 1;
-	// 	debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 2] = (*(debugger_8 + 2)) >> 1;
-	// 	debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 3] = (*(debugger_8 + 3)) >> 1;
-
-	// 	debugger_8 += 4;
-	// 	debugger_8_next += 4;
-	// }
 
 	SDL_UpdateTexture(core_texture, NULL, core_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
 }
 
 void host_t::update_debugger_texture(uint32_t *debugger)
 {
-	// // Option 1: simple "fake" scanlines uses alpha value for each second line
-	// // This way, the viewer in debug has transparency values...
-	// // Unless, of course, SDL_BLENDMODE_NONE will be used :-)
-	// for (int y=0; y<MAX_SCANLINES; y++) {
-	// 	for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
-	// 		debugger_buffer[(MAX_PIXELS_PER_SCANLINE * (y << 1)) + x] = *debugger;
-	// 		debugger_buffer[(MAX_PIXELS_PER_SCANLINE * ((y << 1) + 1)) + x] = *debugger;
-	// 		*(uint8_t *)&debugger_buffer[(MAX_PIXELS_PER_SCANLINE * ((y << 1) + 1)) + x] = 160;	// 160 is an alpha value
-	// 		debugger++;
-	// 	}
-	// }
-	// //
-
-	// Option 2: Per 8 bit channel
 	uint8_t *debugger_8 = (uint8_t *)debugger;
 	uint8_t *debugger_8_next = debugger_8 + (MAX_PIXELS_PER_SCANLINE << 2);
 	uint8_t *debugger_buffer_8 = (uint8_t *)debugger_buffer;
 
-	for (int y=0; y<(MAX_SCANLINES - 1); y++) {
+	if (scanlines) {
+		for (int y=0; y<(MAX_SCANLINES - 1); y++) {
+			for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
+				// core line
+				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 0] = *debugger_8;
+				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 1] = *(debugger_8 + 1);
+				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 2] = *(debugger_8 + 2);
+				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 3] = *(debugger_8 + 3);
+				// odd line
+				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 0] = 160;
+				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 1] = ((*(debugger_8 + 1)) >> 1) + ((*(debugger_8_next + 1)) >> 1);
+				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 2] = ((*(debugger_8 + 2)) >> 1) + ((*(debugger_8_next + 2)) >> 1);
+				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 3] = ((*(debugger_8 + 3)) >> 1) + ((*(debugger_8_next + 3)) >> 1);
+
+				debugger_8 += 4;
+				debugger_8_next += 4;
+			}
+		}
+
 		for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
-			// core line
-			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 0] = *debugger_8;
-			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 1] = *(debugger_8 + 1);
-			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 2] = *(debugger_8 + 2);
-			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 3] = *(debugger_8 + 3);
-			// odd line
-			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 0] = 160;
-			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 1] = ((*(debugger_8 + 1)) >> 1) + ((*(debugger_8_next + 1)) >> 1);
-			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 2] = ((*(debugger_8 + 2)) >> 1) + ((*(debugger_8_next + 2)) >> 1);
-			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 3] = ((*(debugger_8 + 3)) >> 1) + ((*(debugger_8_next + 3)) >> 1);
+			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 0] = *debugger_8;
+			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 1] = *(debugger_8 + 1);
+			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 2] = *(debugger_8 + 2);
+			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 3] = *(debugger_8 + 3);
+
+			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 0] = 160;
+			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 1] = (*(debugger_8 + 2)) >> 1;
+			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 2] = (*(debugger_8 + 2)) >> 1;
+			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 3] = (*(debugger_8 + 3)) >> 1;
 
 			debugger_8 += 4;
 			debugger_8_next += 4;
 		}
-	}
-
-	for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
-		debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 0] = *debugger_8;
-		debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 1] = *(debugger_8 + 1);
-		debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 2] = *(debugger_8 + 2);
-		debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 3] = *(debugger_8 + 3);
-
-		debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 0] = 160;
-		debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 1] = (*(debugger_8 + 2)) >> 1;
-		debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 2] = (*(debugger_8 + 2)) >> 1;
-		debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 3] = (*(debugger_8 + 3)) >> 1;
-
-		debugger_8 += 4;
-		debugger_8_next += 4;
+	} else {
+	// simple "fake" scanlines uses alpha value for each second line
+	// // This way, the viewer in debug has transparency values...
+	// // Unless, of course, SDL_BLENDMODE_NONE will be used :-)
+		for (int y=0; y<MAX_SCANLINES; y++) {
+			for (int x=0; x<MAX_PIXELS_PER_SCANLINE; x++) {
+				debugger_buffer[(MAX_PIXELS_PER_SCANLINE * (y << 1)) + x] = *debugger;
+				debugger_buffer[(MAX_PIXELS_PER_SCANLINE * ((y << 1) + 1)) + x] = *debugger;
+				//*(uint8_t *)&debugger_buffer[(MAX_PIXELS_PER_SCANLINE * ((y << 1) + 1)) + x] = 160;	// 160 is an alpha value
+				debugger++;
+			}
+		}
 	}
 
 	SDL_UpdateTexture(debugger_texture, NULL, debugger_buffer, MAX_PIXELS_PER_SCANLINE * sizeof(uint32_t));
@@ -376,17 +390,17 @@ void host_t::update_screen()
 			break;
 	}
 
-	// if ((system->current_mode == DEBUG_MODE) && viewer_visible) {
-	// 	SDL_Rect viewer = {
-	// 		352,
-	// 		24,
-	// 		(4*MAX_PIXELS_PER_SCANLINE)/5,
-	// 		(4*MAX_SCANLINES)/5
-	// 	};
-	// 	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
-	// 	SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
-	// 	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_BLEND);
-	// }
+	if ((system->current_mode == DEBUG_MODE) && viewer_visible) {
+		SDL_Rect viewer = {
+			video_fullscreen ? fullscreen_rect.x : 0,
+			video_fullscreen ? fullscreen_rect.y : 0,
+			(video_fullscreen ? video_scaling_fullscreen : video_scaling_windowed) * MAX_PIXELS_PER_SCANLINE / 2,
+			(video_fullscreen ? video_scaling_fullscreen : video_scaling_windowed) * MAX_SCANLINES / 2
+		};
+		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
+		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
+		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_BLEND);
+	}
 
 	SDL_RenderPresent(video_renderer);
 }
