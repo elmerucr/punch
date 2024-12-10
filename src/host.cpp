@@ -172,31 +172,42 @@ void host_t::video_init()
 	 * Print the list of video backends
 	 */
 	int num_video_drivers = SDL_GetNumVideoDrivers();
-	printf("[SDL] Display %d video backend(s) compiled into SDL: ",
-	       num_video_drivers);
-	for (int i=0; i<num_video_drivers; i++)
+	printf("[SDL] Display %d video backend(s) compiled into SDL: ", num_video_drivers);
+	for (int i=0; i<num_video_drivers; i++) {
 		printf(" \'%s\' ", SDL_GetVideoDriver(i));
+	}
 	printf("\n[SDL] Display now using backend '%s'\n", SDL_GetCurrentVideoDriver());
 
 	SDL_DisplayMode dm;
 	SDL_GetCurrentDisplayMode(0, &dm);	// some implementations take SDL_GetWindowDisplayIndex(video_window) in stead of 0
 	printf("[SDL] Display current desktop dimension: %i x %i\n", dm.w, dm.h);
-	video_scaling_max = 1;
-	//while (((video_scaling_max * MAX_PIXELS_PER_SCANLINE) < dm.w) && ((video_scaling_max * ((10 * MAX_SCANLINES) / 9)) < dm.h)) video_scaling_max++;
-	while (((video_scaling_max * MAX_PIXELS_PER_SCANLINE) < dm.w) && ((video_scaling_max * (MAX_SCANLINES)) < dm.h)) video_scaling_max++;
-	video_scaling_max--;
-	video_scaling = video_scaling_max;
-	//video_scaling = (3 * video_scaling_max) / 4;
-	if (video_scaling_max > 4) video_scaling = 4;
-	printf("[SDL] Max video scaling is %i, defaulting to %i\n", video_scaling_max, video_scaling);
+
+	int width_scaling = dm.w/MAX_PIXELS_PER_SCANLINE;
+	int height_scaling = dm.h/MAX_SCANLINES;
+	video_scaling_fullscreen = width_scaling < height_scaling ? width_scaling : height_scaling; // take minimum
+	if (video_scaling_fullscreen & 0b1) video_scaling_fullscreen--;	// force even
+	printf("[SDL] Video scaling fullscreen will be %i times\n", video_scaling_fullscreen);
+	fullscreen_rect.w = video_scaling_fullscreen * MAX_PIXELS_PER_SCANLINE;
+	fullscreen_rect.h = video_scaling_fullscreen * MAX_SCANLINES;
+	fullscreen_rect.x = (dm.w - fullscreen_rect.w) >> 1;
+	fullscreen_rect.y = (dm.h - fullscreen_rect.h) >> 1;
+	printf("w:%i h:%i x:%i y:%i\n", fullscreen_rect.w, fullscreen_rect.h, fullscreen_rect.x, fullscreen_rect.y);
+
+
+	if ((fullscreen_rect.x == 0) || (fullscreen_rect.y == 0)) {
+		video_scaling_windowed = video_scaling_fullscreen - 2;
+	} else {
+		video_scaling_windowed = video_scaling_fullscreen;
+	}
+	if (video_scaling_windowed < 1) video_scaling_windowed = 1;
 
 	/*
 	 * Create window
 	 */
 	video_window = SDL_CreateWindow("punch", SDL_WINDOWPOS_CENTERED,
 				  SDL_WINDOWPOS_CENTERED,
-				  video_scaling * MAX_PIXELS_PER_SCANLINE,
-				  video_scaling * MAX_SCANLINES,
+				  video_scaling_windowed * MAX_PIXELS_PER_SCANLINE,
+				  video_scaling_windowed * MAX_SCANLINES,
 				  SDL_WINDOW_SHOWN |
 				  SDL_WINDOW_ALLOW_HIGHDPI);
 
@@ -210,7 +221,6 @@ void host_t::video_init()
 	if (dm.refresh_rate == FPS) {
 		printf("[SDL] Display: this is equal to the FPS of punch, trying for vsync\n");
 		SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
-		//video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 		video_renderer = SDL_CreateRenderer(video_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	} else {
 		printf("[SDL] Display: this differs from the FPS of punch, going for software FPS\n");
@@ -238,7 +248,8 @@ void host_t::video_init()
 	create_core_texture();
 	create_debugger_texture();
 
-	SDL_RenderSetLogicalSize(video_renderer, 2 * MAX_PIXELS_PER_SCANLINE, 2 * MAX_SCANLINES);	// keeps right aspect ratio
+	// started in windowed mode!
+	SDL_RenderSetLogicalSize(video_renderer, window_width, window_height);
 
 	/*
 	 * Make sure mouse cursor isn't visible
@@ -358,24 +369,24 @@ void host_t::update_screen()
 
 	switch (system->current_mode) {
 		case DEBUG_MODE:
-			SDL_RenderCopy(video_renderer, debugger_texture, NULL, NULL);
+			SDL_RenderCopy(video_renderer, debugger_texture, NULL, video_fullscreen ? &fullscreen_rect : NULL);
 			break;
 		case RUN_MODE:
-			SDL_RenderCopy(video_renderer, core_texture, NULL, NULL);
+			SDL_RenderCopy(video_renderer, core_texture, NULL, video_fullscreen ? &fullscreen_rect : NULL);
 			break;
 	}
 
-	if ((system->current_mode == DEBUG_MODE) && viewer_visible) {
-		SDL_Rect viewer = {
-			352,
-			24,
-			(4*MAX_PIXELS_PER_SCANLINE)/5,
-			(4*MAX_SCANLINES)/5
-		};
-		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
-		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
-		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_BLEND);
-	}
+	// if ((system->current_mode == DEBUG_MODE) && viewer_visible) {
+	// 	SDL_Rect viewer = {
+	// 		352,
+	// 		24,
+	// 		(4*MAX_PIXELS_PER_SCANLINE)/5,
+	// 		(4*MAX_SCANLINES)/5
+	// 	};
+	// 	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
+	// 	SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);
+	// 	SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_BLEND);
+	// }
 
 	SDL_RenderPresent(video_renderer);
 }
@@ -432,14 +443,6 @@ enum events_output_state host_t::events_process_events()
 				} else if( (event.key.keysym.sym == SDLK_q) && alt_pressed ) {
 					events_wait_until_key_released(SDLK_q);
 					return_value = QUIT_EVENT;
-				} else if ((event.key.keysym.sym == SDLK_MINUS) && alt_pressed) {
-					// decrease screen size
-					events_wait_until_key_released(SDLK_MINUS);
-					video_decrease_window_size();
-				} else if ((event.key.keysym.sym == SDLK_EQUALS) && alt_pressed) {
-					// increase screen size
-					events_wait_until_key_released(SDLK_EQUALS);
-					video_increase_window_size();
 				} else if(event.key.keysym.sym == SDLK_F9) {
 					events_wait_until_key_released(SDLK_F9);
 					system->switch_mode();
@@ -608,36 +611,18 @@ void host_t::video_toggle_fullscreen()
 	video_fullscreen = !video_fullscreen;
 	if (video_fullscreen) {
 		SDL_SetWindowFullscreen(video_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_GetWindowSize(video_window, &window_width, &window_height);
+		SDL_RenderSetLogicalSize(video_renderer, window_width, window_height);
+		printf("[SDL] Fullscreen size: %i x %i\n", window_width, window_height);
 	} else {
 		SDL_SetWindowFullscreen(video_window, SDL_WINDOW_RESIZABLE);
+		SDL_GetWindowSize(video_window, &window_width, &window_height);
+		SDL_RenderSetLogicalSize(video_renderer, window_width, window_height);
+		printf("[SDL] Window size: %i x %i\n", window_width, window_height);
 	}
 }
 
 void host_t::video_toggle_scanlines()
 {
 	scanlines = !scanlines;
-}
-
-void host_t::video_increase_window_size()
-{
-	if (!video_fullscreen) {
-		if (video_scaling < video_scaling_max) video_scaling++;
-		// SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * ((10 * MAX_SCANLINES) / 9));
-		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * MAX_SCANLINES);
-		SDL_GetWindowSize(video_window, &window_width, &window_height);
-		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-		printf("[SDL] Video scaling: %i\n", video_scaling);
-	}
-}
-
-void host_t::video_decrease_window_size()
-{
-	if (!video_fullscreen) {
-		if (video_scaling > 1) video_scaling--;
-		// SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * ((10 * MAX_SCANLINES) / 9));
-		SDL_SetWindowSize(video_window, video_scaling * MAX_PIXELS_PER_SCANLINE, video_scaling * MAX_SCANLINES);
-		SDL_GetWindowSize(video_window, &window_width, &window_height);
-		SDL_SetWindowPosition(video_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-		printf("[SDL] Video scaling: %i\n", video_scaling);
-	}
 }

@@ -58,11 +58,11 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xe].flags_2 = 0b00000'001;	// select tiny font 4x6
 
 	/* character screen in slot 0xd */
-	blitter->surface[0xd].w = 80;
-	blitter->surface[0xd].h = 30;
+	blitter->surface[0xd].w = 72;
+	blitter->surface[0xd].h = 25;
 	blitter->surface[0xd].base_address = 0x00010000;
 	blitter->surface[0xd].x = 0;
-	blitter->surface[0xd].y = 10;
+	blitter->surface[0xd].y = 6;
 	blitter->surface[0xd].flags_0 = 0b00'00'00'00;
 
 	terminal = new terminal_t(system, &blitter->surface[0xd], blitter, fg, bg);
@@ -81,7 +81,7 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xc].w = 8;
 	blitter->surface[0xc].h = 21;
 	blitter->surface[0xc].x = 30;
-	blitter->surface[0xc].y = 169;
+	blitter->surface[0xc].y = 135;
 	blitter->surface[0xc].color_table[0x00] = 0x00;
 	blitter->surface[0xc].color_table[0x01] = 0x54;
 	blitter->surface[0xc].color_table[0x02] = 0xfb;
@@ -100,8 +100,8 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xf].flags_2 = 0b00000000;
 	blitter->surface[0xf].w = 16;
 	blitter->surface[0xf].h = 48;
-	blitter->surface[0xf].x = 176;
-	blitter->surface[0xf].y = 94;
+	blitter->surface[0xf].x = 158;
+	blitter->surface[0xf].y = 60;
 }
 
 void debugger_t::print_version()
@@ -141,8 +141,8 @@ void debugger_t::redraw()
 
 	blitter->tile_blit(0xe, 0x0, 0xd);
 	blitter->io_write8(0x05, fg);	// set drawing color
-	blitter->solid_rectangle(0, 0, 319, 9, 0x0);
-	blitter->solid_rectangle(0, 190, 319, 199, 0x0);
+	blitter->solid_rectangle(0, 0, 287, 5, 0x0);
+	blitter->solid_rectangle(0, 156, 287, 161, 0x0);
 
 	// Update and draw palette
 	if (palette_visible) {
@@ -182,7 +182,7 @@ void debugger_t::redraw()
 			}
 
 			blitter->surface[0xc].x += 2 * (right ? 1 : -1);
-			if (blitter->surface[0xc].x > 340) {
+			if (blitter->surface[0xc].x > 308) {
 				blitter->surface[0xc].x = -20;
 			} else if (blitter->surface[0xc].x < -20) {
 				blitter->surface[0xc].x = 340;
@@ -524,7 +524,7 @@ void debugger_t::status()
 	terminal->printf("\n%s", text_buffer);
 	terminal->printf("\n\n_disassembly_________________________");
 	uint16_t pc = system->core->cpu->get_pc();
-	for (int i=0; i<8; i++) {
+	for (int i=0; i<7; i++) {
 		terminal->putchar('\n');
 		pc += disassemble_instruction(pc);
 	}

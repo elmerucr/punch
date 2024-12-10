@@ -200,7 +200,7 @@ void commander_t::reset()
 	sq_setprintfunc(v, printfunc, errorfunc);
 
 	if (v) {
-		system->debugger->terminal->printf("\n[Squirrel] %s - %s", SQUIRREL_VERSION, SQUIRREL_COPYRIGHT);
+		system->debugger->terminal->printf("\n[Squirrel] %s", SQUIRREL_VERSION);
 	} else {
 		system->debugger->terminal->printf("\n[Squirrel] Error: Failed to open virtual machine");
 	}

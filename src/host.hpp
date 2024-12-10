@@ -110,8 +110,9 @@ private:
 	/*
 	 * Video related
 	 */
-	uint8_t video_scaling_max;
-	uint8_t video_scaling;
+	uint8_t video_scaling_fullscreen;
+	uint8_t video_scaling_windowed;
+	SDL_Rect fullscreen_rect;
 	bool scanlines{true};
 
 	bool video_fullscreen{false};
@@ -152,12 +153,12 @@ public:
 
 	char *sdl_preference_path;
 
-//	/*
-//	 * Audio related
-//	 */
+	/*
+	 * Audio related
+	 */
 	inline void queue_audio(void *buffer, unsigned size) { SDL_QueueAudio(audio_device, buffer, size); }
 	inline unsigned int get_queued_audio_size_bytes() { return SDL_GetQueuedAudioSize(audio_device); }
-//
+
 	/*
 	 * Video related
 	 */
@@ -165,8 +166,6 @@ public:
 	void update_debugger_texture(uint32_t *debugger);
 	void update_screen();
 
-	void video_increase_window_size();
-	void video_decrease_window_size();
 	void video_toggle_fullscreen();
 	void video_toggle_scanlines();
 	void video_toggle_debugger_viewer() {
