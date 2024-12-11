@@ -120,7 +120,7 @@ void debugger_t::print_version()
 			terminal->putsymbol(symbol[i]);
 		}
 	}
-	terminal->printf("\npunch v%i.%i.%i (C)2023-%i elmerucr",
+	terminal->printf("\npunch v%i.%i.%i (C)%i elmerucr",
 	       PUNCH_MAJOR_VERSION,
 	       PUNCH_MINOR_VERSION,
 	       PUNCH_BUILD, PUNCH_YEAR);
@@ -137,12 +137,7 @@ void debugger_t::redraw()
 	blitter->set_pixel_saldo(MAX_PIXELS_PER_FRAME);
 
 	blitter->io_write8(0x05, cc);	// set clear color
-	blitter->clear_surface(0x0);	// no need, everything is redrawn already
-
-	blitter->tile_blit(0xe, 0x0, 0xd);
-	blitter->io_write8(0x05, fg);	// set drawing color
-	blitter->solid_rectangle(0, 0, 287, 5, 0x0);
-	blitter->solid_rectangle(0, 156, 287, 161, 0x0);
+	blitter->clear_surface(0x0);
 
 	// Update and draw palette
 	if (palette_visible) {
@@ -156,6 +151,12 @@ void debugger_t::redraw()
 		}
 		blitter->blit(0xf, 0x0);
 	}
+
+	blitter->tile_blit(0xe, 0x0, 0xd);
+
+	blitter->io_write8(0x05, fg);	// set drawing color
+	blitter->solid_rectangle(0, 0, 287, 5, 0x0);
+	blitter->solid_rectangle(0, 156, 287, 161, 0x0);
 
 	// Bruce Lee
 	static int state = 0;
@@ -519,17 +520,17 @@ void debugger_t::prompt()
 void debugger_t::status()
 {
 	terminal->clear();
-	terminal->printf("_cpu___________________________________________________________");
+	terminal->printf("__cpu_________________________________________________________");
 	system->core->cpu->status(text_buffer, 2048);
 	terminal->printf("\n%s", text_buffer);
-	terminal->printf("\n\n_disassembly_________________________");
+	terminal->printf("\n\n__disassembly________________________");
 	uint16_t pc = system->core->cpu->get_pc();
-	for (int i=0; i<7; i++) {
+	for (int i=0; i<6; i++) {
 		terminal->putchar('\n');
 		pc += disassemble_instruction(pc);
 	}
 
-	terminal->printf("\n\n_usp___  _ssp___  t_____s___bpm______cycles  IRQ_s__Name_____");
+	terminal->printf("\n\n__usp__  __ssp__  t_____s___bpm______cycles  IRQ_s__Name_____");
 
 	for (int i=0; i<8; i++) {
 		uint16_t usp = (system->core->cpu->get_us() + i) & 0xffff;

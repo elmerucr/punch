@@ -280,7 +280,7 @@ void host_t::update_core_texture(uint32_t *core)
 				core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 2] = *(core_8 + 2);
 				core_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 3] = *(core_8 + 3);
 				// odd line
-				core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 0] = 160;
+				core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 0] = scanlines_value;
 				core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 1] = ((*(core_8 + 1)) >> 1) + ((*(core_8_next + 1)) >> 1);
 				core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 2] = ((*(core_8 + 2)) >> 1) + ((*(core_8_next + 2)) >> 1);
 				core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 3] = ((*(core_8 + 3)) >> 1) + ((*(core_8_next + 3)) >> 1);
@@ -296,7 +296,7 @@ void host_t::update_core_texture(uint32_t *core)
 			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 2] = *(core_8 + 2);
 			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 3] = *(core_8 + 3);
 
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 0] = 160;
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 0] = scanlines_value;
 			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 1] = (*(core_8 + 2)) >> 1;
 			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 2] = (*(core_8 + 2)) >> 1;
 			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 3] = (*(core_8 + 3)) >> 1;
@@ -336,7 +336,7 @@ void host_t::update_debugger_texture(uint32_t *debugger)
 				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 2] = *(debugger_8 + 2);
 				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (y << 3) + (x << 2) + 3] = *(debugger_8 + 3);
 				// odd line
-				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 0] = 160;
+				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 0] = scanlines_value;
 				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 1] = ((*(debugger_8 + 1)) >> 1) + ((*(debugger_8_next + 1)) >> 1);
 				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 2] = ((*(debugger_8 + 2)) >> 1) + ((*(debugger_8_next + 2)) >> 1);
 				debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((y << 3) + (1 << 2)) + (x << 2) + 3] = ((*(debugger_8 + 3)) >> 1) + ((*(debugger_8_next + 3)) >> 1);
@@ -352,7 +352,7 @@ void host_t::update_debugger_texture(uint32_t *debugger)
 			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 2] = *(debugger_8 + 2);
 			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 3] = *(debugger_8 + 3);
 
-			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 0] = 160;
+			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 0] = scanlines_value;
 			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 1] = (*(debugger_8 + 2)) >> 1;
 			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 2] = (*(debugger_8 + 2)) >> 1;
 			debugger_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 3] = (*(debugger_8 + 3)) >> 1;
@@ -392,10 +392,10 @@ void host_t::update_screen()
 
 	if ((system->current_mode == DEBUG_MODE) && viewer_visible) {
 		SDL_Rect viewer = {
-			video_fullscreen ? fullscreen_rect.x : 0,
-			video_fullscreen ? fullscreen_rect.y : 0,
-			(video_fullscreen ? video_scaling_fullscreen : video_scaling_windowed) * MAX_PIXELS_PER_SCANLINE / 2,
-			(video_fullscreen ? video_scaling_fullscreen : video_scaling_windowed) * MAX_SCANLINES / 2
+			(190 * video_scaling_fullscreen) + (video_fullscreen ? fullscreen_rect.x : 0),
+			(14 * video_scaling_fullscreen) + (video_fullscreen ? fullscreen_rect.y : 0),
+			(video_fullscreen ? video_scaling_fullscreen : video_scaling_windowed) * MAX_PIXELS_PER_SCANLINE / 4,
+			(video_fullscreen ? video_scaling_fullscreen : video_scaling_windowed) * MAX_SCANLINES / 4
 		};
 		SDL_SetTextureBlendMode(core_texture, SDL_BLENDMODE_NONE);
 		SDL_RenderCopy(video_renderer, core_texture, NULL, &viewer);

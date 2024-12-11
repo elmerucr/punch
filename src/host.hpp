@@ -114,6 +114,7 @@ private:
 	uint8_t video_scaling_windowed;
 	SDL_Rect fullscreen_rect;
 	bool scanlines{true};
+	const uint8_t scanlines_value{160};
 
 	bool video_fullscreen{false};
 	SDL_Window *video_window;
