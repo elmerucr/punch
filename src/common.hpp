@@ -1,24 +1,20 @@
-/*
- * common.hpp
- * punch
- *
- * Copyright © 2023-2024 elmerucr. All rights reserved.
- */
+//
+// common.hpp
+// punch
+//
+// Copyright © 2023-2024 elmerucr. All rights reserved.
+//
 
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
-/*
- * Version information
- */
+// Version information
 #define PUNCH_MAJOR_VERSION 0
 #define PUNCH_MINOR_VERSION	9
-#define PUNCH_BUILD			20241211
+#define PUNCH_BUILD			20241218
 #define PUNCH_YEAR			2024
 
-/*
- * Video
- */
+// Video
 #define VRAM_SIZE				0x1000000
 #define VRAM_SIZE_MASK			(VRAM_SIZE-1)
 #define FPS						60

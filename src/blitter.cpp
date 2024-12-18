@@ -1,9 +1,9 @@
-/*
- * blitter.cpp
- * punch
- *
- * Copyright © 2023-2024 elmerucr. All rights reserved.
- */
+// ---------------------------------------------------------------------
+// blitter.cpp
+// punch
+//
+// Copyright © 2023-2024 elmerucr. All rights reserved.
+// ---------------------------------------------------------------------
 
 #include "blitter.hpp"
 #include "common.hpp"
@@ -26,18 +26,16 @@ void blitter_ic::reset()
 		vram[i] = (i & 0x40) ? 0xfc : 0x00;
 	}
 
-	/*
-	 * A palette using RRGGBBII system. R, G and B use two bits and have
-	 * 4 levels each (0.00, 0.33, 0.66 and 1.00 of max). On top of that,
-	 * the intensity level (II) is shared between all channels.
-	 *
-	 * Final color levels are RR * II, GG * II and BB * II.
-	 *
-	 * II is not linear, see below. This system results in a nice palette
-	 * with many dark shades as well to choose from (compared to RGB332).
-	 *
-	 * Inspired by: https://www.bigmessowires.com/2008/07/04/video-palette-setup/
-	 */
+	// A palette using RRGGBBII system. R, G and B use two bits and have
+	// 4 levels each (0.00, 0.33, 0.66 and 1.00 of max). On top of that,
+	// the intensity level (II) is shared between all channels.
+	//
+	// Final color levels are RR * II, GG * II and BB * II.
+	//
+	// II is not linear, see below. This system results in a nice palette
+	// with many dark shades as well to choose from (compared to RGB332).
+	//
+	// Inspired by: https://www.bigmessowires.com/2008/07/04/video-palette-setup/
 	for (int i = 0; i < 256; i++) {
 		uint32_t r = (i & 0b11000000) >> 6;
 		uint32_t g = (i & 0b00110000) >> 4;

@@ -1,9 +1,9 @@
-/*
- * blitter.hpp
- * punch
- *
- * Copyright © 2023-2024 elmerucr. All rights reserved.
- */
+// ---------------------------------------------------------------------
+// blitter.hpp
+// punch
+//
+// Copyright © 2023-2024 elmerucr. All rights reserved.
+// ---------------------------------------------------------------------
 
 #ifndef BLITTER_HPP
 #define BLITTER_HPP
@@ -23,10 +23,8 @@
 #define FLAGS1_VER_FLIP		0b00100000
 #define	FLAGS1_X_Y_FLIP		0b01000000
 
-/*
- * for both pixels and tiles!!!
- * need to write documentation
- */
+// for both pixels and tiles!!!
+// need to write documentation
 struct surface_t {
 	int16_t x{0};
 	int16_t y{0};
@@ -38,18 +36,18 @@ struct surface_t {
 
 	// TODO: fg bg color stuff gone?
 
-	/*
-	 * Properties related to flags_0 (as encoded inside machine)
-	 *
-	 * 7 6 5 4 3 2 1 0
-	 *   | | |     | |
-	 *   | | |     | |
-	 *   | | |     | +-- Tile_blit only: Use fixed background color (0 = off, 1 = on)
-	 *   | | |     +---- Tile_blit only: Use fixed foreground color (0 = off, 1 = on)
-	 *   +-+-+---------- Bits per pixel (0b000 = 1, 0b001 = 2, 0b010 = 4, 0b011 = 8, 0b100 = 32)
-	 *
-	 * bits 2, 3, 6 and 7: Reserved
-	 */
+	// -----------------------------------------------------------------
+	// Properties related to flags_0 (as encoded inside machine)
+	//
+	// 7 6 5 4 3 2 1 0
+	//   | | |     | |
+	//   | | |     | |
+	//   | | |     | +-- Tile_blit only: Use fixed background color (0 = off, 1 = on)
+	//   | | |     +---- Tile_blit only: Use fixed foreground color (0 = off, 1 = on)
+	//   +-+-+---------- Bits per pixel (0b000 = 1, 0b001 = 2, 0b010 = 4, 0b011 = 8, 0b100 = 32)
+	//
+	// bits 2, 3, 6 and 7: Reserved
+	// -----------------------------------------------------------------
 	uint8_t flags_0{0};
 
 	/*

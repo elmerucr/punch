@@ -60,7 +60,7 @@ private:
 	const uint8_t fg = PUNCH_LIGHTBLUE;
 	const uint8_t fg_acc = 0xaf;
 	const uint8_t bg = 0x00;
-	const uint8_t bg_acc = 0x5e;
+	const uint8_t bg_acc = 0x03;
 	const uint8_t cc = PUNCH_BLUE;
 
 	// const uint8_t fg = 0x7f;

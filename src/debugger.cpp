@@ -96,12 +96,19 @@ debugger_t::debugger_t(system_t *s)
 	blitter->surface[0xf].index = 0;
 	blitter->surface[0xf].base_address = 0x1000;
 	blitter->surface[0xf].flags_0 = 0b01000000;	// 32 bit color
-	blitter->surface[0xf].flags_1 = 0b00000111; // 8x both directions
+	blitter->surface[0xf].flags_1 = 0b0000111; // 8x both directions
 	blitter->surface[0xf].flags_2 = 0b00000000;
-	blitter->surface[0xf].w = 16;
+	blitter->surface[0xf].w = 32;
 	blitter->surface[0xf].h = 48;
-	blitter->surface[0xf].x = 158;
+	blitter->surface[0xf].x = 16;
 	blitter->surface[0xf].y = 60;
+
+	// bg accent lightblue transparent
+	blitter->vram[0xc0c] = 0x40;
+	blitter->vram[0xc0d] = blitter->vram[0xc00 + (0xae << 2) + 1];
+	blitter->vram[0xc0e] = blitter->vram[0xc00 + (0xae << 2) + 2];
+	blitter->vram[0xc0f] = blitter->vram[0xc00 + (0xae << 2) + 3];
+
 }
 
 void debugger_t::print_version()
@@ -142,11 +149,11 @@ void debugger_t::redraw()
 	// Update and draw palette
 	if (palette_visible) {
 		for (int y=0; y<48; y++) {
-			for (int x=0; x<16; x++) {
-				blitter->vram[0x1000 + (16 * 4 * y) + (4 * x) + 0] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * x) + 0];
-				blitter->vram[0x1000 + (16 * 4 * y) + (4 * x) + 1] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * x) + 1];
-				blitter->vram[0x1000 + (16 * 4 * y) + (4 * x) + 2] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * x) + 2];
-				blitter->vram[0x1000 + (16 * 4 * y) + (4 * x) + 3] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * x) + 3];
+			for (int x=0; x<32; x++) {
+				blitter->vram[0x1000 + (32 * 4 * y) + (4 * x) + 0] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * (x>>1)) + 0];
+				blitter->vram[0x1000 + (32 * 4 * y) + (4 * x) + 1] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * (x>>1)) + 1];
+				blitter->vram[0x1000 + (32 * 4 * y) + (4 * x) + 2] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * (x>>1)) + 2];
+				blitter->vram[0x1000 + (32 * 4 * y) + (4 * x) + 3] = system->core->blitter->vram[0xc00 + (16 * 4 * (y/3)) + (4 * (x>>1)) + 3];
 			}
 		}
 		blitter->blit(0xf, 0x0);
