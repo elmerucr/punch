@@ -50,63 +50,58 @@ struct surface_t {
 	// -----------------------------------------------------------------
 	uint8_t flags_0{0};
 
-	/*
-	 * Properties related to flags_1 (as encoded inside machine)
-	 * Size, flips and xy flip
-	 *
-	 * 7 6 5 4 3 2 1 0
-	 *   | | | | | | |
-	 *   | | | | | +-+-- Width (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
-	 *   | | | +-+------ Height (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
-	 *   | | +---------- Horizontal flip (0 = off, 1 = on)
-	 *   | +------------ Vertical flip (0 = off, 1 = on)
-	 *   +-------------- XY flip (0 = off, 1 = on)
-	 *
-	 * bits 2,3 and 7: Reserved
-	 */
+	// -----------------------------------------------------------------
+	// Properties related to flags_1 (as encoded inside machine)
+	// Size, flips and xy flip
+	//
+	// 7 6 5 4 3 2 1 0
+	//   | | | | | | |
+	//   | | | | | +-+-- Width (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
+	//   | | | +-+------ Height (00 = 1x, 01 = 2x, 10 = 4x, 11 = 8x)
+	//   | | +---------- Horizontal flip (0 = off, 1 = on)
+	//   | +------------ Vertical flip (0 = off, 1 = on)
+	//   +-------------- XY flip (0 = off, 1 = on)
+	//
+	// bits 2,3 and 7: Reserved
+	// -----------------------------------------------------------------
 	uint8_t flags_1{0};
 
-	/*
-	 * Properties related to flags_2 (as encoded inside machine)
-	 *
-	 * 7 6 5 4 3 2 1 0
-	 *           | | |
-	 *           +-+-+-- Rom font selection
-	 *                    000 = off
-	 *                    001 = tiny font 4x6
-	 *                    010 = off (reserved)
-	 *                    011 = off (reserved)
-	 *                    100 = cbm font 8x8
-	 *                    101 = off (reserved)
-	 *                    110 = off (reserved)
-	 *                    111 = off (reserved)
-	 *
-	 * bits 3, 4, 5, 6, 7: reserved
-	 */
+	// -----------------------------------------------------------------
+	// Properties related to flags_2 (as encoded inside machine)
+	//
+	// 7 6 5 4 3 2 1 0
+	//           | | |
+	//           +-+-+-- Rom font selection
+	//                    000 = off
+	//                    001 = tiny font 4x6
+	//                    010 = off (reserved)
+	//                    011 = off (reserved)
+	//                    100 = cbm font 8x8
+	//                    101 = off (reserved)
+	//                    110 = off (reserved)
+	//                    111 = off (reserved)
+	//
+	// bits 3, 4, 5, 6, 7: reserved
+	// -----------------------------------------------------------------
 	uint8_t flags_2{0};
 
-	/*
-	 * Index is a pointer to a specific tile/sprite/character
-	 */
+	// Index is a pointer to a specific tile/sprite/character
 	uint8_t index{0};
 
-	/*
-	 * Default color_table for 1, 2, 4 and 8 bit modes at init
-	 *
-	 * 1 bit uses slots 0 and 1
-	 * 2 bit uses slots 0, 1, 2 and 3
-	 * 4 bit uses slots 0, ..., 15
-	 * 8 bit uses all
-	 *
-	 */
+	// -----------------------------------------------------------------
+	// Default color_table for 1, 2, 4 and 8 bit modes at init
+	//
+	// 1 bit uses slots 0 and 1
+	// 2 bit uses slots 0, 1, 2 and 3
+	// 4 bit uses slots 0, ..., 15
+	// 8 bit uses all
+	// -----------------------------------------------------------------
 	uint8_t color_table[256];
 };
 
 class blitter_ic {
 private:
-	/*
-	 * Blitter registers
-	 */
+	// Blitter registers
 	uint8_t src_surface{0};
 	uint8_t dst_surface{0};
 	uint8_t tile_surface{0};
@@ -121,11 +116,10 @@ private:
 	uint8_t gamma_blue{255};
 	uint32_t vram_peek{0};	// base address for vram peek page
 
-	/*
-	 * To restrain max no of pixels per frame
-	 * At start of frame, set to specific level
-	 * e.g. max. 8 times total pixels in display.
-	 */
+	// -----------------------------------------------------------------
+	// To restrain max no of pixels per frame. At start of frame, set
+	// to specific level e.g. max. 8 times total pixels in display.
+	// -----------------------------------------------------------------
 	uint32_t pixel_saldo{0};
 
 	/*

@@ -26,6 +26,7 @@ void blitter_ic::reset()
 		vram[i] = (i & 0x40) ? 0xfc : 0x00;
 	}
 
+	// -----------------------------------------------------------------
 	// A palette using RRGGBBII system. R, G and B use two bits and have
 	// 4 levels each (0.00, 0.33, 0.66 and 1.00 of max). On top of that,
 	// the intensity level (II) is shared between all channels.
@@ -35,7 +36,9 @@ void blitter_ic::reset()
 	// II is not linear, see below. This system results in a nice palette
 	// with many dark shades as well to choose from (compared to RGB332).
 	//
-	// Inspired by: https://www.bigmessowires.com/2008/07/04/video-palette-setup/
+	// Inspired by:
+	// https://www.bigmessowires.com/2008/07/04/video-palette-setup/
+	// -----------------------------------------------------------------
 	for (int i = 0; i < 256; i++) {
 		uint32_t r = (i & 0b11000000) >> 6;
 		uint32_t g = (i & 0b00110000) >> 4;
@@ -78,39 +81,29 @@ void blitter_ic::reset()
 	surface[0].flags_2 = 0x00;
 }
 
-/*
- * Short indexed version. Returns number of pixels written.
- */
+// Short indexed version. Returns number of pixels written.
 uint32_t blitter_ic::blit(const uint8_t s, const uint8_t d)
 {
 	return blit(&surface[s & 0b1111], &surface[d & 0b1111]);
 }
 
-/*
- * Returns number of pixels written.
- */
+// Returns number of pixels written.
 uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 {
 	uint32_t old_pixel_saldo = pixel_saldo;
 
-	/*
-	 * Convenience lambda functions
-	 */
+	// Convenience lambda functions
 	auto min = [](int16_t a, int16_t b) { return a < b ? a : b; };
 	auto max = [](int16_t a, int16_t b) { return a > b ? a : b; };
 	auto swap = [](int16_t &a, int16_t &b) { int16_t c = a; a = b; b = c; };
 
-	/*
-	 * Calculate bitshifts for double width and height
-	 */
+	// Calculate bitshifts for double width and height
 	uint8_t dw = src->flags_1 & FLAGS1_DBLWIDTH;
 	uint8_t dh = (src->flags_1 & FLAGS1_DBLHEIGHT) >> 2;
 
 	int16_t startx, endx, starty, endy;
 
-	/*
-	 * Following values are coordinates in the src rectangle
-	 */
+	// Following values are coordinates in the src rectangle
 	if (!(src->flags_1 & FLAGS1_X_Y_FLIP)) {
 		startx = max(0, -src->x);
 		endx = min(src->w << dw, -src->x + dest->w);
@@ -135,9 +128,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 		endy   = (src->h << dh) - temp_value;
 	}
 
-	/*
-	 * Pixel selector from vram or font + offset + mask selector
-	 */
+	// Pixel selector from vram or font + offset + mask selector
 	uint8_t *memory;		// memory is start of an array to 8 bit color numbers
 	uint32_t memory_mask;	// mask used when referring to this memory
 	uint32_t start_address;
@@ -165,43 +156,35 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 			break;
 	}
 
-	/*
-	 * Based on source index (like a sprite pointer), find an offset to
-	 * the start_address
-	 */
+	// Based on source index (like a sprite pointer), find an offset to
+	// the start_address
 	uint32_t offset = (src->index * src->w * src->h);
 
-	/*
-	 * Get color mode of src surface:
-	 *
-	 * 0b000 =  1 bit
-	 * 0b001 =  2 bit
-	 * 0b010 =  4 bit
-	 * 0b011 =  8 bit
-	 * 0b100 = 32 bit
-	 */
+	// -----------------------------------------------------------------
+	// Get color mode of src surface:
+	//
+	// 0b000 =  1 bit
+	// 0b001 =  2 bit
+	// 0b010 =  4 bit
+	// 0b011 =  8 bit
+	// 0b100 = 32 bit
+	// -----------------------------------------------------------------
 	uint8_t color_mode = (src->flags_0 & 0b01110000) >> 4;
 
 	for (int y = starty; y < endy; y++) {
 		for (int x = startx; x < endx; x++) {
 			if (pixel_saldo) {
-				/*
-				 * Adjust placement locations if needed
-				 */
+				// Adjust placement locations if needed
 				int16_t dest_x, dest_y;
 
 				if (src->flags_1 & FLAGS1_HOR_FLIP) dest_x = (src->w << dw) - 1 - x; else dest_x = x;
 				if (src->flags_1 & FLAGS1_VER_FLIP) dest_y = (src->h << dh) - 1 - y; else dest_y = y;
 				if (src->flags_1 & FLAGS1_X_Y_FLIP) swap(dest_x, dest_y);
 
-				/*
-				 * Adjust offset to current values of x and y.
-				 */
+				// Adjust offset to current values of x and y.
 				uint32_t adjusted_offset = offset + (x >> dw) + (src->w * (y >> dh));	// offset can't change during the for loops!
 
-				/*
-				 * Index where pixel source information can be found
-				 */
+				// Index where pixel source information can be found
 				uint8_t color_index{0};
 
 				if (color_mode < 0b100) {
@@ -218,9 +201,7 @@ uint32_t blitter_ic::blit(const surface_t *src, surface_t *dest)
 					color_index = src->color_table[color_index];
 				}
 
-				/*
-				 * Find dst address where result must be stored
-				 */
+				// Find dst address where result must be stored
 				uint32_t dst = (dest->base_address + ((((dest_y + src->y) * dest->w) + dest_x + src->x) << 2)) & VRAM_SIZE_MASK;
 
 				if (color_mode <= 0b11) {
@@ -349,9 +330,7 @@ uint32_t blitter_ic::line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_
 		}
 	}
 
-	/*
-	 * Draw endpoint
-	 */
+	// Draw endpoint
 	if ((x0 >= 0) && (x0 < s->w) && (y0 >= 0) && (y0 < s->h)) {
 		if (pixel_saldo) {
 			blend(draw_color_addr, (s->base_address + (((y0 * s->w) + x0) << 2)) & VRAM_SIZE_MASK);
@@ -417,6 +396,7 @@ uint8_t blitter_ic::io_read8(uint16_t address)
 				case 0x19: return gamma_red;
 				case 0x1a: return gamma_green;
 				case 0x1b: return gamma_blue;
+				//case 0x1c: ;
 
 				default: return 0x00;
 			}
@@ -475,6 +455,7 @@ void blitter_ic::io_write8(uint16_t address, uint8_t value)
 				case 0x19: gamma_red = value; break;
 				case 0x1a: gamma_green = value; break;
 				case 0x1b: gamma_blue = value; break;
+				case 0x1c: gamma_red = gamma_green = gamma_blue = value; break;
 
 				default: break;
 			}

@@ -297,7 +297,7 @@ void host_t::update_core_texture(uint32_t *core)
 			core_buffer_8[MAX_PIXELS_PER_SCANLINE * ((MAX_SCANLINES - 1) << 3) + (x << 2) + 3] = *(core_8 + 3);
 
 			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 0] = scanlines_value;
-			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 1] = (*(core_8 + 2)) >> 1;
+			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 1] = (*(core_8 + 1)) >> 1;
 			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 2] = (*(core_8 + 2)) >> 1;
 			core_buffer_8[MAX_PIXELS_PER_SCANLINE * (((MAX_SCANLINES - 1) << 3)  + (1 << 2)) + (x << 2) + 3] = (*(core_8 + 3)) >> 1;
 

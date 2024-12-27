@@ -11,7 +11,7 @@
 // Version information
 #define PUNCH_MAJOR_VERSION 0
 #define PUNCH_MINOR_VERSION	9
-#define PUNCH_BUILD			20241218
+#define PUNCH_BUILD			20241227
 #define PUNCH_YEAR			2024
 
 // Video
