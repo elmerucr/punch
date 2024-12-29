@@ -143,9 +143,7 @@ private:
 		{ 8, 1, 0b11111111 }
 	};
 
-	/*
-	 * The palette is directly stored in main vram
-	 */
+	// The palette is directly stored in main vram
 	const uint32_t palette_addr = 0xc00;
 
 	const uint32_t draw_color_addr = 0xf3e800;

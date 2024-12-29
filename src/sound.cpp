@@ -111,7 +111,7 @@ sound_ic::sound_ic(system_t *s) : analog0(0), analog1(1), analog2(2), analog3(3)
 		sid[i].enable_filter(true);
 		sid[i].reset();
 	}
-	
+
 	/*
 	 * reset cycle counters for sid chips
 	 */
@@ -130,9 +130,7 @@ sound_ic::sound_ic(system_t *s) : analog0(0), analog1(1), analog2(2), analog3(3)
 
 sound_ic::~sound_ic()
 {
-	/*
-	 * nothing
-	 */
+	// nothing
 }
 
 uint8_t sound_ic::io_read_byte(uint16_t address)
@@ -316,12 +314,12 @@ void sound_ic::run(uint32_t number_of_cycles)
 		f_sample_buffer_mono_sid1[i] = delay[1].sample(sample_buffer_mono_sid1[i]);
 		f_sample_buffer_mono_sid2[i] = delay[2].sample(sample_buffer_mono_sid2[i]);
 		f_sample_buffer_mono_sid3[i] = delay[3].sample(sample_buffer_mono_sid3[i]);
-		
+
 		f_sample_buffer_mono_analog0[i] = delay[4].sample(sample_buffer_mono_analog0[i]);
 		f_sample_buffer_mono_analog1[i] = delay[5].sample(sample_buffer_mono_analog1[i]);
 		f_sample_buffer_mono_analog2[i] = delay[6].sample(sample_buffer_mono_analog2[i]);
 		f_sample_buffer_mono_analog3[i] = delay[7].sample(sample_buffer_mono_analog3[i]);
-		
+
 		// left channel
 		sample_buffer_stereo[(2 * i) + 0] =
 			(f_sample_buffer_mono_sid0[i]    * balance_registers[0x0]) +
@@ -354,7 +352,7 @@ void sound_ic::run(uint32_t number_of_cycles)
 		 */
 		sample_buffer_stereo[(2 * i) + 0] /= 32768 * 255;	// left
 		sample_buffer_stereo[(2 * i) + 1] /= 32768 * 255;	// right
-		
+
 		if (sound_starting) {
 			sample_buffer_stereo[2 * i] *= (float)(4000-sound_starting) / 4000;
 			sample_buffer_stereo[(2 * i) + 1] *= (float)(4000-sound_starting) / 4000;
@@ -374,6 +372,6 @@ void sound_ic::reset()
 	sid[1].reset();
 	sid[2].reset();
 	sid[3].reset();
-	
+
 	sound_starting = 4000;
 }

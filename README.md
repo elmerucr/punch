@@ -23,7 +23,7 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 
 ### Debug screen
 
-![punch](./docs/20241011_screenshot_debug.png)
+![punch](./docs/20241229_screenshot_debug.png)
 
 ## Memory Map
 
@@ -34,28 +34,37 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 * ```$000-$0ff``` direct page (default after reset)
 * ```$100-$3ff``` available ram and system stack pointer (768 bytes)
 * ```$0400-$0fff``` input/output area
-	* ```$400-$4ff``` blitter surface descriptors (16 in total, 16 bytes each)
-		* ```$4x0-$4x1```: x position (16 bit signed)
-		* ```$4x2-$4x3```: y position (16 bit signed)
-		* ```$4x4-$4x5```: w width (16 bit unsigned)
-		* ```$4x6-$4x7```: h height (16 bit unsigned)
-		* ```$4x8-$4xb```: base address of surface data ($8 will always contain ```$00```)
-		* ```$4xc```: flags_0
-		* ```$4xd```: flags_1
-		* ```$4xe```: flags_2
-		* ```$4xf```: index ("sprite pointer")
-	* ```$500-$5ff``` blitter surface color tables (16) for 1, 2 and 4 bit color modes
-	* ```$600-$7ff``` sound
-	* ```$800-$8ff``` core
+	* ```$400-$41f``` core
 		* ```$800``` status register
 		* ```$801``` control register
-	* ```$900-$9ff``` keyboard
-	* ```$a00-$aff``` timer
-	* ```$b00-$bff``` commander (scripting engine)
-	* ```$c00-$dff``` reserved area
-	* ```$e00-$eff``` blitter
-		* ```$e00``` status register (unused)
-		* ```$e01``` control register
+	* ```$420-$43f``` timer
+	* ```$440-$45f``` commander (scripting engine)
+	* ```$500-$5ff``` keyboard
+		* ```$500``` status register
+		* ```$501``` control register (writing only)
+		* ```$502/$503``` keyboard repeat delay ms (16 bit unsigned)
+		* ```$504/$505``` keyboard repeat speed ms (16 bit unsigned)
+		* ```$506``` pop keyboard event (reading only)
+		* ```$580-$5ff``` keyboard state
+	* ```$600-$7ff``` sound (big endian)
+		* ```$600-$61f``` sid 0
+		* ```$620-$63f``` sid 1
+		* ```$640-$65f``` sid 2
+		* ```$660-$67f``` sid 3
+		* ```$680-$69f``` sid 0 (all registers readable)
+		* ```$6a0-$6bf``` sid 1 (all registers readable)
+		* ```$6c0-$6df``` sid 2 (all registers readable)
+		* ```$6e0-$6ff``` sid 3 (all registers readable)
+		* ```$700-$71f``` analog 0
+		* ```$720-$73f``` analog 1
+		* ```$740-$75f``` analog 2
+		* ```$760-$77f``` analog 3
+		* ```$780-$78f``` delays (*wip*)
+		* ```$790-$79f``` mixer
+		* ```$7a0-$7ff``` *(wip) reserved*	* ```$e00-$eff``` blitter
+	* ```$800-$8ff``` blitter base page
+		* ```$800``` status register (unused)
+		* ```$801``` control register
 			* write ```0b00000001```: blit source to destination surface
 			* write ```0b00000010```: tile blit source/dest/tile
 			* write ```0b00000100```: clear destination surface with drawing color
@@ -63,25 +72,42 @@ Punch is a virtual computer system that draws inspiration from iconic computing 
 			* write ```0b00010000```: line
 			* write ```0b00100000```: rectangle
 			* write ```0b01000000```: solid rectangle
-		* ```$e02``` source surface pointer (lowest nibble only)
-		* ```$e03``` destination surface pointer (lowest nibble only)
-		* ```$e04``` tile surface pointer (lowest nibble)
-		* ```$e05``` drawing color
-		* ```$e08-$e09``` x0 for drawing operations (16 bit signed)
-		* ```$e0a-$e0b``` y0 for drawing operations (16 bit signed)
-		* ```$e0c-$e0d``` x1 for drawing operations (16 bit signed)
-		* ```$e0e-$e0f``` y1 for drawing operations (16 bit signed)
-		* ```$e10-$e13``` vram peek base address (24 bits, $e10 always #$00)
-		* ```$e18``` added alpha value during blits
-	* ```$f00-$fff``` vram peek
-* ```$1000-$fbff``` 59kb ram ($fc00 is initial usp)
+		* ```$802``` source surface pointer (lowest nibble only)
+		* ```$803``` destination surface pointer (lowest nibble only)
+		* ```$804``` tile surface pointer (lowest nibble)
+		* ```$805``` drawing color
+		* ```$808-$809``` x0 for drawing operations (16 bit signed)
+		* ```$80a-$80b``` y0 for drawing operations (16 bit signed)
+		* ```$80c-$80d``` x1 for drawing operations (16 bit signed)
+		* ```$80e-$80f``` y1 for drawing operations (16 bit signed)
+		* ```$810-$813``` vram peek base address (24 bits, $e10 always #$00)
+		* ```$818``` added alpha value during blits
+		* ```$819``` added gamma red during blits
+		* ```$81a``` added gamma green during blits
+		* ```$81b``` added gamma blue during blits
+		* ```$81c``` added gamma r, g and b (write only)
+	* ```$900-$9ff``` blitter vram poke / peek page (see $810-$813)
+	* ```$a00-$aff``` blitter surface descriptors (16 in total, 16 bytes each)
+		* ```$ax0-$ax1``` x position (16 bit signed)
+		* ```$ax2-$ax3``` y position (16 bit signed)
+		* ```$ax4-$ax5``` w width (16 bit unsigned)
+		* ```$ax6-$ax7``` h height (16 bit unsigned)
+		* ```$ax8-$axb``` base address of surface data ($ax8 will always contain ```$00```)
+		* ```$axc``` flags_0
+		* ```$axd``` flags_1
+		* ```$axe``` flags_2
+		* ```$axf``` index ("sprite pointer")
+	* ```$b00-$bff``` *reserved*
+	* ```$c00-$fff``` color table (32 bits color, 256 values, for 1, 2, 4 and 8 bit modes)
+	* ```$1000-$1fff``` color index tables (for 1, 2, 4 and ...)
+* ```$2000-$fbff``` 55kb ram ($fc00 is initial usp)
 * ```$fc00-$ffff``` 1kb kernel + vectors
 
 ### Addressable by Blitter only
 
 * ```$010000-$ffffff``` available vram (16.320kb) of which:
-* ```$f00000-$f3e7ff``` default framebuffer vram (256.000 bytes)
-* ```$f3e800```         draw color, 32 bit, stored in vram
+* ```$f00000-$f2d8ff``` default framebuffer vram (182kb)
+* ```$f3e800```         draw color, 32 bit, stored in vram *(is this correct)*
 
 ## Building with CMake
 

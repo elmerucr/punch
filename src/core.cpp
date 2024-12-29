@@ -116,6 +116,7 @@ void core_t::write8(uint16_t address, uint8_t value) {
 				case COMMANDER_SUB_PAGE:
 					commander->io_write8(address & 0x1f, value);
 					break;
+				// here we have several slots left!!!
 				default:
 					// do nothing
 					break;

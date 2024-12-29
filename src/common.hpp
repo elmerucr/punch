@@ -1,20 +1,24 @@
-//
+// ---------------------------------------------------------------------
 // common.hpp
 // punch
 //
 // Copyright © 2023-2024 elmerucr. All rights reserved.
-//
+// ---------------------------------------------------------------------
 
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+// ---------------------------------------------------------------------
 // Version information
+// ---------------------------------------------------------------------
 #define PUNCH_MAJOR_VERSION 0
 #define PUNCH_MINOR_VERSION	9
-#define PUNCH_BUILD			20241227
+#define PUNCH_BUILD			20241229
 #define PUNCH_YEAR			2024
 
+// ---------------------------------------------------------------------
 // Video
+// ---------------------------------------------------------------------
 #define VRAM_SIZE				0x1000000
 #define VRAM_SIZE_MASK			(VRAM_SIZE-1)
 #define FPS						60
@@ -24,24 +28,24 @@
 #define MAX_PIXELS_PER_FRAME	524288
 #define FRAMEBUFFER_ADDRESS		0xf00000
 
-/*
- * Audio
- */
+// ---------------------------------------------------------------------
+// Audio
+// ---------------------------------------------------------------------
 #define SAMPLE_RATE				48000
 #define AUDIO_BUFFER_SIZE		8000.0
 #define SID_CLOCK_SPEED			985248
 #define SID_CYCLES_PER_FRAME	(SID_CLOCK_SPEED/FPS)
 
-/*
- * Cpu
- */
+// ---------------------------------------------------------------------
+// Cpu
+// ---------------------------------------------------------------------
 #define CPU_CLOCK_MULTIPLY		1
 #define CPU_CLOCK_SPEED			(CPU_CLOCK_MULTIPLY*SID_CLOCK_SPEED)
 #define CPU_CYCLES_PER_FRAME	(CPU_CLOCK_SPEED/FPS)
 
-/*
- * Colors similar to C64 colors
- */
+// ---------------------------------------------------------------------
+// Colors similar to C64 colors
+// ---------------------------------------------------------------------
 #define PUNCH_BLACK			0b00'00'00'01	// 0x01 (don't use 0x00, that one's transparent)
 #define PUNCH_WHITE			0b11'11'11'11	// 0xff
 #define PUNCH_RED			0b11'00'01'10	// 0xc6
@@ -59,9 +63,9 @@
 #define PUNCH_LIGHTBLUE		0b10'10'11'10	// 0xae
 #define PUNCH_LIGHTGREY		0b11'11'11'10	// 0xfe
 
-/*
- * C64 colors (VirtualC64) argb4444 format
- */
+// ---------------------------------------------------------------------
+// C64 colors (VirtualC64) argb4444 format
+// ---------------------------------------------------------------------
 // #define C64_ARGB444_BLACK       0xf000
 // #define C64_ARGB444_WHITE       0xffff
 // #define C64_ARGB444_RED         0xf733
@@ -79,10 +83,9 @@
 // #define C64_ARGB444_LIGHTBLUE   0xf67d
 // #define C64_ARGB444_LIGHTGREY   0xfaaa
 
-
-/*
- * Ascii values (some of them are petscii)
- */
+// ---------------------------------------------------------------------
+// Ascii values (some of them are petscii)
+// ---------------------------------------------------------------------
 #define ASCII_NULL          0x00    // null
 #define ASCII_BACKSPACE     0x08
 #define ASCII_HOR_TAB       0x09
