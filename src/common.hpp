@@ -2,7 +2,7 @@
 // common.hpp
 // punch
 //
-// Copyright © 2023-2024 elmerucr. All rights reserved.
+// Copyright © 2023-2025 elmerucr. All rights reserved.
 // ---------------------------------------------------------------------
 
 #ifndef COMMON_HPP
@@ -13,8 +13,8 @@
 // ---------------------------------------------------------------------
 #define PUNCH_MAJOR_VERSION 0
 #define PUNCH_MINOR_VERSION	9
-#define PUNCH_BUILD			20241229
-#define PUNCH_YEAR			2024
+#define PUNCH_BUILD			20250101
+#define PUNCH_YEAR			2025
 
 // ---------------------------------------------------------------------
 // Video

@@ -1,9 +1,9 @@
-/*
- * core.hpp
- * punch
- *
- * Copyright © 2023-2024 elmerucr. All rights reserved.
- */
+// ---------------------------------------------------------------------
+// core.hpp
+// punch
+//
+// Copyright © 2023-2024 elmerucr. All rights reserved.
+// ---------------------------------------------------------------------
 
 #ifndef CORE_HPP
 #define CORE_HPP

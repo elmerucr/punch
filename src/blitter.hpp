@@ -2,7 +2,7 @@
 // blitter.hpp
 // punch
 //
-// Copyright © 2023-2024 elmerucr. All rights reserved.
+// Copyright © 2023-2025 elmerucr. All rights reserved.
 // ---------------------------------------------------------------------
 
 #ifndef BLITTER_HPP
