@@ -527,7 +527,7 @@ void debugger_t::prompt()
 void debugger_t::status()
 {
 	terminal->clear();
-	terminal->printf("__cpu_________________________________________________________");
+	terminal->printf("__cpu__________________________________________________");
 	system->core->cpu->status(text_buffer, 2048);
 	terminal->printf("\n%s", text_buffer);
 	terminal->printf("\n\n__disassembly________________________");

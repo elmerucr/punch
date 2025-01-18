@@ -29,7 +29,7 @@
 #define FRAMEBUFFER_ADDRESS		0xf00000
 
 // ---------------------------------------------------------------------
-// Audio
+// audio
 // ---------------------------------------------------------------------
 #define SAMPLE_RATE				48000
 #define AUDIO_BUFFER_SIZE		8000.0
@@ -37,14 +37,14 @@
 #define SID_CYCLES_PER_FRAME	(SID_CLOCK_SPEED/FPS)
 
 // ---------------------------------------------------------------------
-// Cpu
+// cpu
 // ---------------------------------------------------------------------
 #define CPU_CLOCK_MULTIPLY		1
 #define CPU_CLOCK_SPEED			(CPU_CLOCK_MULTIPLY*SID_CLOCK_SPEED)
 #define CPU_CYCLES_PER_FRAME	(CPU_CLOCK_SPEED/FPS)
 
 // ---------------------------------------------------------------------
-// Colors similar to C64 colors
+// colors similar to C64 colors
 // ---------------------------------------------------------------------
 #define PUNCH_BLACK			0b00'00'00'01	// 0x01 (don't use 0x00, that one's transparent)
 #define PUNCH_WHITE			0b11'11'11'11	// 0xff
