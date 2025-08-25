@@ -1,5 +1,8 @@
 .vscode
 .DS_Store
+*.list
+*.o
 build/
 Debug/
 Release/
+rom_mc6809/mk_rom

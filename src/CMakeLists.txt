@@ -8,7 +8,7 @@ add_library(system STATIC
 	exceptions.cpp
 	host.cpp
 	keyboard.cpp
-	rom.cpp
+	../rom_mc6809/rom.cpp
 	sound.cpp
 	stats.cpp
 	system.cpp

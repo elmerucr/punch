@@ -1,0 +1,37 @@
+_ROM_START	= 0xfc00;
+_RAM_START	= 0x0100;
+
+SECTIONS {
+	. = _ROM_START;
+
+	TEXT : {
+		_TEXT_START = .;
+		*(TEXT);
+		*(RODATA);
+		_TEXT_END = .;
+	}
+
+	DATA _RAM_START : AT(ADDR(TEXT) + SIZEOF(TEXT)) {
+		_DATA_START = (. - _RAM_START) + _TEXT_END;
+		*(DATA);
+		_DATA_END = (. - _RAM_START) + _TEXT_END;
+	}
+
+	BSS : {
+		_BSS_START = .;
+		*(BSS);
+		_BSS_END = .;
+	}
+
+	VECTORS_GENERAL 0xffd4 : AT(0xffd4) {
+		_VECTORS_GENERAL_START = .;
+		*(VECTORS_GENERAL);
+		_VECTORS_GENERAL_END = .;
+	}
+
+	VECTORS_SYSTEM 0xfff0 : AT(0xfff0) {
+		_VECTORS_SYSTEM_START = .;
+		*(VECTORS_SYSTEM);
+		_VECTORS_SYSTEM_END = .;
+	}
+}
